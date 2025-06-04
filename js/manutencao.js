@@ -22,13 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const checklistVeiculoSelect = document.getElementById('checklistVeiculo');
 
     // Campos de busca
-    const searchMaintenanceInput = document.getElementById('searchInputMaintenance'); // Corrigido para ser específico
+    const searchMaintenanceInput = document.getElementById('searchInputMaintenance');
     const searchChecklistInput = document.getElementById('searchChecklistInput');
 
     // --- Função auxiliar para exibir mensagens ---
     function showMessage(element, text, type) {
         if (!element) {
-            // console.warn("Elemento de mensagem não encontrado:", element); // Comentado para reduzir logs
             return;
         }
         element.textContent = text;
@@ -89,10 +88,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     let iconClass = 'fa-tools';
                     let title = 'Manutenção Próxima';
                     let mainInfo = '';
-                    let actionsHtml = ''; // Para adicionar botões de ação
+                    let actionsHtml = '';
 
                     if (maint.tipo === 'Troca de Óleo') {
-                        iconClass = 'fa-tint'; // Ícone de gota de óleo
+                        iconClass = 'fa-tint';
                         title = 'Próxima Troca de Óleo';
                         mainInfo = maint.kmPrevisto ? `${maint.kmPrevisto.toLocaleString('pt-BR')} km` : '';
                         if (maint.dataPrevista) {
@@ -102,7 +101,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         iconClass = 'fa-clipboard-check';
                         title = 'Próximo Checklist';
                         mainInfo = maint.dataPrevista ? new Date(maint.dataPrevista).toLocaleDateString('pt-BR') : '';
-                        // Adiciona o botão "Imprimir Checklist"
                         actionsHtml = `<button class="button-secondary button-small btn-print-checklist" data-veiculo-id="${maint.veiculoId}" data-veiculo-placa="${maint.veiculoPlaca}" data-data-prevista="${maint.dataPrevista}"><i class="fas fa-print"></i> Imprimir Checklist</button>`;
                     } else {
                         mainInfo = maint.dataPrevista ? new Date(maint.dataPrevista).toLocaleDateString('pt-BR') : '';
@@ -124,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     upcomingMaintenanceSection.appendChild(widget);
                 });
 
-                // Adiciona event listeners para os botões de imprimir checklist
                 document.querySelectorAll('.btn-print-checklist').forEach(button => {
                     button.addEventListener('click', function() {
                         const veiculoId = this.dataset.veiculoId;
@@ -145,11 +142,108 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Função placeholder para gerar formulário de checklist
-    function gerarFormularioChecklist(veiculoId, veiculoPlaca, dataPrevista) {
-        console.log(`Gerar formulário de checklist para: Veículo ID ${veiculoId}, Placa ${veiculoPlaca}, Data ${new Date(dataPrevista).toLocaleDateString('pt-BR')}`);
-        // Aqui virá a lógica para abrir uma nova janela/modal com o formulário para impressão
-        alert(`Funcionalidade "Imprimir Checklist" para ${veiculoPlaca} em ${new Date(dataPrevista).toLocaleDateString('pt-BR')} ainda não implementada.\nOs dados para impressão seriam para o Veículo ID: ${veiculoId}.`);
+    function gerarFormularioChecklist(veiculoId, veiculoPlaca, dataPrevistaISO) {
+        const dataFormatada = dataPrevistaISO ? new Date(dataPrevistaISO).toLocaleDateString('pt-BR') : '____/____/______';
+        const hojeFormatado = new Date().toLocaleDateString('pt-BR');
+
+        const checklistItens = [
+            "Nível do Óleo do Motor", "Nível do Líquido de Arrefecimento", "Nível do Fluido de Freio",
+            "Nível do Fluido da Direção Hidráulica", "Calibragem e Estado dos Pneus (incluindo estepe)",
+            "Faróis (baixo, alto, setas, freio, ré, neblina)", "Lanternas Internas",
+            "Palhetas do Limpador de Para-brisa", "Esguicho de Água do Para-brisa",
+            "Vazamentos (motor, câmbio, radiador)", "Cintos de Segurança", "Buzina",
+            "Extintor de Incêndio (presença e validade)", "Triângulo, Macaco, Chave de Roda",
+            "Bateria (estado visual, terminais)", "Freio de Estacionamento", "Amortecedores (inspeção visual)",
+            "Documentação do Veículo (CRLV)", "Limpeza Interna e Externa"
+        ];
+
+        let itensHtml = '';
+        checklistItens.forEach(item => {
+            itensHtml += `
+                <tr>
+                    <td>${item}</td>
+                    <td style="text-align: center;"><input type="checkbox" aria-label="OK para ${item}"></td>
+                    <td style="text-align: center;"><input type="checkbox" aria-label="Atenção para ${item}"></td>
+                    <td><input type="text" style="width: 98%; border: 1px solid #ccc; padding: 4px;" aria-label="Observações para ${item}"></td>
+                </tr>
+            `;
+        });
+
+        const printWindow = window.open('', '_blank', 'height=800,width=800');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Formulário de Checklist Veicular - ${veiculoPlaca}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1, h2 { text-align: center; color: #333; }
+                    .info-section { margin-bottom: 20px; padding: 10px; border: 1px solid #eee; background: #f9f9f9; }
+                    .info-section p { margin: 5px 0; }
+                    .info-section label { font-weight: bold; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .observations-section { margin-top: 20px; }
+                    .observations-section textarea { width: 98%; height: 80px; padding: 8px; border: 1px solid #ccc;}
+                    .signature-section { margin-top: 40px; text-align: center; }
+                    .signature-line { display: inline-block; width: 250px; border-bottom: 1px solid #000; margin-top: 40px; }
+                    @media print {
+                        body { margin: 0; font-size: 10pt; }
+                        .no-print { display: none; }
+                        table { page-break-inside: auto; }
+                        tr { page-break-inside: avoid; page-break-after: auto; }
+                        thead { display: table-header-group; }
+                        tfoot { display: table-footer-group; }
+                        h1 { font-size: 16pt;}
+                        h2 { font-size: 14pt;}
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Formulário de Checklist Veicular</h1>
+                <div class="info-section">
+                    <p><label>Veículo (Placa):</label> ${veiculoPlaca}</p>
+                    <p><label>Data Programada do Checklist:</label> ${dataFormatada}</p>
+                    <hr style="margin: 10px 0;">
+                    <p><label>Data da Inspeção:</label> <input type="text" value="${hojeFormatado}" style="border: 1px solid #ccc; padding: 4px; width: 100px;"></p>
+                    <p><label>Realizado Por:</label> <input type="text" style="border: 1px solid #ccc; padding: 4px; width: 250px;"></p>
+                    <p><label>Quilometragem Atual:</label> <input type="number" style="border: 1px solid #ccc; padding: 4px; width: 100px;"> km</p>
+                </div>
+
+                <h2>Itens de Verificação</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th style="width: 60px; text-align: center;">OK</th>
+                            <th style="width: 80px; text-align: center;">Atenção</th>
+                            <th>Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itensHtml}
+                    </tbody>
+                </table>
+
+                <div class="observations-section">
+                    <h2>Observações Gerais:</h2>
+                    <textarea aria-label="Observações Gerais"></textarea>
+                </div>
+
+                <div class="signature-section">
+                    <p class="signature-line"></p>
+                    <p>Assinatura do Responsável</p>
+                </div>
+                
+                <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Imprimir Formulário</button>
+                <button class="no-print" onclick="window.close()" style="margin-top: 20px; margin-left: 10px; padding: 10px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Fechar</button>
+
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        // printWindow.focus(); // Comentado pois pode ser irritante para o usuário
+        // printWindow.print(); // Descomente se quiser que a caixa de diálogo de impressão abra automaticamente
     }
 
 
@@ -206,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showMessage(messageChecklistHistory, '', '');
 
         try {
-            let url = 'https://gpx-api-xwv1.onrender.com/api/checklists/historico'; // Supondo que este endpoint exista ou será criado
+            let url = 'https://gpx-api-xwv1.onrender.com/api/checklists/historico';
             if (searchTerm) {
                 url += `?search=${encodeURIComponent(searchTerm)}`;
             }
@@ -268,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('.cancel-form-btn').forEach(button => {
         button.addEventListener('click', (e) => {
-            e.preventDefault(); // Previne submit se o botão estiver dentro de um form
+            e.preventDefault();
             const form = e.target.closest('form');
             if (form) {
                 form.reset();
@@ -349,7 +443,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                // Supondo que o endpoint para checklists é /api/checklists
                 const response = await fetch('https://gpx-api-xwv1.onrender.com/api/checklists', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -430,7 +523,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (confirm('Tem certeza que deseja excluir este checklist?')) {
                     showMessage(messageChecklistHistory, 'Excluindo checklist...', 'info');
                     try {
-                        // Supondo endpoint /api/checklists/:id para DELETE
                         const response = await fetch(`https://gpx-api-xwv1.onrender.com/api/checklists/${checklistId}`, { method: 'DELETE' });
                         const responseData = await response.json();
                         if (response.ok) {
@@ -465,10 +557,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (window.location.pathname.includes('manutencao.html')) {
-        hideAllForms(); // Garante que formulários comecem escondidos
+        hideAllForms();
         carregarVeiculosParaSelects();
         loadUpcomingMaintenance();
         loadMaintenanceHistory();
-        loadChecklistHistory(); // Carrega histórico de checklists
+        loadChecklistHistory();
     }
 });
