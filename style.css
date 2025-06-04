@@ -1,0 +1,136 @@
+/* Reset básico e configurações globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Faz o padding e a borda não aumentarem o tamanho total do elemento */
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Fonte que importamos no HTML */
+    background-color: #f0f2f5; /* Um cinza claro para o fundo */
+    color: #333; /* Cor principal do texto */
+    line-height: 1.6;
+    display: flex; /* Usaremos flexbox para centralizar o conteúdo */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Altura mínima de 100% da tela */
+    padding: 20px; /* Espaçamento nas laterais em telas menores */
+}
+
+/* Contêiner principal do login */
+.login-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Caixa do formulário de login */
+.login-box {
+    background-color: #ffffff; /* Fundo branco para a caixa */
+    padding: 40px;
+    border-radius: 8px; /* Bordas arredondadas */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para dar profundidade */
+    width: 100%;
+    max-width: 400px; /* Largura máxima da caixa de login */
+    text-align: center; /* Centraliza o texto dentro da caixa */
+}
+
+.logo-img {
+    max-width: 150px; /* Ajuste o tamanho conforme necessário */
+    margin-bottom: 20px; /* Espaço abaixo da logo */
+    display: block; /* Para poder usar margin auto se precisar centralizar, mas o text-align: center do pai já deve cuidar disso */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login-box h1 {
+    font-size: 24px;
+    font-weight: 700; /* Peso da fonte (bold) */
+    color: #1c1e21; /* Uma cor escura para o título principal */
+    margin-bottom: 10px;
+}
+
+.login-box .subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+/* Grupos de input (label + input) */
+.input-group {
+    margin-bottom: 20px;
+    text-align: left; /* Alinha o texto dos labels à esquerda */
+}
+
+.input-group label {
+    display: block; /* Faz o label ocupar a linha inteira */
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.input-group input[type="text"],
+.input-group input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 1px solid #ddd; /* Borda sutil */
+    border-radius: 6px;
+    background-color: #f9f9f9; /* Cor de fundo leve para os inputs */
+    transition: border-color 0.3s ease; /* Transição suave para a borda */
+}
+
+.input-group input[type="text"]:focus,
+.input-group input[type="password"]:focus {
+    outline: none; /* Remove o contorno padrão ao focar */
+    border-color: #007bff; /* Muda a cor da borda ao focar (azul) */
+    background-color: #fff;
+}
+
+/* Botão de login */
+.login-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background-color: #007bff; /* Cor azul para o botão */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+    transition: background-color 0.3s ease; /* Transição suave para o hover */
+    margin-top: 10px; /* Espaço acima do botão */
+}
+
+.login-button:hover {
+    background-color: #0056b3; /* Cor mais escura ao passar o mouse */
+}
+
+/* Mensagem de feedback (erro/sucesso) */
+.login-message {
+    margin-top: 15px;
+    font-size: 14px;
+    min-height: 20px; /* Para evitar que o layout "pule" quando a mensagem aparece */
+}
+
+/* Links de rodapé */
+.footer-links {
+    margin-top: 25px;
+    font-size: 13px;
+}
+
+.footer-links a {
+    color: #007bff;
+    text-decoration: none; /* Remove o sublinhado padrão dos links */
+}
+
+.footer-links a:hover {
+    text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
+}
+
+.footer-links span {
+    margin: 0 10px;
+    color: #aaa;
+}
