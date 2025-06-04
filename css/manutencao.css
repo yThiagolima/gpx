@@ -312,3 +312,29 @@
         margin-left: 0;
     }
 }
+
+#modalRegistrarTrocaOleo .modal-content {
+    max-width: 550px; /* Pode ser um pouco maior se necessário */
+}
+
+#modalRegistrarTrocaOleo h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    color: var(--primary-blue-dark);
+}
+#modalRegistrarTrocaOleo p strong {
+    color: var(--text-dark);
+}
+
+#modalRegistrarTrocaOleo hr {
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+#modalRegistrarTrocaOleo h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: var(--text-medium);
+}
