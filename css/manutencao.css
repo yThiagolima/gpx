@@ -260,3 +260,55 @@
     border-radius: 3px;
     box-sizing: border-box;
 }
+
+/* Estilos para os filtros dos históricos na página de manutenção */
+.history-filters {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os filtros quebrem linha em telas menores */
+    gap: 10px; /* Espaçamento entre os elementos de filtro */
+    align-items: flex-end; /* Alinha os itens na base */
+    padding: 10px 0px 20px 0px; /* Espaçamento interno */
+    /* background-color: #f8f8f8; /* Cor de fundo suave, opcional */
+    /* border-radius: 4px; /* Bordas arredondadas, opcional */
+    /* margin-bottom: 20px; /* Espaço abaixo dos filtros */
+}
+
+.history-filters .form-group {
+    margin-bottom: 0; /* Remove margem inferior padrão do form-group dentro dos filtros */
+    flex-grow: 1; /* Faz os form-groups tentarem ocupar espaço disponível */
+    min-width: 150px; /* Largura mínima para cada filtro */
+}
+
+.history-filters label {
+    font-size: 0.85em;
+    margin-bottom: 3px; /* Menor espaço abaixo do label */
+    display: block;
+}
+
+.history-filters select,
+.history-filters button {
+    padding: 8px 10px; /* Padding um pouco menor para filtros */
+    font-size: 0.9em; /* Fonte um pouco menor */
+    height: auto; /* Altura automática baseada no padding */
+}
+.history-filters button {
+    white-space: nowrap; /* Evita que o texto do botão quebre linha */
+    flex-grow: 0; /* Botão não cresce */
+    margin-left: 5px; /* Pequeno espaço antes do botão */
+}
+
+/* Ajuste para telas menores, se necessário */
+@media (max-width: 768px) {
+    .history-filters {
+        flex-direction: column; /* Filtros um abaixo do outro */
+        align-items: stretch; /* Fazem os itens ocuparem a largura total */
+    }
+    .history-filters .form-group {
+        width: 100%; /* Ocupa toda a largura */
+        margin-bottom: 10px; /* Espaço entre os filtros empilhados */
+    }
+    .history-filters button {
+        width: 100%; /* Botão ocupa toda a largura */
+        margin-left: 0;
+    }
+}
