@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const filtroAnoSelect = document.getElementById('filtroAno');
     const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
 
-    // Containers de Relatório (para mensagens de carregamento ou dados)
+    // Containers de Relatório
     const gastosTableContainer = document.getElementById('gastosTableContainer');
     const graficoGastosContainer = document.getElementById('graficoGastosContainer');
     const combustivelTableContainer = document.getElementById('combustivelTableContainer');
@@ -19,18 +19,34 @@ document.addEventListener('DOMContentLoaded', function () {
     
     const messageRelatorios = document.getElementById('messageRelatorios');
 
-    // Instância do gráfico (será criada depois)
+    // Instância do gráfico
     let gastosChart = null;
 
-    // Função auxiliar para exibir mensagens
+    // --- Funções Auxiliares ---
     function showMessage(text, type) {
         if (messageRelatorios) {
             messageRelatorios.textContent = text;
             messageRelatorios.className = 'message-feedback';
-            if (type) {
-                messageRelatorios.classList.add(type);
-            }
+            if (type) messageRelatorios.classList.add(type);
         }
+    }
+
+    function formatCurrency(value) {
+        if (value === null || value === undefined) return 'N/A';
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        // Adiciona verificação se a data é válida para evitar "Invalid Date"
+        if (isNaN(date.getTime())) return 'Data Inválida';
+        return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' }); // UTC para evitar problemas de fuso na exibição
+    }
+
+    function formatNumber(value, minDigits = 0, maxDigits = 2) {
+        if (value === null || value === undefined || isNaN(parseFloat(value))) return '--';
+        return parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: minDigits, maximumFractionDigits: maxDigits });
     }
 
     // --- Funções de População de Filtros ---
@@ -38,11 +54,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!filtroVeiculoSelect) return;
         try {
             const response = await fetch('https://gpx-api-xwv1.onrender.com/api/veiculos');
-            if (!response.ok) throw new Error('Falha ao carregar veículos para filtro.');
+            if (!response.ok) throw new Error('Falha ao carregar veículos.');
             const veiculos = await response.json();
-
-            // Mantém a opção "Todos os Veículos"
-            // filtroVeiculoSelect.innerHTML = '<option value="todos">Todos os Veículos</option>'; 
             veiculos.forEach(v => {
                 const option = document.createElement('option');
                 option.value = v._id;
@@ -51,22 +64,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         } catch (error) {
             console.error('Erro ao popular filtro de veículos:', error);
-            filtroVeiculoSelect.innerHTML = '<option value="todos">Erro ao carregar</option>';
-            showMessage('Erro ao carregar lista de veículos para os filtros.', 'error');
+            showMessage('Erro ao carregar lista de veículos.', 'error');
         }
     }
 
     function popularFiltroMeses() {
         if (!filtroMesSelect) return;
-        // Mantém "Todos os Meses"
-        // filtroMesSelect.innerHTML = '<option value="todos">Todos os Meses</option>';
         const meses = [
-            { valor: 1, nome: "Janeiro" }, { valor: 2, nome: "Fevereiro" },
-            { valor: 3, nome: "Março" }, { valor: 4, nome: "Abril" },
-            { valor: 5, nome: "Maio" }, { valor: 6, nome: "Junho" },
-            { valor: 7, nome: "Julho" }, { valor: 8, nome: "Agosto" },
-            { valor: 9, nome: "Setembro" }, { valor: 10, nome: "Outubro" },
-            { valor: 11, nome: "Novembro" }, { valor: 12, nome: "Dezembro" }
+            { valor: 1, nome: "Janeiro" }, { valor: 2, nome: "Fevereiro" }, { valor: 3, nome: "Março" },
+            { valor: 4, nome: "Abril" }, { valor: 5, nome: "Maio" }, { valor: 6, nome: "Junho" },
+            { valor: 7, nome: "Julho" }, { valor: 8, nome: "Agosto" }, { valor: 9, nome: "Setembro" },
+            { valor: 10, nome: "Outubro" }, { valor: 11, nome: "Novembro" }, { valor: 12, nome: "Dezembro" }
         ];
         meses.forEach(mes => {
             const option = document.createElement('option');
@@ -78,64 +86,138 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function popularFiltroAnos() {
         if (!filtroAnoSelect) return;
-        // Mantém "Todos os Anos"
-        // filtroAnoSelect.innerHTML = '<option value="todos">Todos os Anos</option>';
         const anoAtual = new Date().getFullYear();
-        for (let i = 0; i < 5; i++) { // Exibe o ano atual e os 4 anteriores
+        for (let i = 0; i < 5; i++) {
             const ano = anoAtual - i;
             const option = document.createElement('option');
             option.value = ano;
             option.textContent = ano;
             filtroAnoSelect.appendChild(option);
         }
-        // Adiciona o ano atual como selecionado por padrão, se não for "todos"
-        // filtroAnoSelect.value = anoAtual; 
+        filtroAnoSelect.value = anoAtual; // Define o ano atual como padrão
     }
 
-    // --- Funções de Carregamento de Dados dos Relatórios (Placeholders) ---
+    // --- Funções de Carregamento de Dados dos Relatórios ---
     async function carregarRelatorioGastos(veiculoId, mes, ano) {
         if (!gastosTableContainer || !sumarioTotalGastosEl) return;
         gastosTableContainer.innerHTML = '<p class="loading-message">Carregando dados de gastos...</p>';
         sumarioTotalGastosEl.textContent = 'Calculando...';
-        showMessage('Buscando dados de gastos...', 'info');
+        
+        const params = new URLSearchParams();
+        if (veiculoId && veiculoId !== 'todos') params.append('veiculoId', veiculoId);
+        if (mes && mes !== 'todos') params.append('mes', mes);
+        if (ano && ano !== 'todos') params.append('ano', ano);
 
-        // TODO: Construir URL com query params para a API
-        // Ex: /api/relatorios/gastos?veiculoId=${veiculoId}&mes=${mes}&ano=${ano}
-        console.log(`Buscaria gastos para: Veículo=${veiculoId}, Mês=${mes}, Ano=${ano}`);
+        try {
+            const response = await fetch(`/api/relatorios/gastos-detalhados?${params.toString()}`);
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.message || `Erro ${response.status} ao buscar gastos.`);
+            }
+            const data = await response.json();
 
-        // Simulação de dados (substituir com chamada de API real)
-        setTimeout(() => {
-            // Exemplo de como preencher a tabela e o sumário
-            // const dadosExemplo = {
-            //     detalhes: [ /* { data, tipo, descricao, valor } */ ],
-            //     total: 1234.56
-            // };
-            // gastosTableContainer.innerHTML = '';
-            // sumarioTotalGastosEl.textContent = `R$ ${dadosExemplo.total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            gastosTableContainer.innerHTML = '<p>Dados de gastos ainda não implementados. API necessária.</p>';
-            sumarioTotalGastosEl.textContent = 'R$ 0,00';
-            showMessage('Funcionalidade de relatório de gastos em desenvolvimento.', 'info');
-        }, 1000);
+            if (data.detalhes && data.detalhes.length > 0) {
+                let tableHtml = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Veículo (Placa)</th>
+                                <th>Tipo de Gasto</th>
+                                <th>Descrição</th>
+                                <th style="text-align:right;">Valor (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                data.detalhes.forEach(gasto => {
+                    tableHtml += `
+                        <tr>
+                            <td>${formatDate(gasto.data)}</td>
+                            <td>${gasto.veiculoPlaca || 'N/A'}</td>
+                            <td>${gasto.tipoGasto || 'N/A'}</td>
+                            <td>${gasto.descricaoGasto || 'N/A'}</td>
+                            <td style="text-align:right;">${formatCurrency(gasto.valorGasto)}</td>
+                        </tr>`;
+                });
+                tableHtml += `</tbody></table>`;
+                gastosTableContainer.innerHTML = tableHtml;
+            } else {
+                gastosTableContainer.innerHTML = '<p>Nenhum gasto encontrado para os filtros selecionados.</p>';
+            }
+            sumarioTotalGastosEl.textContent = formatCurrency(data.sumario.totalGastos);
+            showMessage('Relatório de gastos carregado.', 'success');
+        } catch (error) {
+            console.error('Erro ao carregar relatório de gastos:', error);
+            gastosTableContainer.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`;
+            sumarioTotalGastosEl.textContent = formatCurrency(0);
+            showMessage(`Erro ao carregar gastos: ${error.message}`, 'error');
+        }
     }
 
-    async function carregarGraficoGastos(veiculoId, mes, ano) {
+    async function carregarGraficoGastos(veiculoId, ano) {
         if (!graficoGastosContainer) return;
         graficoGastosContainer.innerHTML = '<p class="loading-message">Gerando gráfico de gastos...</p>';
-        showMessage('Buscando dados para gráfico de gastos...', 'info');
         
-        console.log(`Buscaria dados para gráfico: Veículo=${veiculoId}, Mês=${mes}, Ano=${ano}`);
+        const params = new URLSearchParams();
+        if (veiculoId && veiculoId !== 'todos') params.append('veiculoId', veiculoId);
+        if (ano && ano !== 'todos') params.append('ano', ano);
+        else params.append('ano', new Date().getFullYear()); // Default para ano atual se 'todos' for selecionado
 
-        // Simulação (substituir com chamada de API e lógica do Chart.js)
-        setTimeout(() => {
-            // if (gastosChart) {
-            //     gastosChart.destroy(); // Destruir gráfico anterior se existir
-            // }
-            // graficoGastosContainer.innerHTML = '<canvas id="graficoGastosCanvas"></canvas>';
-            // const ctx = document.getElementById('graficoGastosCanvas').getContext('2d');
-            // gastosChart = new Chart(ctx, { /* Configuração do gráfico com dados da API */ });
-            graficoGastosContainer.innerHTML = '<p>Gráfico de gastos ainda não implementado. API e Chart.js necessários.</p>';
-            showMessage('Funcionalidade de gráfico de gastos em desenvolvimento.', 'info');
-        }, 1000);
+        try {
+            const response = await fetch(`/api/relatorios/gastos-mensais?${params.toString()}`);
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.message || `Erro ${response.status} ao buscar dados para gráfico.`);
+            }
+            const chartData = await response.json();
+
+            if (gastosChart) {
+                gastosChart.destroy(); // Destruir gráfico anterior
+            }
+            graficoGastosContainer.innerHTML = '<canvas id="graficoGastosCanvas"></canvas>'; // Recria o canvas
+            const ctx = document.getElementById('graficoGastosCanvas').getContext('2d');
+            
+            gastosChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels, // Ex: ["Jan", "Fev", ...]
+                    datasets: chartData.datasets 
+                    // Ex: [{ label: 'Combustível', data: [...], backgroundColor: 'rgba(255, 159, 64, 0.5)' }, 
+                    //      { label: 'Manutenção', data: [...], backgroundColor: 'rgba(75, 192, 192, 0.5)' }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return formatCurrency(value); }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += formatCurrency(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            showMessage('Gráfico de gastos carregado.', 'success');
+        } catch (error) {
+            console.error('Erro ao carregar gráfico de gastos:', error);
+            graficoGastosContainer.innerHTML = `<p class="error-message">Erro ao gerar gráfico: ${error.message}</p>`;
+            showMessage(`Erro ao gerar gráfico: ${error.message}`, 'error');
+        }
     }
 
     async function carregarRelatorioCombustivel(veiculoId, mes, ano) {
@@ -145,29 +227,66 @@ document.addEventListener('DOMContentLoaded', function () {
         sumarioTotalCombustivelEl.textContent = 'Calculando...';
         sumarioConsumoMedioEl.textContent = 'Calculando...';
         sumarioCustoKmEl.textContent = 'Calculando...';
-        showMessage('Buscando dados de combustível...', 'info');
 
-        console.log(`Buscaria dados de combustível para: Veículo=${veiculoId}, Mês=${mes}, Ano=${ano}`);
+        const params = new URLSearchParams();
+        if (veiculoId && veiculoId !== 'todos') params.append('veiculoId', veiculoId);
+        if (mes && mes !== 'todos') params.append('mes', mes);
+        if (ano && ano !== 'todos') params.append('ano', ano);
         
-        // Simulação (substituir com chamada de API)
-        setTimeout(() => {
-            // Exemplo de como preencher
-            // const dadosCombustivelExemplo = {
-            //     detalhes: [ /* { data, litros, valorLitro, custoTotal, kmAnterior, kmAtual, kmRodados, consumo } */],
-            //     totalGasto: 500.00,
-            //     consumoMedio: 10.5, // km/L
-            //     custoMedioKm: 0.55 // R$/km
-            // };
-            // combustivelTableContainer.innerHTML = '';
-            // sumarioTotalCombustivelEl.textContent = `R$ ${dadosCombustivelExemplo.totalGasto.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            // sumarioConsumoMedioEl.textContent = `${dadosCombustivelExemplo.consumoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})} Km/L`;
-            // sumarioCustoKmEl.textContent = `R$ ${dadosCombustivelExemplo.custoMedioKm.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} /Km`;
-            combustivelTableContainer.innerHTML = '<p>Relatório de combustível ainda não implementado. API necessária.</p>';
-            sumarioTotalCombustivelEl.textContent = 'R$ 0,00';
+        try {
+            const response = await fetch(`/api/relatorios/analise-combustivel?${params.toString()}`);
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.message || `Erro ${response.status} ao buscar dados de combustível.`);
+            }
+            const data = await response.json();
+
+            if (data.detalhes && data.detalhes.length > 0) {
+                let tableHtml = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Veículo (Placa)</th>
+                                <th style="text-align:right;">Litros</th>
+                                <th style="text-align:right;">Valor/L (R$)</th>
+                                <th style="text-align:right;">Custo Total (R$)</th>
+                                <th style="text-align:right;">KM Atual</th>
+                                <th style="text-align:right;">KM Rodados</th>
+                                <th style="text-align:right;">Consumo (Km/L)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                data.detalhes.forEach(abast => {
+                    tableHtml += `
+                        <tr>
+                            <td>${formatDate(abast.data)}</td>
+                            <td>${abast.veiculoPlaca || 'N/A'}</td>
+                            <td style="text-align:right;">${formatNumber(abast.litros, 2, 2)}</td>
+                            <td style="text-align:right;">${formatNumber(abast.valorPorLitro, 3, 3)}</td>
+                            <td style="text-align:right;">${formatCurrency(abast.custoTotal)}</td>
+                            <td style="text-align:right;">${formatNumber(abast.quilometragemAtual, 0, 0)}</td>
+                            <td style="text-align:right;">${abast.kmRodados !== null ? formatNumber(abast.kmRodados, 0, 0) : 'N/A'}</td>
+                            <td style="text-align:right;">${abast.consumoNoTrecho !== null ? formatNumber(abast.consumoNoTrecho, 1, 1) : 'N/A'}</td>
+                        </tr>`;
+                });
+                tableHtml += `</tbody></table>`;
+                combustivelTableContainer.innerHTML = tableHtml;
+            } else {
+                combustivelTableContainer.innerHTML = '<p>Nenhum dado de combustível encontrado para os filtros selecionados.</p>';
+            }
+            sumarioTotalCombustivelEl.textContent = formatCurrency(data.sumario.totalGastoCombustivel);
+            sumarioConsumoMedioEl.textContent = `${formatNumber(data.sumario.consumoMedioGeral, 1, 1)} Km/L`;
+            sumarioCustoKmEl.textContent = `${formatCurrency(data.sumario.custoMedioPorKm)} /Km`;
+            showMessage('Relatório de combustível carregado.', 'success');
+        } catch (error) {
+            console.error('Erro ao carregar relatório de combustível:', error);
+            combustivelTableContainer.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`;
+            sumarioTotalCombustivelEl.textContent = formatCurrency(0);
             sumarioConsumoMedioEl.textContent = '-- Km/L';
             sumarioCustoKmEl.textContent = 'R$ -- /Km';
-            showMessage('Funcionalidade de relatório de combustível em desenvolvimento.', 'info');
-        }, 1000);
+            showMessage(`Erro ao carregar dados de combustível: ${error.message}`, 'error');
+        }
     }
 
     // --- Event Listener para Aplicar Filtros ---
@@ -179,9 +298,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             showMessage('Aplicando filtros e carregando relatórios...', 'info');
 
-            // Chamar as funções para carregar cada seção do relatório
             carregarRelatorioGastos(veiculoId, mes, ano);
-            carregarGraficoGastos(veiculoId, mes, ano);
+            carregarGraficoGastos(veiculoId, ano); // Gráfico geralmente por ano, ou pode adaptar para mês também
             carregarRelatorioCombustivel(veiculoId, mes, ano);
         });
     }
@@ -192,13 +310,16 @@ document.addEventListener('DOMContentLoaded', function () {
             popularFiltroVeiculos();
             popularFiltroMeses();
             popularFiltroAnos();
-            // Poderia carregar com "todos" por padrão ou esperar o clique no botão
-            // Por enquanto, espera o clique.
-            showMessage('Selecione os filtros desejados e clique em "Aplicar Filtros".', 'info');
+            showMessage('Selecione os filtros desejados e clique em "Aplicar Filtros" para gerar os relatórios.', 'info');
+            // Configurações iniciais para os sumários
+            if(sumarioTotalGastosEl) sumarioTotalGastosEl.textContent = formatCurrency(0);
+            if(sumarioTotalCombustivelEl) sumarioTotalCombustivelEl.textContent = formatCurrency(0);
+            if(sumarioConsumoMedioEl) sumarioConsumoMedioEl.textContent = '-- Km/L';
+            if(sumarioCustoKmEl) sumarioCustoKmEl.textContent = 'R$ -- /Km';
         }
     }
 
-    // Lógica de usuário e logout (geralmente do dashboard.js, mas garantindo aqui se necessário)
+    // Lógica de usuário e logout
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessageEl = document.getElementById('welcomeMessage');
     const storedUser = localStorage.getItem('gpx7User');
@@ -209,14 +330,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (user && user.username && welcomeMessageEl) {
                 welcomeMessageEl.textContent = `Olá, ${user.username}!`;
             }
-        } catch (e) {
-            console.error("Erro ao parsear usuário do localStorage:", e);
-        }
+        } catch (e) { console.error("Erro ao parsear usuário:", e); }
     }
     if (logoutButton) {
         logoutButton.addEventListener('click', function() {
             localStorage.removeItem('gpx7User');
-            // localStorage.removeItem('authToken'); // Futuro
             window.location.href = 'login.html';
         });
     }
