@@ -3,11 +3,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Elementos principais da página
     const upcomingMaintenanceSection = document.getElementById('upcomingMaintenance');
     const maintenanceHistoryBody = document.getElementById('maintenanceHistoryBody');
-    const checklistHistoryBody = document.getElementById('checklistHistoryBody');
+    const checklistHistoryBody = document.getElementById('checklistHistoryBody'); // Adicionado
     const messageUpcoming = document.getElementById('messageUpcoming');
     const messageRegistro = document.getElementById('messageRegistro');
     const messageHistory = document.getElementById('messageHistory');
-    const messageChecklistHistory = document.getElementById('messageChecklistHistory');
+    const messageChecklistHistory = document.getElementById('messageChecklistHistory'); // Adicionado
 
     // Botões para exibir/ocultar formulários
     const showMaintenanceFormBtn = document.getElementById('showMaintenanceFormBtn');
@@ -22,13 +22,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const checklistVeiculoSelect = document.getElementById('checklistVeiculo');
 
     // Campos de busca
-    const searchMaintenanceInput = document.getElementById('searchInput'); // Corrigido para 'searchInput'
+    const searchMaintenanceInput = document.getElementById('searchInputMaintenance'); // Corrigido para ser específico
     const searchChecklistInput = document.getElementById('searchChecklistInput');
 
     // --- Função auxiliar para exibir mensagens ---
     function showMessage(element, text, type) {
         if (!element) {
-            console.warn("Elemento de mensagem não encontrado:", element);
+            // console.warn("Elemento de mensagem não encontrado:", element); // Comentado para reduzir logs
             return;
         }
         element.textContent = text;
@@ -36,52 +36,42 @@ document.addEventListener('DOMContentLoaded', function() {
         if (type) {
             element.classList.add(type);
         }
-        // Opcional: esconder a mensagem após X segundos (descomente se desejar)
-        // setTimeout(() => { element.textContent = ''; element.style.display = 'none'; }, 5000);
     }
 
     // --- Funções de Carregamento de Dados ---
 
-    // Carrega a lista de veículos para os selects nos formulários
     async function carregarVeiculosParaSelects() {
         try {
             const response = await fetch('https://gpx-api-xwv1.onrender.com/api/veiculos');
             if (!response.ok) throw new Error('Falha ao carregar veículos.');
             const veiculos = await response.json();
 
-            // Preenche o select do formulário de Manutenção
-            if (manutencaoVeiculoSelect) {
-                manutencaoVeiculoSelect.innerHTML = '<option value="">Selecione um veículo</option>';
-                veiculos.forEach(v => {
-                    const option = document.createElement('option');
-                    option.value = v._id; // O ID do veículo no banco de dados
-                    option.dataset.placa = v.placa; // Armazena a placa como um data attribute
-                    option.textContent = `${v.placa} - ${v.marca} ${v.modelo}`;
-                    manutencaoVeiculoSelect.appendChild(option);
-                });
-            }
-            // Preenche o select do formulário de Checklist
-            if (checklistVeiculoSelect) {
-                checklistVeiculoSelect.innerHTML = '<option value="">Selecione um veículo</option>';
-                veiculos.forEach(v => {
-                    const option = document.createElement('option');
-                    option.value = v._id;
-                    option.dataset.placa = v.placa;
-                    option.textContent = `${v.placa} - ${v.marca} ${v.modelo}`;
-                    checklistVeiculoSelect.appendChild(option);
-                });
-            }
+            const popularSelect = (selectElement, veiculosLista) => {
+                if (selectElement) {
+                    selectElement.innerHTML = '<option value="">Selecione um veículo</option>';
+                    veiculosLista.forEach(v => {
+                        const option = document.createElement('option');
+                        option.value = v._id;
+                        option.dataset.placa = v.placa;
+                        option.textContent = `${v.placa} - ${v.marca} ${v.modelo}`;
+                        selectElement.appendChild(option);
+                    });
+                }
+            };
+
+            popularSelect(manutencaoVeiculoSelect, veiculos);
+            popularSelect(checklistVeiculoSelect, veiculos);
+
         } catch (error) {
             console.error('Erro ao carregar veículos para selects:', error);
             showMessage(messageRegistro, 'Erro ao carregar lista de veículos para os formulários.', 'error');
         }
     }
 
-    // Carrega e exibe as próximas manutenções e alertas (seção superior)
     async function loadUpcomingMaintenance() {
         if (!upcomingMaintenanceSection) return;
         upcomingMaintenanceSection.innerHTML = '<p class="loading-message text-center">Carregando próximas manutenções...</p>';
-        showMessage(messageUpcoming, '', ''); // Limpa mensagem anterior
+        showMessage(messageUpcoming, '', '');
 
         try {
             const response = await fetch('https://gpx-api-xwv1.onrender.com/api/manutencoes/proximas');
@@ -89,20 +79,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const errorData = await response.json().catch(() => ({ message: `Erro ${response.status} ao buscar próximas manutenções.` }));
                 throw new Error(errorData.message);
             }
-            const data = await response.json(); // Espera um array de objetos de manutenção/alerta
+            const data = await response.json();
 
             if (data && data.length > 0) {
-                upcomingMaintenanceSection.innerHTML = ''; // Limpa a mensagem de carregamento
+                upcomingMaintenanceSection.innerHTML = '';
                 data.forEach(maint => {
                     const widget = document.createElement('div');
-                    widget.className = 'widget'; // Reutiliza o estilo de widget do dashboard
-                    let iconClass = 'fa-tools'; // Ícone padrão
+                    widget.className = 'widget';
+                    let iconClass = 'fa-tools';
                     let title = 'Manutenção Próxima';
                     let mainInfo = '';
+                    let actionsHtml = ''; // Para adicionar botões de ação
 
-                    // Lógica para determinar ícone e informações com base no tipo de alerta
                     if (maint.tipo === 'Troca de Óleo') {
-                        iconClass = 'fa-gas-pump';
+                        iconClass = 'fa-tint'; // Ícone de gota de óleo
                         title = 'Próxima Troca de Óleo';
                         mainInfo = maint.kmPrevisto ? `${maint.kmPrevisto.toLocaleString('pt-BR')} km` : '';
                         if (maint.dataPrevista) {
@@ -112,23 +102,38 @@ document.addEventListener('DOMContentLoaded', function() {
                         iconClass = 'fa-clipboard-check';
                         title = 'Próximo Checklist';
                         mainInfo = maint.dataPrevista ? new Date(maint.dataPrevista).toLocaleDateString('pt-BR') : '';
+                        // Adiciona o botão "Imprimir Checklist"
+                        actionsHtml = `<button class="button-secondary button-small btn-print-checklist" data-veiculo-id="${maint.veiculoId}" data-veiculo-placa="${maint.veiculoPlaca}" data-data-prevista="${maint.dataPrevista}"><i class="fas fa-print"></i> Imprimir Checklist</button>`;
                     } else {
-                        // Para outros tipos de manutenção que possam surgir
                         mainInfo = maint.dataPrevista ? new Date(maint.dataPrevista).toLocaleDateString('pt-BR') : '';
                     }
 
                     widget.innerHTML = `
-                        <div class="widget-icon" style="background-color: var(--primary-blue); color: var(--neutral-white);">
+                        <div class="widget-icon" style="background-color: var(--primary-blue-dark); color: var(--neutral-white);">
                             <i class="fas ${iconClass}"></i>
                         </div>
                         <div class="widget-content">
                             <h2>${title} - ${maint.veiculoPlaca || 'N/A'}</h2>
                             <span class="widget-data">${mainInfo || '--'}</span>
                             <p style="font-size:0.85em; color:var(--text-muted); margin-top:5px;">${maint.descricao || 'Verificar e agendar.'}</p>
+                            <div class="widget-actions" style="margin-top: 10px;">
+                                ${actionsHtml}
+                            </div>
                         </div>
                     `;
                     upcomingMaintenanceSection.appendChild(widget);
                 });
+
+                // Adiciona event listeners para os botões de imprimir checklist
+                document.querySelectorAll('.btn-print-checklist').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const veiculoId = this.dataset.veiculoId;
+                        const veiculoPlaca = this.dataset.veiculoPlaca;
+                        const dataPrevista = this.dataset.dataPrevista;
+                        gerarFormularioChecklist(veiculoId, veiculoPlaca, dataPrevista);
+                    });
+                });
+
             } else {
                 upcomingMaintenanceSection.innerHTML = '<p class="text-center">Nenhuma manutenção futura ou alerta no momento.</p>';
             }
@@ -140,11 +145,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Carrega e exibe o histórico de manutenções gerais (tabela)
+    // Função placeholder para gerar formulário de checklist
+    function gerarFormularioChecklist(veiculoId, veiculoPlaca, dataPrevista) {
+        console.log(`Gerar formulário de checklist para: Veículo ID ${veiculoId}, Placa ${veiculoPlaca}, Data ${new Date(dataPrevista).toLocaleDateString('pt-BR')}`);
+        // Aqui virá a lógica para abrir uma nova janela/modal com o formulário para impressão
+        alert(`Funcionalidade "Imprimir Checklist" para ${veiculoPlaca} em ${new Date(dataPrevista).toLocaleDateString('pt-BR')} ainda não implementada.\nOs dados para impressão seriam para o Veículo ID: ${veiculoId}.`);
+    }
+
+
     async function loadMaintenanceHistory(searchTerm = '') {
         if (!maintenanceHistoryBody) return;
         maintenanceHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center">Carregando histórico de manutenções...</td></tr>';
-        showMessage(messageHistory, '', ''); // Limpa mensagem anterior
+        showMessage(messageHistory, '', '');
 
         try {
             let url = 'https://gpx-api-xwv1.onrender.com/api/manutencoes/historico';
@@ -157,10 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const errorData = await response.json().catch(() => ({ message: `Erro ${response.status} ao buscar histórico.` }));
                 throw new Error(errorData.message);
             }
-            const data = await response.json(); // Espera um array de objetos de histórico de manutenção
+            const data = await response.json();
 
             if (data && data.length > 0) {
-                maintenanceHistoryBody.innerHTML = ''; // Limpa a mensagem de carregamento
+                maintenanceHistoryBody.innerHTML = '';
                 data.forEach(maint => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -172,30 +184,29 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td>${maint.descricao || '--'}</td>
                         <td class="action-buttons">
                             <button class="btn-action view" title="Ver Detalhes" data-id="${maint._id}"><i class="fas fa-eye"></i></button>
-                            <button class="btn-action edit" title="Editar Manutenção" data-id="${maint._id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-action edit" title="Editar Manutenção" data-id="${maint._id}" disabled><i class="fas fa-edit"></i></button>
                             <button class="btn-action delete-maintenance" title="Excluir Manutenção" data-id="${maint._id}"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     `;
                     maintenanceHistoryBody.appendChild(tr);
                 });
             } else {
-                maintenanceHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum histórico de manutenção encontrado.</td></tr>';
+                maintenanceHistoryBody.innerHTML = `<tr><td colspan="7" class="text-center">Nenhum histórico de manutenção ${searchTerm ? 'encontrado para "' + searchTerm + '"' : 'registrado'}.</td></tr>`;
             }
         } catch (error) {
             console.error('Erro ao carregar histórico de manutenções:', error);
             showMessage(messageHistory, error.message || 'Falha ao carregar histórico de manutenções.', 'error');
-            maintenanceHistoryBody.innerHTML = `<p class="error-message text-center">Erro ao carregar histórico.</p>`;
+            maintenanceHistoryBody.innerHTML = `<tr><td colspan="7" class="error-message text-center">Erro ao carregar histórico.</td></tr>`;
         }
     }
 
-    // Carrega e exibe o histórico de checklists (tabela separada)
     async function loadChecklistHistory(searchTerm = '') {
         if (!checklistHistoryBody) return;
         checklistHistoryBody.innerHTML = '<tr><td colspan="6" class="text-center">Carregando histórico de checklists...</td></tr>';
-        showMessage(messageChecklistHistory, '', ''); // Limpa mensagem anterior
+        showMessage(messageChecklistHistory, '', '');
 
         try {
-            let url = 'https://gpx-api-xwv1.onrender.com/api/checklists/historico';
+            let url = 'https://gpx-api-xwv1.onrender.com/api/checklists/historico'; // Supondo que este endpoint exista ou será criado
             if (searchTerm) {
                 url += `?search=${encodeURIComponent(searchTerm)}`;
             }
@@ -205,10 +216,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const errorData = await response.json().catch(() => ({ message: `Erro ${response.status} ao buscar histórico de checklists.` }));
                 throw new Error(errorData.message);
             }
-            const data = await response.json(); // Espera um array de objetos de histórico de checklist
+            const data = await response.json();
 
             if (data && data.length > 0) {
-                checklistHistoryBody.innerHTML = ''; // Limpa a mensagem de carregamento
+                checklistHistoryBody.innerHTML = '';
                 data.forEach(checklist => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -225,17 +236,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     checklistHistoryBody.appendChild(tr);
                 });
             } else {
-                checklistHistoryBody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum histórico de checklist encontrado.</td></tr>';
+                checklistHistoryBody.innerHTML = `<tr><td colspan="6" class="text-center">Nenhum histórico de checklist ${searchTerm ? 'encontrado para "' + searchTerm + '"' : 'registrado'}.</td></tr>`;
             }
         } catch (error) {
             console.error('Erro ao carregar histórico de checklists:', error);
             showMessage(messageChecklistHistory, error.message || 'Falha ao carregar histórico de checklists.', 'error');
-            checklistHistoryBody.innerHTML = `<p class="error-message text-center">Erro ao carregar histórico.</p>`;
+            checklistHistoryBody.innerHTML = `<tr><td colspan="6" class="error-message text-center">Erro ao carregar histórico de checklists.</td></tr>`;
         }
     }
-
-
-    // --- Lógica de Exibição/Ocultação de Formulários ---
 
     function hideAllForms() {
         if (formRegistrarManutencao) formRegistrarManutencao.style.display = 'none';
@@ -246,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showMaintenanceFormBtn.addEventListener('click', () => {
             hideAllForms();
             if (formRegistrarManutencao) formRegistrarManutencao.style.display = 'block';
-            showMessage(messageRegistro, '', ''); // Limpa mensagens anteriores
+            showMessage(messageRegistro, '', '');
         });
     }
 
@@ -254,46 +262,43 @@ document.addEventListener('DOMContentLoaded', function() {
         showChecklistFormBtn.addEventListener('click', () => {
             hideAllForms();
             if (formRegistrarChecklist) formRegistrarChecklist.style.display = 'block';
-            showMessage(messageRegistro, '', ''); // Limpa mensagens anteriores
+            showMessage(messageRegistro, '', '');
         });
     }
 
-    // Botões de "Cancelar" nos formulários
     document.querySelectorAll('.cancel-form-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            hideAllForms();
-            showMessage(messageRegistro, '', ''); // Limpa mensagens
-            // Opcional: resetar os formulários também
-            if (formRegistrarManutencao) formRegistrarManutencao.reset();
-            if (formRegistrarChecklist) formRegistrarChecklist.reset();
+        button.addEventListener('click', (e) => {
+            e.preventDefault(); // Previne submit se o botão estiver dentro de um form
+            const form = e.target.closest('form');
+            if (form) {
+                form.reset();
+                hideAllForms();
+            }
+            showMessage(messageRegistro, '', '');
         });
     });
-
-    // --- Lógica de Submissão de Formulários ---
-
-    // Submissão do formulário de Registro de Manutenção
+    
     if (formRegistrarManutencao) {
         formRegistrarManutencao.addEventListener('submit', async function(event) {
             event.preventDefault();
             showMessage(messageRegistro, 'Registrando manutenção...', 'info');
 
             const selectedOption = manutencaoVeiculoSelect.options[manutencaoVeiculoSelect.selectedIndex];
-            const veiculoPlaca = selectedOption.dataset.placa; // Pega a placa do data attribute
+            const veiculoPlaca = selectedOption ? selectedOption.dataset.placa : null;
 
             const manutencaoData = {
-                veiculoId: this.elements['veiculoId'].value, // 'this' refere-se ao formulário
+                veiculoId: this.elements['manutencaoVeiculoId'].value,
                 veiculoPlaca: veiculoPlaca,
-                tipoManutencao: this.elements['tipoManutencao'].value,
-                dataRealizacao: this.elements['dataRealizacao'].value,
-                custo: this.elements['custo'].value,
-                quilometragem: this.elements['quilometragem'].value,
-                realizadaPor: this.elements['realizadaPor'].value,
-                descricao: this.elements['descricao'].value,
+                tipoManutencao: this.elements['manutencaoTipo'].value,
+                dataRealizacao: this.elements['manutencaoData'].value,
+                custo: this.elements['manutencaoCusto'].value,
+                quilometragem: this.elements['manutencaoKm'].value,
+                realizadaPor: this.elements['manutencaoRealizadaPor'].value,
+                descricao: this.elements['manutencaoDescricao'].value,
             };
 
-            // Validação básica (verificação de campos obrigatórios)
-            if (!manutencaoData.veiculoId || !manutencaoData.tipoManutencao || !manutencaoData.dataRealizacao || manutencaoData.quilometragem === '') {
-                showMessage(messageRegistro, 'Por favor, preencha todos os campos obrigatórios (*) da manutenção.', 'error');
+            if (!manutencaoData.veiculoId || !manutencaoData.veiculoPlaca || !manutencaoData.tipoManutencao || !manutencaoData.dataRealizacao || manutencaoData.quilometragem === '') {
+                showMessage(messageRegistro, 'Preencha: Veículo, Placa, Tipo, Data e Quilometragem da manutenção.', 'error');
                 return;
             }
 
@@ -307,12 +312,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (response.ok) {
                     showMessage(messageRegistro, responseData.message || 'Manutenção registrada com sucesso!', 'success');
-                    this.reset(); // Reseta o formulário
-                    hideAllForms(); // Esconde o formulário
-                    loadMaintenanceHistory(); // Recarrega o histórico de manutenções
-                    loadUpcomingMaintenance(); // Recarrega alertas (pode ter mudado a próxima troca de óleo)
+                    this.reset();
+                    hideAllForms();
+                    loadMaintenanceHistory();
+                    loadUpcomingMaintenance();
                 } else {
-                    showMessage(messageRegistro, responseData.message || `Erro ${response.status}: Não foi possível registrar a manutenção.`, 'error');
+                    showMessage(messageRegistro, responseData.message || `Erro ${response.status}: Não foi possível registrar.`, 'error');
                 }
             } catch (error) {
                 console.error('Erro ao registrar manutenção:', error);
@@ -321,31 +326,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Submissão do formulário de Registro de Checklist
     if (formRegistrarChecklist) {
         formRegistrarChecklist.addEventListener('submit', async function(event) {
             event.preventDefault();
             showMessage(messageRegistro, 'Registrando checklist...', 'info');
 
             const selectedOption = checklistVeiculoSelect.options[checklistVeiculoSelect.selectedIndex];
-            const veiculoPlaca = selectedOption.dataset.placa;
+            const veiculoPlaca = selectedOption ? selectedOption.dataset.placa : null;
 
             const checklistData = {
-                veiculoId: this.elements['veiculoId'].value,
+                veiculoId: this.elements['checklistVeiculoId'].value,
                 veiculoPlaca: veiculoPlaca,
-                dataRealizacao: this.elements['dataRealizacao'].value,
-                quilometragem: this.elements['quilometragem'].value,
-                realizadoPor: this.elements['realizadoPor'].value,
-                observacoes: this.elements['observacoes'].value,
+                dataRealizacao: this.elements['checklistData'].value,
+                quilometragem: this.elements['checklistKm'].value,
+                realizadoPor: this.elements['checklistRealizadoPor'].value,
+                observacoes: this.elements['checklistObservacoes'].value,
             };
 
-            // Validação básica
-            if (!checklistData.veiculoId || !checklistData.dataRealizacao || checklistData.quilometragem === '') {
-                showMessage(messageRegistro, 'Por favor, preencha todos os campos obrigatórios (*) do checklist.', 'error');
+            if (!checklistData.veiculoId || !checklistData.veiculoPlaca || !checklistData.dataRealizacao || checklistData.quilometragem === '') {
+                showMessage(messageRegistro, 'Preencha: Veículo, Placa, Data e Quilometragem do checklist.', 'error');
                 return;
             }
 
             try {
+                // Supondo que o endpoint para checklists é /api/checklists
                 const response = await fetch('https://gpx-api-xwv1.onrender.com/api/checklists', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -355,12 +359,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (response.ok) {
                     showMessage(messageRegistro, responseData.message || 'Checklist registrado com sucesso!', 'success');
-                    this.reset(); // Reseta o formulário
-                    hideAllForms(); // Esconde o formulário
-                    loadChecklistHistory(); // Recarrega o histórico de checklists
-                    loadUpcomingMaintenance(); // Recarrega alertas (pode ter mudado o próximo checklist)
+                    this.reset();
+                    hideAllForms();
+                    loadChecklistHistory();
+                    loadUpcomingMaintenance();
                 } else {
-                    showMessage(messageRegistro, responseData.message || `Erro ${response.status}: Não foi possível registrar o checklist.`, 'error');
+                    showMessage(messageRegistro, responseData.message || `Erro ${response.status}: Não foi possível registrar.`, 'error');
                 }
             } catch (error) {
                 console.error('Erro ao registrar checklist:', error);
@@ -369,20 +373,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Lógica de Busca nas Tabelas ---
-
-    // Busca no histórico de Manutenções
     if (searchMaintenanceInput) {
         let searchTimeout;
         searchMaintenanceInput.addEventListener('keyup', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 loadMaintenanceHistory(this.value);
-            }, 500); // Atraso para evitar muitas requisições
+            }, 500);
         });
     }
 
-    // Busca no histórico de Checklists
     if (searchChecklistInput) {
         let searchTimeout;
         searchChecklistInput.addEventListener('keyup', function() {
@@ -393,89 +393,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Lógica de Ações nas Tabelas (Excluir, Visualizar, Editar) ---
-
-    // Ações para o histórico de Manutenções
     if (maintenanceHistoryBody) {
         maintenanceHistoryBody.addEventListener('click', async function(event) {
             const targetButton = event.target.closest('button.btn-action');
             if (!targetButton) return;
-
             const maintenanceId = targetButton.dataset.id;
 
-            if (targetButton.classList.contains('delete-maintenance')) { // Classe específica para excluir
-                if (confirm('Tem certeza que deseja excluir esta manutenção? Esta ação não pode ser desfeita.')) {
+            if (targetButton.classList.contains('delete-maintenance')) {
+                if (confirm('Tem certeza que deseja excluir esta manutenção?')) {
                     showMessage(messageHistory, 'Excluindo manutenção...', 'info');
                     try {
                         const response = await fetch(`https://gpx-api-xwv1.onrender.com/api/manutencoes/${maintenanceId}`, { method: 'DELETE' });
                         const responseData = await response.json();
-
                         if (response.ok) {
-                            showMessage(messageHistory, responseData.message || 'Manutenção excluída com sucesso!', 'success');
-                            loadMaintenanceHistory(); // Recarrega a tabela
-                            loadUpcomingMaintenance(); // Alerta pode ter mudado
-                        } else {
-                            throw new Error(responseData.message || `Erro ${response.status} ao excluir manutenção.`);
-                        }
-                    } catch (error) {
-                        console.error('Erro ao excluir manutenção:', error);
-                        showMessage(messageHistory, error.message || 'Falha ao excluir manutenção.', 'error');
-                    }
+                            showMessage(messageHistory, responseData.message || 'Excluída!', 'success');
+                            loadMaintenanceHistory();
+                            loadUpcomingMaintenance();
+                        } else { throw new Error(responseData.message || `Erro ${response.status}`); }
+                    } catch (error) { showMessage(messageHistory, error.message || 'Falha.', 'error'); }
                 }
             } else if (targetButton.classList.contains('view')) {
-                console.log('Ver detalhes da manutenção (ID):', maintenanceId);
-                // Redirecionar para uma página de detalhes de manutenção (se houver)
-                // Ex: window.location.href = `detalhes_manutencao.html?id=${maintenanceId}`;
-                showMessage(messageHistory, 'Funcionalidade de detalhes de manutenção em desenvolvimento.', 'info');
+                showMessage(messageHistory, 'Visualizar detalhes de manutenção (em desenvolvimento).', 'info');
             } else if (targetButton.classList.contains('edit')) {
-                console.log('Editar manutenção (ID):', maintenanceId);
-                // Redirecionar para uma página de edição de manutenção (se houver)
-                // Ex: window.location.href = `editar_manutencao.html?id=${maintenanceId}`;
-                showMessage(messageHistory, 'Funcionalidade de edição de manutenção em desenvolvimento.', 'info');
+                showMessage(messageHistory, 'Editar manutenção (em desenvolvimento).', 'info');
             }
         });
     }
 
-    // Ações para o histórico de Checklists
     if (checklistHistoryBody) {
         checklistHistoryBody.addEventListener('click', async function(event) {
             const targetButton = event.target.closest('button.btn-action');
             if (!targetButton) return;
-
             const checklistId = targetButton.dataset.id;
 
-            if (targetButton.classList.contains('delete-checklist')) { // Classe específica para excluir
-                if (confirm('Tem certeza que deseja excluir este checklist? Esta ação não pode ser desfeita.')) {
+            if (targetButton.classList.contains('delete-checklist')) {
+                if (confirm('Tem certeza que deseja excluir este checklist?')) {
                     showMessage(messageChecklistHistory, 'Excluindo checklist...', 'info');
                     try {
+                        // Supondo endpoint /api/checklists/:id para DELETE
                         const response = await fetch(`https://gpx-api-xwv1.onrender.com/api/checklists/${checklistId}`, { method: 'DELETE' });
                         const responseData = await response.json();
-
                         if (response.ok) {
-                            showMessage(messageChecklistHistory, responseData.message || 'Checklist excluído com sucesso!', 'success');
-                            loadChecklistHistory(); // Recarrega a tabela
-                            loadUpcomingMaintenance(); // Alerta pode ter mudado
-                        } else {
-                            throw new Error(responseData.message || `Erro ${response.status} ao excluir checklist.`);
-                        }
-                    } catch (error) {
-                        console.error('Erro ao excluir checklist:', error);
-                        showMessage(messageChecklistHistory, error.message || 'Falha ao excluir checklist.', 'error');
-                    }
+                            showMessage(messageChecklistHistory, responseData.message || 'Excluído!', 'success');
+                            loadChecklistHistory();
+                            loadUpcomingMaintenance();
+                        } else { throw new Error(responseData.message || `Erro ${response.status}`); }
+                    } catch (error) { showMessage(messageChecklistHistory, error.message || 'Falha.', 'error'); }
                 }
             } else if (targetButton.classList.contains('view')) {
-                console.log('Ver detalhes do checklist (ID):', checklistId);
-                // Redirecionar para uma página de detalhes de checklist (se houver)
-                // Ex: window.location.href = `detalhes_checklist.html?id=${checklistId}`;
-                showMessage(messageChecklistHistory, 'Funcionalidade de detalhes de checklist em desenvolvimento.', 'info');
+                showMessage(messageChecklistHistory, 'Visualizar detalhes de checklist (em desenvolvimento).', 'info');
             }
-            // Não há botão de 'edit' para checklist neste layout, mas se houvesse, a lógica seria similar.
         });
     }
 
-    // --- Lógica do Header (Logout/Welcome Message) ---
-    // Esta lógica é geralmente centralizada em um script como dashboard.js
-    // Mantenho aqui por conveniência, mas reforce a ideia de não duplicar.
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessage = document.getElementById('welcomeMessage');
     const storedUser = localStorage.getItem('gpx7User');
@@ -485,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (user && user.username) {
                 welcomeMessage.textContent = `Olá, ${user.username}!`;
             }
-        } catch (e) { console.error("Erro ao parsear usuário do localStorage:", e); }
+        } catch (e) { console.error("Erro ao parsear usuário:", e); }
     }
     if (logoutButton) {
         logoutButton.addEventListener('click', function() {
@@ -494,11 +464,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Inicialização da Página de Manutenção ---
     if (window.location.pathname.includes('manutencao.html')) {
-        carregarVeiculosParaSelects(); // Popula os selects de veículo
-        loadUpcomingMaintenance(); // Carrega alertas e próximas manutenções
-        loadMaintenanceHistory(); // Carrega o histórico de manutenções
-        loadChecklistHistory(); // Carrega o histórico de checklists
+        hideAllForms(); // Garante que formulários comecem escondidos
+        carregarVeiculosParaSelects();
+        loadUpcomingMaintenance();
+        loadMaintenanceHistory();
+        loadChecklistHistory(); // Carrega histórico de checklists
     }
 });
