@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - GPX7 Controle de Veículos</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/dashboard.css"> <link rel="stylesheet" href="../css/forms.css">   <link rel="stylesheet" href="../css/table-styles.css"> <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </head>
+<body>
+    <header class="main-header">
+        <nav class="navbar">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/ixmFdu4.png" alt="Logo GPX7" class="navbar-logo">
+                <span class="navbar-title">GPX7</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="cadastrar_veiculo.html"><i class="fas fa-plus-circle"></i> Cadastrar Carros</a></li>
+                <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
+                <li><a href="manutencao.html"><i class="fas fa-tools"></i> Manutenção</a></li>
+                <li><a href="abastecimento.html"><i class="fas fa-gas-pump"></i> Abastecimento</a></li>
+                <li><a href="relatorios.html" class="active"><i class="fas fa-chart-bar"></i> Relatório</a></li> {/* */}
+            </ul>
+            <div class="user-menu">
+                <span id="welcomeMessage">Olá, Usuário!</span>
+                <button id="logoutButton" class="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1><i class="fas fa-chart-bar"></i> Relatórios Gerenciais</h1>
+        <p>Analise os dados da sua frota, despesas e consumo.</p>
+
+        <section class="filters-section card">
+            <h2><i class="fas fa-filter"></i> Filtros Gerais</h2>
+            <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="form-group">
+                    <label for="filtroVeiculo">Selecionar Veículo:</label>
+                    <select id="filtroVeiculo" name="filtroVeiculo">
+                        <option value="todos">Todos os Veículos</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroMes">Selecionar Mês:</label>
+                    <select id="filtroMes" name="filtroMes">
+                        <option value="todos">Todos os Meses</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroAno">Selecionar Ano:</label>
+                    <select id="filtroAno" name="filtroAno">
+                        <option value="todos">Todos os Anos</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <button id="btnAplicarFiltros" class="button-primary"><i class="fas fa-check"></i> Aplicar Filtros</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="relatorioGastosPorCarro" class="report-section card" style="margin-top: 30px;">
+            <h2><i class="fas fa-money-bill-wave"></i> Gastos Detalhados por Veículo</h2>
+            <div id="gastosTableContainer" class="table-container">
+                <p class="loading-message">Selecione os filtros para carregar os dados de gastos...</p>
+                </div>
+            <div id="gastosSumario" style="margin-top: 15px; padding: 10px; background-color: #f0f0f0; border-radius: 4px;">
+                 <p><strong>Resumo dos Gastos:</strong> <span id="sumarioTotalGastos">R$ 0,00</span></p>
+            </div>
+        </section>
+
+        <section id="relatorioGraficosGastos" class="report-section card" style="margin-top: 30px;">
+            <h2><i class="fas fa-chart-line"></i> Gráficos de Gastos Mensais</h2>
+            <div id="graficoGastosContainer" style="min-height: 300px; padding:10px; border: 1px solid #ddd; border-radius: 4px;">
+                <p class="loading-message">Selecione os filtros para gerar o gráfico de gastos...</p>
+                </div>
+        </section>
+
+        <section id="relatorioCombustivel" class="report-section card" style="margin-top: 30px;">
+            <h2><i class="fas fa-gas-pump"></i> Análise de Combustível</h2>
+            <div id="combustivelTableContainer" class="table-container">
+                <p class="loading-message">Selecione os filtros para carregar os dados de combustível...</p>
+                </div>
+            <div id="combustivelSumario" style="margin-top: 15px; padding: 10px; background-color: #f0f0f0; border-radius: 4px;">
+                <p><strong>Total Gasto com Combustível:</strong> <span id="sumarioTotalCombustivel">R$ 0,00</span></p>
+                <p><strong>Consumo Médio Geral:</strong> <span id="sumarioConsumoMedio">-- Km/L</span></p>
+                <p><strong>Custo Médio por Km:</strong> <span id="sumarioCustoKm">R$ -- /Km</span></p>
+            </div>
+        </section>
+        
+        <p id="messageRelatorios" class="message-feedback" style="margin-top: 20px;"></p>
+
+    </main>
+
+    <script src="../js/dashboard.js"></script> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <script src="../js/relatorios.js"></script> </body>
+</html>
