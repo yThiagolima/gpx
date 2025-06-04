@@ -2,17 +2,19 @@
 document.addEventListener('DOMContentLoaded', function() {
     const detalhesVeiculoContent = document.getElementById('detalhesVeiculoContent');
     const messageElement = document.getElementById('messageDetalhes');
-    const btnEditarVeiculo = document.getElementById('btnEditarVeiculo');
+    const btnEditarVeiculo = document.getElementById('btnEditarVeiculo'); // Pega o botão de editar
 
+    // Função auxiliar para exibir mensagens de feedback
     function showMessage(text, type) {
         if (!messageElement) return;
         messageElement.textContent = text;
-        messageElement.className = 'message-feedback';
+        messageElement.className = 'message-feedback'; // Reseta classes
         if (type) {
             messageElement.classList.add(type);
         }
     }
 
+    // Pega o ID do veículo da URL (ex: detalhes_veiculo.html?id=12345)
     const urlParams = new URLSearchParams(window.location.search);
     const veiculoId = urlParams.get('id');
 
@@ -32,24 +34,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
-            // const token = localStorage.getItem('authToken');
+            // const token = localStorage.getItem('authToken'); // Para quando tivermos JWT
             // const headers = { 'Authorization': `Bearer ${token}` };
 
-            const response = await fetch(backendUrl /*, { headers } */);
+            const response = await fetch(backendUrl /*, { headers } */); // Adicionar headers com token futuramente
             
             if (response.ok) {
                 const veiculo = await response.json();
-                if (!veiculo || Object.keys(veiculo).length === 0) { // Checa se o objeto veículo é vazio
+                if (!veiculo || Object.keys(veiculo).length === 0) {
                     showMessage('Dados do veículo não encontrados ou veículo inválido.', 'error');
                     detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">Veículo não encontrado.</p>`;
                     return;
                 }
-                showMessage(''); // Limpa mensagem de carregando/erro
+                showMessage(''); 
                 
                 const formatDate = (dateString) => {
                     if (!dateString) return '--';
                     const date = new Date(dateString);
-                    // Verifica se a data é válida antes de formatar
                     if (isNaN(date.getTime())) return '--'; 
                     return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                 };
@@ -76,10 +77,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
 
+                // Configura o botão de editar APÓS carregar os dados do veículo
                 if (btnEditarVeiculo) {
                     btnEditarVeiculo.onclick = () => {
-                        // window.location.href = `editar_veiculo.html?id=${veiculoId}`; // Futuramente
-                        alert(`Funcionalidade "Editar" para ID ${veiculoId} ainda não implementada.`);
+                        if (veiculoId) { // Garante que veiculoId é válido antes de redirecionar
+                            console.log("Redirecionando para Editar Veículo ID:", veiculoId);
+                            window.location.href = `editar_veiculo.html?id=${veiculoId}`;
+                        } else {
+                            console.error("ID do Veículo não disponível para edição.");
+                            showMessage("Não foi possível determinar o veículo para edição.", "error");
+                        }
                     };
                 }
 
@@ -114,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Só executa o carregamento dos dados se estivermos na página de detalhes_veiculo.html
     if (window.location.pathname.includes('detalhes_veiculo.html')) {
         carregarDetalhesVeiculo();
     }
