@@ -1,60 +1,35 @@
-// frontend/js/editar_veiculo.js
+// frontend/js/detalhes_veiculo.js
 document.addEventListener('DOMContentLoaded', function() {
-    const formEditarVeiculo = document.getElementById('formEditarVeiculo');
-    const messageElement = document.getElementById('message'); // O <p id="message"> no seu HTML
-    const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
+    const detalhesVeiculoContent = document.getElementById('detalhesVeiculoContent');
+    const messageElement = document.getElementById('messageDetalhes');
+    const btnEditarVeiculo = document.getElementById('btnEditarVeiculo');
 
-    // Elementos do formulário (para preenchimento e coleta)
-    const placaInput = document.getElementById('placa');
-    const marcaInput = document.getElementById('marca');
-    const modeloInput = document.getElementById('modelo');
-    const anoFabricacaoInput = document.getElementById('anoFabricacao');
-    const anoModeloInput = document.getElementById('anoModelo');
-    const corInput = document.getElementById('cor');
-    const chassiInput = document.getElementById('chassi');
-    const renavamInput = document.getElementById('renavam');
-    const quilometragemAtualInput = document.getElementById('quilometragemAtual');
-    const oleoKmInput = document.getElementById('oleoKm');
-    const oleoDataInput = document.getElementById('oleoData');
-    const frequenciaChecklistInput = document.getElementById('frequenciaChecklist');
-
-    // Função auxiliar para exibir mensagens de feedback
     function showMessage(text, type) {
         if (!messageElement) return;
         messageElement.textContent = text;
-        messageElement.className = 'message-feedback'; // Reseta classes
+        messageElement.className = 'message-feedback';
         if (type) {
             messageElement.classList.add(type);
         }
     }
 
-    // Pega o ID do veículo da URL
     const urlParams = new URLSearchParams(window.location.search);
     const veiculoId = urlParams.get('id');
 
-    // Função para formatar data YYYY-MM-DD para campos do tipo 'date'
-    function formatDateForInput(dateString) {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '';
-        // Adiciona 1 dia para corrigir potencial problema de fuso horário na conversão para input date
-        // Isso acontece porque new Date('YYYY-MM-DD') pode ser interpretado como UTC meia-noite,
-        // e ao converter para fuso local, pode voltar um dia.
-        date.setUTCDate(date.getUTCDate() + 1); 
-        return date.toISOString().split('T')[0];
-    }
-
-
-    // Carrega os dados do veículo para preencher o formulário
-    async function carregarDadosParaEdicao() {
+    async function carregarDetalhesVeiculo() {
         if (!veiculoId) {
-            showMessage('ID do veículo não fornecido para edição.', 'error');
-            // Desabilitar formulário ou redirecionar
-            if(formEditarVeiculo) formEditarVeiculo.style.display = 'none';
+            showMessage('ID do veículo não fornecido na URL.', 'error');
+            if (detalhesVeiculoContent) detalhesVeiculoContent.innerHTML = '<p class="error-message" style="text-align:center; color:var(--error-red);">ID do veículo não especificado na URL.</p>';
+            if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none'; // Esconde o botão se não há ID
+            return;
+        }
+        if (!detalhesVeiculoContent) {
+            console.error("Elemento 'detalhesVeiculoContent' não encontrado no DOM.");
             return;
         }
 
-        showMessage('Carregando dados do veículo...', 'info');
+        detalhesVeiculoContent.innerHTML = '<p class="loading-message" style="text-align:center;">Carregando detalhes do veículo...</p>';
+        showMessage('', 'info');
 
         try {
             const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
@@ -62,118 +37,75 @@ document.addEventListener('DOMContentLoaded', function() {
             // const headers = { 'Authorization': `Bearer ${token}` };
 
             const response = await fetch(backendUrl /*, { headers } */);
-
+            
             if (response.ok) {
                 const veiculo = await response.json();
-                showMessage(''); // Limpa mensagem
-
-                // Preenche o formulário
-                if(placaInput) placaInput.value = veiculo.placa || '';
-                if(marcaInput) marcaInput.value = veiculo.marca || '';
-                if(modeloInput) modeloInput.value = veiculo.modelo || '';
-                if(anoFabricacaoInput) anoFabricacaoInput.value = veiculo.anoFabricacao || '';
-                if(anoModeloInput) anoModeloInput.value = veiculo.anoModelo || '';
-                if(corInput) corInput.value = veiculo.cor || '';
-                if(chassiInput) chassiInput.value = veiculo.chassi || '';
-                if(renavamInput) renavamInput.value = veiculo.renavam || '';
-                if(quilometragemAtualInput) quilometragemAtualInput.value = veiculo.quilometragemAtual || '';
+                if (!veiculo || Object.keys(veiculo).length === 0) {
+                    showMessage('Dados do veículo não encontrados ou veículo inválido.', 'error');
+                    detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">Veículo não encontrado.</p>`;
+                    if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none'; // Esconde o botão se não encontrar veículo
+                    return;
+                }
+                showMessage(''); 
                 
-                if (veiculo.manutencaoInfo) {
-                    if(oleoKmInput) oleoKmInput.value = veiculo.manutencaoInfo.proxTrocaOleoKm || '';
-                    if(oleoDataInput) oleoDataInput.value = formatDateForInput(veiculo.manutencaoInfo.proxTrocaOleoData);
-                    if(frequenciaChecklistInput) frequenciaChecklistInput.value = veiculo.manutencaoInfo.frequenciaChecklistDias || '';
+                const formatDate = (dateString) => {
+                    if (!dateString) return '--';
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return '--'; 
+                    date.setUTCDate(date.getUTCDate()); // Ajusta para data local sem mudar o dia por fuso
+                    return date.toLocaleDateString('pt-BR', { /* timeZone: 'UTC' */ }); // Removido timeZone UTC para exibir data local
+                };
+
+                detalhesVeiculoContent.innerHTML = `
+                    <div class="details-grid">
+                        <div class="detail-item"><strong>Placa:</strong> <span>${veiculo.placa || '--'}</span></div>
+                        <div class="detail-item"><strong>Marca:</strong> <span>${veiculo.marca || '--'}</span></div>
+                        <div class="detail-item"><strong>Modelo:</strong> <span>${veiculo.modelo || '--'}</span></div>
+                        <div class="detail-item"><strong>Ano Fabricação:</strong> <span>${veiculo.anoFabricacao || '--'}</span></div>
+                        <div class="detail-item"><strong>Ano Modelo:</strong> <span>${veiculo.anoModelo || '--'}</span></div>
+                        <div class="detail-item"><strong>Cor:</strong> <span>${veiculo.cor || '--'}</span></div>
+                        <div class="detail-item"><strong>Chassi (VIN):</strong> <span>${veiculo.chassi || '--'}</span></div>
+                        <div class="detail-item"><strong>Renavam:</strong> <span>${veiculo.renavam || '--'}</span></div>
+                        <div class="detail-item"><strong>Km Atual:</strong> <span>${veiculo.quilometragemAtual !== null && veiculo.quilometragemAtual !== undefined ? veiculo.quilometragemAtual.toLocaleString('pt-BR') + ' km' : '--'}</span></div>
+                        <div class="detail-item"><strong>Data de Cadastro:</strong> <span>${formatDate(veiculo.dataCadastro)}</span></div>
+                    </div>
+                    <h3>Informações de Manutenção</h3>
+                    <div class="details-grid">
+                        <div class="detail-item"><strong>Próx. Troca de Óleo (Km):</strong> <span>${veiculo.manutencaoInfo?.proxTrocaOleoKm ? veiculo.manutencaoInfo.proxTrocaOleoKm.toLocaleString('pt-BR') + ' km' : '--'}</span></div>
+                        <div class="detail-item"><strong>Próx. Troca de Óleo (Data):</strong> <span>${formatDate(veiculo.manutencaoInfo?.proxTrocaOleoData)}</span></div>
+                        <div class="detail-item"><strong>Frequência Checklist:</strong> <span>${veiculo.manutencaoInfo?.frequenciaChecklistDias ? veiculo.manutencaoInfo.frequenciaChecklistDias + ' dias' : '--'}</span></div>
+                        <div class="detail-item"><strong>Próximo Checklist (Data):</strong> <span>${formatDate(veiculo.manutencaoInfo?.dataProxChecklist)}</span></div>
+                    </div>
+                `;
+
+                // Configura o botão de editar APÓS carregar os dados do veículo
+                if (btnEditarVeiculo) {
+                    btnEditarVeiculo.style.display = 'inline-flex'; // Garante que o botão está visível
+                    btnEditarVeiculo.onclick = () => {
+                        if (veiculoId) {
+                            console.log("Redirecionando da página de DETALHES para Editar Veículo ID:", veiculoId);
+                            window.location.href = `editar_veiculo.html?id=${veiculoId}`;
+                        } else {
+                            console.error("ID do Veículo não disponível para edição a partir da página de detalhes.");
+                            showMessage("Não foi possível determinar o veículo para edição.", "error");
+                        }
+                    };
                 }
 
             } else {
-                const errorData = await response.json().catch(() => ({ message: `Veículo não encontrado ou erro ${response.status}.` }));
-                showMessage(errorData.message || 'Não foi possível carregar os dados do veículo para edição.', 'error');
-                if(formEditarVeiculo) formEditarVeiculo.style.display = 'none'; // Esconde o formulário se não puder carregar
+                const errorData = await response.json().catch(() => ({ message: `Veículo não encontrado ou erro ${response.status} ao buscar dados.` }));
+                showMessage(errorData.message || `Erro ${response.status}.`, 'error');
+                detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">${errorData.message || 'Não foi possível carregar os detalhes do veículo.'}</p>`;
+                if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none'; // Esconde o botão se houver erro
             }
         } catch (error) {
-            console.error('Erro ao buscar dados do veículo para edição:', error);
-            showMessage('Falha na conexão ao buscar dados para edição.', 'error');
-            if(formEditarVeiculo) formEditarVeiculo.style.display = 'none';
+            console.error('Erro ao buscar detalhes do veículo:', error);
+            showMessage('Falha na conexão ao buscar detalhes. Verifique sua internet ou tente novamente.', 'error');
+            detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">Erro de conexão. Não foi possível carregar os detalhes.</p>`;
+            if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none'; // Esconde o botão se houver erro de conexão
         }
     }
 
-    // Event listener para o envio do formulário de edição
-    if (formEditarVeiculo) {
-        formEditarVeiculo.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            showMessage('', 'info');
-
-            const formData = new FormData(formEditarVeiculo);
-            const dadosAtualizados = {};
-            formData.forEach((value, key) => {
-                // Converte campos numéricos para número, se não vazios
-                if (key === 'anoFabricacao' || key === 'anoModelo' || key === 'quilometragemAtual' || key === 'oleoKm' || key === 'frequenciaChecklist') {
-                    dadosAtualizados[key] = value ? parseInt(value, 10) : null;
-                } else if (key === 'oleoData') { // Trata campo de data
-                    dadosAtualizados[key] = value ? value : null; // Envia como string YYYY-MM-DD ou null
-                }
-                else {
-                    dadosAtualizados[key] = value.trim() === '' ? null : value.trim();
-                }
-            });
-
-            // Validação básica (similar à de cadastro)
-            if (!dadosAtualizados.placa || !dadosAtualizados.marca || !dadosAtualizados.modelo || !dadosAtualizados.anoFabricacao || !dadosAtualizados.anoModelo || dadosAtualizados.quilometragemAtual === null) {
-                showMessage('Por favor, preencha todos os campos obrigatórios (*).', 'error');
-                return;
-            }
-
-            showMessage('Salvando alterações...', 'info');
-
-            try {
-                const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
-                // const token = localStorage.getItem('authToken');
-                // const headers = { 
-                //     'Content-Type': 'application/json',
-                //     'Authorization': `Bearer ${token}` 
-                // };
-
-                const response = await fetch(backendUrl, {
-                    method: 'PUT', // Método HTTP para atualização
-                    headers: {
-                        'Content-Type': 'application/json',
-                        // headers: headers // Adicionar quando tiver JWT
-                    },
-                    body: JSON.stringify(dadosAtualizados)
-                });
-
-                const responseData = await response.json();
-
-                if (response.ok) {
-                    showMessage(responseData.message || 'Veículo atualizado com sucesso!', 'success');
-                    // Opcional: Redirecionar para a página de detalhes ou lista após um tempo
-                    setTimeout(() => {
-                        window.location.href = `detalhes_veiculo.html?id=${veiculoId}`; // Volta para os detalhes do veículo atualizado
-                    }, 2000);
-                } else {
-                    showMessage(responseData.message || `Erro ${response.status}: Não foi possível atualizar o veículo.`, 'error');
-                }
-
-            } catch (error) {
-                console.error('Erro ao tentar atualizar veículo:', error);
-                showMessage('Erro de conexão ao tentar atualizar o veículo.', 'error');
-            }
-        });
-    }
-
-    // Event listener para o botão "Cancelar"
-    if (btnCancelarEdicao) {
-        btnCancelarEdicao.addEventListener('click', function() {
-            // Volta para a página de detalhes do veículo ou para a lista de veículos
-            if (veiculoId) {
-                window.location.href = `detalhes_veiculo.html?id=${veiculoId}`;
-            } else {
-                window.location.href = 'veiculos.html'; // Fallback se não houver ID (improvável aqui)
-            }
-        });
-    }
-    
-
-    // Lógica do header (logout/welcome)
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessage = document.getElementById('welcomeMessage');
     const storedUser = localStorage.getItem('gpx7User');
@@ -192,8 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Chama a função para carregar os dados do veículo quando a página carrega
-    if (window.location.pathname.includes('editar_veiculo.html')) {
-        carregarDadosParaEdicao();
+    if (window.location.pathname.includes('detalhes_veiculo.html')) {
+        if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none'; // Esconde inicialmente até os dados carregarem
+        carregarDetalhesVeiculo();
     }
 });
