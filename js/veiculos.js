@@ -1,7 +1,7 @@
 // frontend/js/veiculos.js
 document.addEventListener('DOMContentLoaded', function () {
     const corpoTabelaVeiculos = document.getElementById('corpoTabelaVeiculos');
-    const messageElement = document.getElementById('messageVeiculos');
+    const messageElement = document.getElementById('messageVeiculos'); // Elemento de mensagem específico desta página
 
     function showMessage(text, type) {
         if (!messageElement) return;
@@ -21,9 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const backendUrl = 'https://gpx-api-xwv1.onrender.com/api/veiculos';
             // const token = localStorage.getItem('authToken');
-            // const headers = { 'Authorization': `Bearer ${token}` }; // Futuramente
+            // const headers = { 'Authorization': `Bearer ${token}` };
 
-            const response = await fetch(backendUrl /*, { headers }*/);
+            const response = await fetch(backendUrl /*, { headers } */);
             const veiculos = await response.json();
 
             if (response.ok) {
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     corpoTabelaVeiculos.innerHTML = '';
                     veiculos.forEach(veiculo => {
                         const tr = document.createElement('tr');
-                        tr.setAttribute('data-id', veiculo._id); // Adiciona o ID à linha da tabela também
+                        tr.setAttribute('data-id', veiculo._id);
                         tr.innerHTML = `
                             <td>${veiculo.placa || '--'}</td>
                             <td>${veiculo.marca || '--'}</td>
@@ -62,17 +62,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // --- LÓGICA PARA OS BOTÕES DE AÇÃO (EXCLUIR) ---
     if (corpoTabelaVeiculos) {
         corpoTabelaVeiculos.addEventListener('click', async function(event) {
-            const targetButton = event.target.closest('button.btn-action.delete'); // Procura o botão de excluir mais próximo
+            const targetButton = event.target.closest('button.btn-action');
 
-            if (targetButton) {
-                const veiculoId = targetButton.dataset.id;
-                const veiculoRow = targetButton.closest('tr'); // Pega a linha da tabela (tr)
-                const placaVeiculo = veiculoRow.querySelector('td:first-child').textContent; // Pega a placa para a mensagem
+            if (!targetButton) return; // Se não clicou em um botão de ação, não faz nada
 
-                if (confirm(`Tem certeza que deseja excluir o veículo com placa ${placaVeiculo} (ID: ${veiculoId})? Esta ação não pode ser desfeita.`)) {
+            const veiculoId = targetButton.dataset.id;
+
+            if (targetButton.classList.contains('delete')) {
+                const veiculoRow = targetButton.closest('tr');
+                const placaVeiculo = veiculoRow ? veiculoRow.querySelector('td:first-child').textContent : 'este veículo';
+
+                if (confirm(`Tem certeza que deseja excluir ${placaVeiculo} (ID: ${veiculoId})? Esta ação não pode ser desfeita.`)) {
                     showMessage('Excluindo veículo...', 'info');
                     try {
                         const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
@@ -81,18 +83,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         const response = await fetch(backendUrl, {
                             method: 'DELETE',
-                            // headers: headers // Adicionar quando tiver JWT
+                            // headers: headers
                         });
 
                         const data = await response.json();
 
-                        if (response.ok) { // Status 200 ou 204
+                        if (response.ok) {
                             showMessage(data.message || 'Veículo excluído com sucesso!', 'success');
                             if (veiculoRow) {
-                                veiculoRow.remove(); // Remove a linha da tabela no frontend
+                                veiculoRow.remove();
                             }
-                            // Opcional: Recarregar a lista inteira se preferir: carregarVeiculos();
-                            // Verificar se a tabela ficou vazia após a exclusão
                             if (corpoTabelaVeiculos.children.length === 0) {
                                 corpoTabelaVeiculos.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum veículo cadastrado ainda.</td></tr>';
                             }
@@ -104,27 +104,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         showMessage('Erro de conexão ao tentar excluir o veículo.', 'error');
                     }
                 }
-            }
-            
-            // Aqui você pode adicionar a lógica para os botões 'view' e 'edit' de forma similar
-            const viewButton = event.target.closest('button.btn-action.view');
-            if (viewButton) {
-                const veiculoId = viewButton.dataset.id;
-                console.log("Clicou em Detalhes para o ID:", veiculoId);
-                // window.location.href = `detalhes_veiculo.html?id=${veiculoId}`; // Exemplo para futura página
-                alert(`Funcionalidade "Detalhes" para ID ${veiculoId} ainda não implementada.`);
-            }
-
-            const editButton = event.target.closest('button.btn-action.edit');
-            if (editButton) {
-                const veiculoId = editButton.dataset.id;
+            } else if (targetButton.classList.contains('view')) {
+                console.log("Redirecionando para Detalhes do ID:", veiculoId);
+                window.location.href = `detalhes_veiculo.html?id=${veiculoId}`;
+            } else if (targetButton.classList.contains('edit')) {
                 console.log("Clicou em Editar para o ID:", veiculoId);
-                // window.location.href = `editar_veiculo.html?id=${veiculoId}`; // Exemplo para futura página
+                // window.location.href = `editar_veiculo.html?id=${veiculoId}`; // Futuramente
                 alert(`Funcionalidade "Editar" para ID ${veiculoId} ainda não implementada.`);
             }
         });
     }
-
 
     // Lógica do header (logout/welcome)
     const logoutButton = document.getElementById('logoutButton');
