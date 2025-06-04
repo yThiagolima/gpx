@@ -164,3 +164,35 @@ main.container p {
     font-weight: 700; /* Bold */
     color: var(--text-dark); /* Cor mais escura */
 }
+
+.recent-activity {
+    margin-top: 30px;
+    background-color: var(--neutral-white); /* Se quiser um fundo diferente do container principal */
+    padding: 20px;
+    border-radius: 8px;
+    /* box-shadow: var(--shadow-sm); */ /* Pode remover se estiver dentro do .container que já tem sombra */
+}
+
+.recent-activity h2 {
+    font-size: 1.3em;
+    color: var(--primary-blue);
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--neutral-medium-gray);
+    padding-bottom: 10px;
+}
+
+#listaAtividadeRecente {
+    list-style: none;
+    padding-left: 0;
+}
+
+#listaAtividadeRecente li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.95em;
+}
+
+#listaAtividadeRecente li:last-child {
+    border-bottom: none;
+}
