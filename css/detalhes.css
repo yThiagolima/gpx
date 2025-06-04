@@ -1,35 +1,38 @@
 /* frontend/css/detalhes.css */
 
 .details-content-wrapper {
-    background-color: #fdfdfd;
+    background-color: #fdfdfd; /* Um branco um pouco diferente, se quiser contraste */
     padding: 25px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     margin-top: 20px;
     margin-bottom: 20px;
+    box-shadow: var(--shadow-sm); /* Sombra suave */
 }
 
 .details-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Grid responsivo */
+    gap: 20px 25px; /* Espaçamento vertical e horizontal */
 }
 
 .detail-item {
-    margin-bottom: 15px;
-    padding: 10px;
-    background-color: var(--neutral-light-gray);
-    border-left: 4px solid var(--primary-orange);
-    border-radius: 0 4px 4px 0;
+    margin-bottom: 10px; /* Reduzido para melhor encaixe no grid */
+    padding: 12px 15px;
+    background-color: var(--neutral-light-gray); /* Fundo suave */
+    border-left: 4px solid var(--primary-orange); /* Destaque lateral */
+    border-radius: 0 6px 6px 0; /* Arredondamento */
+    word-wrap: break-word; /* Quebra palavras longas */
 }
 
 .detail-item strong {
     display: block;
     color: var(--primary-blue);
     font-weight: 500;
-    margin-bottom: 4px;
-    font-size: 0.9em;
+    margin-bottom: 5px;
+    font-size: 0.85em; /* Um pouco menor para caber melhor */
     text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .detail-item span {
@@ -37,18 +40,44 @@
     font-size: 1em;
 }
 
+h3 { /* Estilo para subtítulos como "Informações de Manutenção" */
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    color: var(--primary-blue);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--neutral-medium-gray);
+}
+
+
 .loading-message, .error-message {
     text-align: center;
-    padding: 20px;
+    padding: 25px;
     font-size: 1.1em;
     color: var(--text-muted);
 }
 
-.page-actions { /* Reutiliza a classe actions-bar-details para os botões de ação da página */
+.page-actions {
     display: flex;
-    justify-content: space-between; /* Ou flex-end se preferir os botões à direita */
+    justify-content: flex-start; /* Alinha botões à esquerda por padrão */
+    gap: 15px; /* Espaço entre os botões */
     align-items: center;
-    margin-top: 20px;
+    margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid var(--neutral-medium-gray);
+}
+
+/* Garante que os botões dentro de .page-actions usem os estilos globais.
+   Seu global.css já deve ter definições para .button-primary e .button-secondary.
+   Se mesmo assim o estilo não aplicar, pode ser um problema de cache ou
+   uma regra CSS mais específica sobrescrevendo. */
+.page-actions .button-primary,
+.page-actions .button-secondary {
+    /* Estilos de global.css devem ser aplicados aqui.
+       Não é necessário redefini-los a menos que haja um conflito.
+       Verifique a ordem de carregamento dos CSS no HTML:
+       1. global.css
+       2. dashboard.css (se aplicar estilos a elementos que não sejam só header)
+       3. detalhes.css (ou o CSS específico da página)
+    */
 }
