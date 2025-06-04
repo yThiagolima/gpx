@@ -1,90 +1,200 @@
 /* frontend/css/global.css */
-* {
+body {
+    font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    background-color: var(--neutral-light-gray, #f4f7f9); /* Fallback color */
+    color: var(--text-dark, #333);
+    line-height: 1.6;
+    display: flex; /* Para o layout geral de header fixo e main flexível */
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 :root {
-    --primary-blue: #005cbf;    /* Azul mais escuro e corporativo */
-    --primary-orange: #ff6600;  /* Laranja vibrante */
-    --neutral-white: #ffffff;
-    --neutral-light-gray: #f4f7fc; 
-    --neutral-medium-gray: #e9ecef;
-    --text-dark: #212529;
-    --text-light: #f8f9fa;
-    --text-muted: #6c757d;
-    --border-color: #ced4da;
+    /* Cores Primárias e Secundárias */
+    --primary-orange: #FF6600;
+    --primary-orange-darker: #e65c00;
+    --primary-blue: #0056b3; /* Um azul mais escuro e sóbrio */
+    --secondary-gray: #6c757d;
+
+    /* Cores Neutras */
+    --neutral-white: #FFFFFF;
+    --neutral-light-gray: #f8f9fa; /* Fundo de seções ou body */
+    --neutral-medium-gray: #ced4da; /* Bordas, divisores */
+    --neutral-dark-gray: #495057;  /* Texto secundário escuro */
+
+    /* Cores de Feedback */
     --success-green: #28a745;
     --error-red: #dc3545;
+    --warning-yellow: #ffc107;
+    --info-blue: #17a2b8;
+
+    /* Cores de Texto */
+    --text-dark: #212529;       /* Principal para textos */
+    --text-muted: #6c757d;      /* Para placeholders, texto secundário */
+    --text-light: #f8f9fa;      /* Texto sobre fundos escuros */
+
+    /* Bordas e Sombras */
+    --border-color: #dee2e6;
+    --border-radius-sm: .2rem;
+    --border-radius-md: .375rem; /* Raio de borda padrão */
+    --border-radius-lg: .5rem;
     --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
     --shadow-md: 0 .5rem 1rem rgba(0,0,0,.15);
+
+    /* Tipografia */
+    --font-family-sans-serif: 'Roboto', sans-serif;
+    --font-size-base: 1rem; /* ~16px */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500; /* Para botões e títulos de widget */
+    --font-weight-bold: 700;
+
+    /* Espaçamento (exemplo) */
+    --spacing-xs: 0.25rem; /* 4px */
+    --spacing-sm: 0.5rem;  /* 8px */
+    --spacing-md: 1rem;    /* 16px */
+    --spacing-lg: 1.5rem;  /* 24px */
+    --spacing-xl: 2rem;    /* 32px */
 }
 
-body {
-    font-family: 'Roboto', sans-serif;
-    line-height: 1.6;
-    background-color: var(--neutral-light-gray);
-    color: var(--text-dark);
-    font-size: 16px; /* Base font size */
+/* Reset básico */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 a {
     color: var(--primary-orange);
     text-decoration: none;
 }
-
 a:hover {
-    color: var(--primary-blue);
     text-decoration: underline;
+    color: var(--primary-orange-darker);
 }
 
-button {
-    font-family: 'Roboto', sans-serif;
-    cursor: pointer;
-    border-radius: 0.25rem; /* Arredondamento padrão para botões */
+img {
+    max-width: 100%;
+    height: auto;
 }
 
-input {
-    font-family: 'Roboto', sans-serif;
-    border-radius: 0.25rem; /* Arredondamento padrão para inputs */
-}
-
-.container { /* Para conteúdo principal da dashboard */
+/* Container principal do conteúdo das páginas internas */
+.container {
     width: 90%;
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 25px;
+    max-width: 1200px; /* Ou outro valor que preferir */
+    margin: var(--spacing-lg) auto; /* 30px auto (se spacing-lg for 1.5rem e base for 16px) */
+    padding: var(--spacing-lg);
     background-color: var(--neutral-white);
-    border-radius: 8px;
+    border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-md);
+    flex-grow: 1; /* Para ocupar o espaço restante se o body for flex column */
+}
+
+.container h1 {
+    color: var(--primary-blue);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.8em;
+    font-weight: var(--font-weight-bold);
+}
+.container h1 i {
+    margin-right: var(--spacing-sm);
+}
+.container > p:first-of-type { /* O parágrafo de subtítulo logo após o h1 */
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-muted);
+    font-size: 1em;
+}
+
+
+/* Estilos de Botão Padrão */
+.button-primary,
+.button-secondary,
+.logout-button { /* Incluindo o logout button para consistência */
+    padding: 10px 18px; /* Ajustado para melhor proporção */
+    font-size: 0.95em; 
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--border-radius-md);
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; 
+    text-decoration: none;
+    cursor: pointer;
+    line-height: 1.5; 
+}
+.button-primary i,
+.button-secondary i,
+.logout-button i {
+    font-size: 0.9em; /* Ajusta tamanho do ícone dentro do botão */
+}
+
+
+.button-primary {
+    background-color: var(--primary-orange);
+    color: var(--neutral-white);
+    border-color: var(--primary-orange);
+}
+.button-primary:hover {
+    background-color: var(--primary-orange-darker);
+    border-color: var(--primary-orange-darker);
+    box-shadow: var(--shadow-sm);
+}
+.button-primary:focus, .button-primary:active {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.45); /* Sombra de foco mais visível */
+}
+
+.button-secondary {
+    background-color: var(--secondary-gray);
+    color: var(--neutral-white); /* Mudado para branco para melhor contraste com cinza */
+    border-color: var(--secondary-gray);
+}
+.button-secondary:hover {
+    background-color: #5a6268; /* Cinza um pouco mais escuro */
+    border-color: #545b62;
+    color: var(--neutral-white);
+    box-shadow: var(--shadow-sm);
+}
+.button-secondary:focus, .button-secondary:active {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.45); /* Sombra de foco */
 }
 
 /* Feedback Messages */
 .message-feedback {
-    margin-top: 15px;
-    font-size: 0.9em;
-    min-height: 20px;
-    font-weight: 500;
-    padding: 10px;
-    border-radius: 4px;
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
     display: none; /* Escondido por padrão, mostrado via JS */
 }
 .message-feedback.success {
-    color: var(--success-green);
-    background-color: #e9f7ef;
-    border: 1px solid var(--success-green);
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
     display: block;
 }
 .message-feedback.error {
-    color: var(--error-red);
-    background-color: #fdecea;
-    border: 1px solid var(--error-red);
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
     display: block;
 }
 .message-feedback.info {
-    color: var(--primary-blue);
-    background-color: #e7f3fe;
-    border: 1px solid var(--primary-blue);
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
     display: block;
+}
+
+/* Estrelas para campos obrigatórios */
+.required-asterisk {
+    color: var(--error-red);
+    margin-left: 2px;
+    font-weight: bold;
 }
