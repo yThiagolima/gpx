@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/forms.css">
     <link rel="stylesheet" href="../css/table-styles.css">
-    <link rel="stylesheet" href="../css/relatorios.css"> <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/relatorios.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -22,7 +23,7 @@
                 <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="cadastrar_veiculo.html"><i class="fas fa-plus-circle"></i> Cadastrar Carros</a></li>
                 <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
-                <li><a href="manutencao.html"><i class="fas fa-tools"></i> Manutenção</a></li>
+                <li><a href="manutencao.html"><i class="fas fa-tools"></i> Manutenções e Checklists</a></li>
                 <li><a href="abastecimento.html"><i class="fas fa-gas-pump"></i> Abastecimento</a></li>
                 <li><a href="relatorios.html" class="active"><i class="fas fa-chart-bar"></i> Relatório</a></li>
             </ul>
@@ -44,7 +45,7 @@
                     <label for="filtroVeiculo">Veículo:</label>
                     <select id="filtroVeiculo" name="filtroVeiculo">
                         <option value="todos">Todos os Veículos</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="filtroDataInicio">Data Início:</label>
@@ -60,7 +61,7 @@
                         <option value="todos">Todos os Tipos</option>
                         <option value="Manutenção">Manutenção</option>
                         <option value="Combustível">Combustível</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="form-group filter-button-group">
                     <button id="btnAplicarFiltros" class="button-primary"><i class="fas fa-search"></i> Gerar Relatórios</button>
@@ -70,40 +71,36 @@
         </section>
         <p id="messageRelatorios" class="message-feedback" style="margin-top: 10px; text-align: center;"></p>
 
-        <div class="report-layout">
-            <section id="relatorioGastosPorCarro" class="report-section card">
-                <h2><i class="fas fa-money-bill-wave"></i> Detalhamento de Gastos</h2>
-                <div id="gastosTableContainer" class="table-container scrollable-table">
-                    <p class="loading-message">Aplique os filtros para carregar os dados de gastos.</p>
-                </div>
-                <div id="gastosSumario" class="report-summary">
-                     <p><strong>Total de Gastos Filtrados:</strong> <span id="sumarioTotalGastos">R$ 0,00</span></p>
-                </div>
-            </section>
-
-            <section id="relatorioCombustivel" class="report-section card">
-                <h2><i class="fas fa-gas-pump"></i> Análise de Combustível</h2>
-                <div id="combustivelTableContainer" class="table-container scrollable-table">
-                    <p class="loading-message">Aplique os filtros para carregar os dados de combustível.</p>
-                </div>
-                <div id="combustivelSumario" class="report-summary">
-                    <p><strong>Total Gasto com Combustível:</strong> <span id="sumarioTotalCombustivel">R$ 0,00</span></p>
-                    <p><strong>Consumo Médio Geral:</strong> <span id="sumarioConsumoMedio">-- Km/L</span></p>
-                    <p><strong>Custo Médio por Km:</strong> <span id="sumarioCustoKm">R$ -- /Km</span></p>
-                    <p><strong>Preço Médio por Litro:</strong> <span id="sumarioPrecoMedioLitro">R$ -- /L</span></p>
-                </div>
-            </section>
-        </div>
-
-        <section id="relatorioGraficosGastos" class="report-section card full-width-card">
-            <h2><i class="fas fa-chart-line"></i> Gráfico de Evolução de Gastos Mensais</h2>
-            <p class="chart-subtitle">(Considera o ano selecionado no filtro "Data Fim" ou o ano atual se não especificado. O filtro de veículo é aplicado.)</p>
+        <section id="relatorioGraficosGastos" class="report-section card"> <h2><i class="fas fa-chart-line"></i> Evolução de Gastos Mensais</h2>
+            <p class="chart-subtitle">(Considera o ano do filtro "Data Fim" ou o ano atual. Filtro de veículo é aplicado.)</p>
             <div id="graficoGastosContainer" class="chart-container">
                 <p class="loading-message">Aplique os filtros para gerar o gráfico de gastos.</p>
-                {/* */}
             </div>
         </section>
-        
+
+        <section id="relatorioGastosPorCarro" class="report-section card">
+            <h2><i class="fas fa-money-bill-wave"></i> Detalhamento de Gastos</h2>
+            <div id="gastosTableContainer" class="table-container scrollable-table">
+                <p class="loading-message">Aplique os filtros para carregar os dados de gastos.</p>
+            </div>
+            <div id="gastosSumario" class="report-summary">
+                 <p><strong>Total de Gastos Filtrados:</strong> <span id="sumarioTotalGastos">R$ 0,00</span></p>
+            </div>
+        </section>
+
+        <section id="relatorioCombustivel" class="report-section card">
+            <h2><i class="fas fa-gas-pump"></i> Análise de Combustível</h2>
+            <div id="combustivelTableContainer" class="table-container scrollable-table">
+                <p class="loading-message">Aplique os filtros para carregar os dados de combustível.</p>
+            </div>
+            <div id="combustivelSumario" class="report-summary">
+                <p><strong>Total Gasto com Combustível:</strong> <span id="sumarioTotalCombustivel">R$ 0,00</span></p>
+                <p><strong>Consumo Médio Geral:</strong> <span id="sumarioConsumoMedio">-- Km/L</span></p>
+                <p><strong>Custo Médio por Km:</strong> <span id="sumarioCustoKm">R$ -- /Km</span></p>
+                <p><strong>Preço Médio por Litro:</strong> <span id="sumarioPrecoMedioLitro">R$ -- /L</span></p>
+            </div>
+        </section>
+            
     </main>
 
     <script src="../js/dashboard.js"></script>
