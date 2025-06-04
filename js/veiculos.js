@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (targetButton.classList.contains('view')) {
-                console.log("Botão Detalhes clicado para ID:", veiculoId);
+                console.log("Botão Detalhes (da lista) clicado para ID:", veiculoId);
                 window.location.href = `detalhes_veiculo.html?id=${veiculoId}`;
             
             } else if (targetButton.classList.contains('edit')) {
