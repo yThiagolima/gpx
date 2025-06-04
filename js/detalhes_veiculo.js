@@ -2,19 +2,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     const detalhesVeiculoContent = document.getElementById('detalhesVeiculoContent');
     const messageElement = document.getElementById('messageDetalhes');
-    const btnEditarVeiculo = document.getElementById('btnEditarVeiculo'); // Pega o botão de editar
+    const btnEditarVeiculo = document.getElementById('btnEditarVeiculo');
 
-    // Função auxiliar para exibir mensagens de feedback
     function showMessage(text, type) {
         if (!messageElement) return;
         messageElement.textContent = text;
-        messageElement.className = 'message-feedback'; // Reseta classes
+        messageElement.className = 'message-feedback';
         if (type) {
             messageElement.classList.add(type);
         }
     }
 
-    // Pega o ID do veículo da URL (ex: detalhes_veiculo.html?id=12345)
     const urlParams = new URLSearchParams(window.location.search);
     const veiculoId = urlParams.get('id');
 
@@ -22,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!veiculoId) {
             showMessage('ID do veículo não fornecido na URL.', 'error');
             if (detalhesVeiculoContent) detalhesVeiculoContent.innerHTML = '<p class="error-message" style="text-align:center; color:var(--error-red);">ID do veículo não especificado na URL.</p>';
+            if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none';
             return;
         }
         if (!detalhesVeiculoContent) {
@@ -30,20 +29,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         detalhesVeiculoContent.innerHTML = '<p class="loading-message" style="text-align:center;">Carregando detalhes do veículo...</p>';
-        showMessage('', 'info'); // Limpa mensagens anteriores
+        showMessage('', 'info');
 
         try {
             const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
-            // const token = localStorage.getItem('authToken'); // Para quando tivermos JWT
-            // const headers = { 'Authorization': `Bearer ${token}` };
-
-            const response = await fetch(backendUrl /*, { headers } */); // Adicionar headers com token futuramente
+            const response = await fetch(backendUrl);
             
             if (response.ok) {
                 const veiculo = await response.json();
                 if (!veiculo || Object.keys(veiculo).length === 0) {
                     showMessage('Dados do veículo não encontrados ou veículo inválido.', 'error');
                     detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">Veículo não encontrado.</p>`;
+                    if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none';
                     return;
                 }
                 showMessage(''); 
@@ -52,7 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!dateString) return '--';
                     const date = new Date(dateString);
                     if (isNaN(date.getTime())) return '--'; 
-                    return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    const offset = date.getTimezoneOffset() * 60000;
+                    const localDate = new Date(date.getTime() - offset);
+                    return localDate.toISOString().split('T')[0];
                 };
 
                 detalhesVeiculoContent.innerHTML = `
@@ -66,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="detail-item"><strong>Chassi (VIN):</strong> <span>${veiculo.chassi || '--'}</span></div>
                         <div class="detail-item"><strong>Renavam:</strong> <span>${veiculo.renavam || '--'}</span></div>
                         <div class="detail-item"><strong>Km Atual:</strong> <span>${veiculo.quilometragemAtual !== null && veiculo.quilometragemAtual !== undefined ? veiculo.quilometragemAtual.toLocaleString('pt-BR') + ' km' : '--'}</span></div>
-                        <div class="detail-item"><strong>Data de Cadastro:</strong> <span>${formatDate(veiculo.dataCadastro)}</span></div>
+                        <div class="detail-item"><strong>Data de Cadastro:</strong> <span>${new Date(veiculo.dataCadastro).toLocaleDateString('pt-BR')}</span></div>
                     </div>
                     <h3>Informações de Manutenção</h3>
                     <div class="details-grid">
@@ -77,14 +76,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
 
-                // Configura o botão de editar APÓS carregar os dados do veículo
                 if (btnEditarVeiculo) {
+                    btnEditarVeiculo.style.display = 'inline-flex';
                     btnEditarVeiculo.onclick = () => {
-                        if (veiculoId) { // Garante que veiculoId é válido antes de redirecionar
-                            console.log("Redirecionando para Editar Veículo ID:", veiculoId);
+                        if (veiculoId) {
+                            console.log("Redirecionando da página de DETALHES para Editar Veículo ID:", veiculoId);
                             window.location.href = `editar_veiculo.html?id=${veiculoId}`;
                         } else {
-                            console.error("ID do Veículo não disponível para edição.");
+                            console.error("ID do Veículo não disponível para edição a partir da página de detalhes.");
                             showMessage("Não foi possível determinar o veículo para edição.", "error");
                         }
                     };
@@ -94,15 +93,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const errorData = await response.json().catch(() => ({ message: `Veículo não encontrado ou erro ${response.status} ao buscar dados.` }));
                 showMessage(errorData.message || `Erro ${response.status}.`, 'error');
                 detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">${errorData.message || 'Não foi possível carregar os detalhes do veículo.'}</p>`;
+                if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none';
             }
         } catch (error) {
             console.error('Erro ao buscar detalhes do veículo:', error);
             showMessage('Falha na conexão ao buscar detalhes. Verifique sua internet ou tente novamente.', 'error');
             detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">Erro de conexão. Não foi possível carregar os detalhes.</p>`;
+            if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none';
         }
     }
 
-    // Lógica do header (logout/welcome)
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessage = document.getElementById('welcomeMessage');
     const storedUser = localStorage.getItem('gpx7User');
@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Só executa o carregamento dos dados se estivermos na página de detalhes_veiculo.html
     if (window.location.pathname.includes('detalhes_veiculo.html')) {
+        if (btnEditarVeiculo) btnEditarVeiculo.style.display = 'none';
         carregarDetalhesVeiculo();
     }
 });
