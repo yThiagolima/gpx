@@ -1,10 +1,9 @@
 // frontend/js/editar_veiculo.js
 document.addEventListener('DOMContentLoaded', function() {
     const formEditarVeiculo = document.getElementById('formEditarVeiculo');
-    const messageElement = document.getElementById('message'); // O <p id="message"> no seu HTML
+    const messageElement = document.getElementById('message');
     const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
 
-    // Elementos do formulário
     const placaInput = document.getElementById('placa');
     const marcaInput = document.getElementById('marca');
     const modeloInput = document.getElementById('modelo');
@@ -18,53 +17,42 @@ document.addEventListener('DOMContentLoaded', function() {
     const oleoDataInput = document.getElementById('oleoData');
     const frequenciaChecklistInput = document.getElementById('frequenciaChecklist');
 
-    // Função auxiliar para exibir mensagens de feedback
     function showMessage(text, type) {
         if (!messageElement) return;
         messageElement.textContent = text;
-        messageElement.className = 'message-feedback'; // Reseta classes
+        messageElement.className = 'message-feedback';
         if (type) {
             messageElement.classList.add(type);
         }
     }
 
-    // Pega o ID do veículo da URL
     const urlParams = new URLSearchParams(window.location.search);
     const veiculoId = urlParams.get('id');
 
-    // Função para formatar data YYYY-MM-DD para campos do tipo 'date'
     function formatDateForInput(dateString) {
         if (!dateString) return '';
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return '';
-        // Ajusta para o fuso horário local para evitar que a data "volte" um dia no input
         const offset = date.getTimezoneOffset() * 60000;
         const localDate = new Date(date.getTime() - offset);
         return localDate.toISOString().split('T')[0];
     }
 
-    // Carrega os dados do veículo para preencher o formulário
     async function carregarDadosParaEdicao() {
         if (!veiculoId) {
             showMessage('ID do veículo não fornecido para edição.', 'error');
             if(formEditarVeiculo) formEditarVeiculo.style.display = 'none';
             return;
         }
-
         showMessage('Carregando dados do veículo...', 'info');
-
         try {
             const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
-            // const token = localStorage.getItem('authToken');
-            // const headers = { 'Authorization': `Bearer ${token}` };
-
-            const response = await fetch(backendUrl /*, { headers } */);
+            const response = await fetch(backendUrl);
 
             if (response.ok) {
                 const veiculo = await response.json();
-                showMessage(''); // Limpa mensagem
+                showMessage('');
 
-                // Preenche o formulário
                 if(placaInput) placaInput.value = veiculo.placa || '';
                 if(marcaInput) marcaInput.value = veiculo.marca || '';
                 if(modeloInput) modeloInput.value = veiculo.modelo || '';
@@ -80,7 +68,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(oleoDataInput) oleoDataInput.value = formatDateForInput(veiculo.manutencaoInfo.proxTrocaOleoData);
                     if(frequenciaChecklistInput) frequenciaChecklistInput.value = veiculo.manutencaoInfo.frequenciaChecklistDias || '';
                 }
-
             } else {
                 const errorData = await response.json().catch(() => ({ message: `Veículo não encontrado ou erro ${response.status}.` }));
                 showMessage(errorData.message || 'Não foi possível carregar os dados do veículo para edição.', 'error');
@@ -93,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Event listener para o envio do formulário de edição
     if (formEditarVeiculo) {
         formEditarVeiculo.addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -120,18 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
-                // const token = localStorage.getItem('authToken');
-                // const headers = { 
-                //     'Content-Type': 'application/json',
-                //     'Authorization': `Bearer ${token}` 
-                // };
-
                 const response = await fetch(backendUrl, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        // Adicionar headers aqui quando tiver JWT
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosAtualizados)
                 });
 
@@ -145,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     showMessage(responseData.message || `Erro ${response.status}: Não foi possível atualizar o veículo.`, 'error');
                 }
-
             } catch (error) {
                 console.error('Erro ao tentar atualizar veículo:', error);
                 showMessage('Erro de conexão ao tentar atualizar o veículo.', 'error');
@@ -153,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Event listener para o botão "Cancelar"
     if (btnCancelarEdicao) {
         btnCancelarEdicao.addEventListener('click', function() {
             if (veiculoId) {
@@ -164,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Lógica do header (logout/welcome)
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessage = document.getElementById('welcomeMessage');
     const storedUser = localStorage.getItem('gpx7User');
