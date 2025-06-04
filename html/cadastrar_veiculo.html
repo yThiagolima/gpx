@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastrar Veículo - GPX7 Controle de Veículos</title>
     <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/dashboard.css"> <link rel="stylesheet" href="../css/forms.css">   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css"> 
+    <link rel="stylesheet" href="../css/forms.css">   
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -17,13 +19,15 @@
             </div>
             <ul class="nav-links">
                 <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="cadastrar_veiculo.html" class="active"><i class="fas fa-plus-circle"></i> Cadastrar Carros</a></li>
+                <li><a href="cadastrar_veiculo.html" class="active"><i class="fas fa-plus-circle"></i> Cadastrar Carros</a></li> {/* ATIVO AQUI */}
                 <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
                 <li><a href="manutencao.html"><i class="fas fa-tools"></i> Manutenção</a></li>
+                <li><a href="abastecimento.html"><i class="fas fa-gas-pump"></i> Abastecimento</a></li> {/* */}
                 <li><a href="relatorios.html"><i class="fas fa-chart-bar"></i> Relatório</a></li>
             </ul>
             <div class="user-menu">
-                <span id="welcomeMessage">Olá, Usuário!</span> <button id="logoutButton" class="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                <span id="welcomeMessage">Olá, Usuário!</span> 
+                <button id="logoutButton" class="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </nav>
     </header>
@@ -50,7 +54,7 @@
                     <label for="anoFabricacao">Ano Fabricação <span class="required-asterisk">*</span></label>
                     <input type="number" id="anoFabricacao" name="anoFabricacao" placeholder="Ex: 2020" min="1900" max="2099" required>
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     <label for="anoModelo">Ano Modelo <span class="required-asterisk">*</span></label>
                     <input type="number" id="anoModelo" name="anoModelo" placeholder="Ex: 2021" min="1900" max="2099" required>
                 </div>
@@ -82,12 +86,12 @@
                     <label for="oleoData">Próx. Troca de Óleo (Data)</label>
                     <input type="date" id="oleoData" name="oleoData">
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     <label for="frequenciaChecklist">Frequência Checklist (dias)</label>
                     <input type="number" id="frequenciaChecklist" name="frequenciaChecklist" placeholder="Ex: 7 (semanal), 30 (mensal)" min="1">
                 </div>
-
-            </div> <div class="form-actions">
+            </div> 
+            <div class="form-actions">
                 <button type="submit" class="button-primary"><i class="fas fa-save"></i> Salvar Veículo</button>
                 <button type="reset" class="button-secondary"><i class="fas fa-eraser"></i> Limpar</button>
             </div>
@@ -95,5 +99,7 @@
         <p id="message" class="message-feedback" style="margin-top: 20px;"></p>
     </main>
 
-    <script src="../js/dashboard.js"></script> <script src="../js/cadastrar_veiculo.js"></script> </body>
+    <script src="../js/dashboard.js"></script> 
+    <script src="../js/cadastrar_veiculo.js"></script> 
+</body>
 </html>
