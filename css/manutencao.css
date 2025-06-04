@@ -1,54 +1,178 @@
 /* css/manutencao.css */
-.card-list-section h2 {
-    font-size: 1.2em; /* um pouco menor para seções dentro da página */
-    margin-bottom: 15px;
+
+/* Estilos para as seções da página de manutenção */
+.maintenance-section {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.07);
 }
 
-.status-list-container .widget,
-.upcoming-maintenance-widgets .widget {
-    margin-bottom: 15px;
-    /* Estilos de widget já definidos em dashboard.css podem ser herdados ou ajustados */
+.maintenance-section h2 {
+    font-size: 1.4em;
+    color: var(--text-dark);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-blue-light);
+    margin-top: 0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
 }
 
-/* Cores de status para checklists e alertas */
-.status-amarelo, .widget.widget-aviso { /* Para itens com aviso (ex: checklist próximo) */
-    background-color: #fff8e1 !important;
-    border-left: 5px solid #ffc107 !important;
-}
-.status-amarelo .widget-title, .widget-aviso .widget-title,
-.status-amarelo .widget-status, .widget-aviso .widget-status {
-    color: #ffa000 !important;
+.maintenance-section h2 .fas {
+    margin-right: 10px;
+    color: var(--primary-blue);
 }
 
-.status-vermelho, .widget.widget-vencido { /* Para itens vencidos/atrasados */
-    background-color: #ffebee !important;
-    border-left: 5px solid #e53935 !important;
-}
-.status-vermelho .widget-title, .widget.widget-vencido .widget-title,
-.status-vermelho .widget-status, .widget.widget-vencido .widget-status {
-    color: #c62828 !important;
+/* Estilo para os containers das listas de status/alertas */
+.status-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout responsivo em colunas */
+    gap: 20px;
 }
 
-.status-ok, .widget.widget-ok { /* Para itens em dia/programados */
-    background-color: #e8f5e9 !important;
-    border-left: 5px solid #4caf50 !important;
-}
-.status-ok .widget-title, .widget.widget-ok .widget-title,
-.status-ok .widget-status, .widget.widget-ok .widget-status {
-    color: #388e3c !important;
+/* Estilos base para os cards/widgets de alerta/status */
+.widget { /* Reutilizando e adaptando a classe .widget do dashboard.css se necessário */
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start; /* Alinha ícone e conteúdo no topo */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
 }
 
-.widget-status {
+.widget:hover {
+    transform: translateY(-3px);
+}
+
+.widget .widget-icon {
+    font-size: 1.8em; /* Tamanho do ícone */
+    padding: 15px;
+    margin-right: 15px;
+    border-radius: 50%; /* Ícone circular */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px; /* Largura e altura fixas para círculo */
+    height: 50px;
+    color: #fff; /* Cor padrão do ícone, o fundo muda por status */
+}
+
+.widget .widget-content {
+    flex-grow: 1;
+}
+
+.widget .widget-title {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: var(--text-dark);
+}
+
+.widget .widget-status {
+    font-size: 0.95em;
     font-weight: bold;
     display: block;
     margin-bottom: 8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block; /* Para o padding funcionar bem */
 }
-.widget-info p {
+
+.widget .widget-info p {
     margin: 4px 0;
     font-size: 0.9em;
+    line-height: 1.5;
+    color: #444;
 }
-.widget-description {
+.widget .widget-info strong {
+    color: #222;
+}
+
+.widget .widget-description {
     font-size: 0.85em;
-    color: #555;
-    margin-top: 5px;
+    color: #666;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+.widget .widget-actions button {
+    font-size: 0.85em;
+    padding: 6px 10px;
+}
+
+
+/* Estilos de STATUS para os widgets/cards */
+
+/* OK / Programado */
+.widget-ok .widget-icon,
+.status-ok .widget-icon { /* Se usar .status-ok diretamente no item */
+    background-color: #28a745; /* Verde */
+}
+.widget-ok .widget-status,
+.status-ok .widget-status {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+/* AVISO / Próximo (Amarelo) */
+.widget-aviso, /* Classe genérica para aviso */
+.status-amarelo .widget-icon { 
+    background-color: #ffc107; /* Amarelo */
+}
+.widget-aviso .widget-status,
+.status-amarelo .widget-status {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+}
+/* Adicionalmente, se quiser uma borda no widget de aviso */
+.widget.widget-aviso {
+    border-left: 5px solid #ffc107;
+}
+
+
+/* VENCIDO / ATRASADO (Vermelho) */
+.widget-vencido .widget-icon, /* Classe genérica para vencido */
+.status-vermelho .widget-icon {
+    background-color: #dc3545; /* Vermelho */
+}
+.widget-vencido .widget-status,
+.status-vermelho .widget-status {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+/* Adicionalmente, se quiser uma borda no widget vencido */
+.widget.widget-vencido {
+    border-left: 5px solid #dc3545;
+}
+
+/* Variações específicas de vencido (se quiser diferenciar mais ainda) */
+.widget-vencido-data .widget-icon { background-color: #c82333; } /* Vermelho mais escuro para data */
+.widget-vencido-km .widget-icon { background-color: #bd2130; }   /* Outro tom de vermelho para KM */
+.widget-vencido-data-km .widget-icon { background-color: #b21f2d; font-size: 2em; } /* Destaque máximo */
+
+
+.upcoming-maintenance-widgets {
+    /* Mantém o layout em grid para os widgets de alerta */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+/* Para as mensagens de carregamento dentro das seções */
+.loading-message.text-center {
+    padding: 20px;
+    color: #777;
+    font-style: italic;
+}
+.error-message.text-center {
+    padding: 20px;
+    color: var(--error-red);
+    font-weight: bold;
 }
