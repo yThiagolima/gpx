@@ -1,0 +1,104 @@
+/* css/relatorios.css */
+
+.filters-section.card {
+    background-color: #f8f9fa;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.filters-section h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+    color: var(--primary-blue-dark);
+    border-bottom: 2px solid var(--primary-blue-light);
+    padding-bottom: 10px;
+}
+
+.report-filters {
+    gap: 15px 20px; /* Espaçamento entre os filtros */
+}
+
+.filter-button-group {
+    display: flex;
+    align-items: flex-end; /* Alinha os botões com a base dos inputs */
+    gap: 10px;
+}
+
+.filter-button-group button {
+    padding: 10px 15px; /* Ajusta o padding dos botões de filtro */
+    font-size: 0.95em;
+}
+
+.report-section.card {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.report-section h2 {
+    margin-top: 0;
+    font-size: 1.3em;
+    color: var(--text-dark);
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+}
+
+.report-layout {
+    display: grid;
+    grid-template-columns: 1fr; /* Default para mobile */
+    gap: 30px;
+}
+
+@media (min-width: 992px) { /* Telas maiores */
+    .report-layout {
+        grid-template-columns: repeat(2, 1fr); /* Duas colunas */
+    }
+}
+
+.full-width-card {
+    grid-column: 1 / -1; /* Ocupa todas as colunas disponíveis no grid */
+}
+
+.chart-container {
+    position: relative;
+    min-height: 350px; /* Altura mínima para o gráfico */
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #fff;
+}
+
+.chart-subtitle {
+    font-size: 0.85em;
+    color: #666;
+    text-align: center;
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
+.report-summary {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+}
+
+.report-summary p {
+    margin: 8px 0;
+    font-size: 0.95em;
+}
+.report-summary strong {
+    color: var(--text-dark);
+}
+
+.scrollable-table {
+    max-height: 400px; /* ou a altura que desejar */
+    overflow-y: auto;
+}
