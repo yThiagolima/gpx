@@ -22,7 +22,7 @@
                 <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="cadastrar_veiculo.html"><i class="fas fa-plus-circle"></i> Cadastrar Carros</a></li>
                 <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
-                <li><a href="manutencao.html" class="active"><i class="fas fa-tools"></i> Manutenções e Checklists</a></li> {/* NOME ATUALIZADO */}
+                <li><a href="manutencao.html" class="active"><i class="fas fa-tools"></i> Manutenções e Checklists</a></li>
                 <li><a href="abastecimento.html"><i class="fas fa-gas-pump"></i> Abastecimento</a></li> 
                 <li><a href="relatorios.html"><i class="fas fa-chart-bar"></i> Relatório</a></li>
             </ul>
@@ -34,17 +34,14 @@
     </header>
 
     <main class="container">
-        <h1><i class="fas fa-wrench"></i> Manutenções e Checklists</h1> {/* ÍCONE E TÍTULO ATUALIZADOS */}
+        <h1><i class="fas fa-wrench"></i> Manutenções e Checklists</h1> 
         <p>Registre manutenções realizadas e acompanhe os próximos checklists e alertas.</p>
 
         <div class="page-actions-bar" style="margin-bottom: 20px;">
             <button id="showNewMaintenanceFormBtn" class="button-primary"><i class="fas fa-plus"></i> Registrar Manutenção Realizada</button>
-            {/* O botão para registrar checklist foi removido conforme solicitado anteriormente, 
-                mas o formulário abaixo ainda existe. Se precisar de um botão para ele, me avise. */}
-        </div>
+            </div>
         <p id="messageRegistro" class="message-feedback"></p>
 
-        {/* Formulário para Registrar Manutenção Realizada (inicialmente oculto) */}
         <form id="formRegistrarManutencao" class="content-form card" style="display: none; margin-bottom:30px;">
             <h2>Registrar Manutenção Realizada</h2>
             <div class="form-grid">
@@ -71,7 +68,7 @@
                     <input type="number" id="manutencaoCusto" name="custo" placeholder="0.00" step="0.01" min="0">
                 </div>
                 <div class="form-group">
-                    <label for="manutencaoLocal">Local/Oficina</label> {/* CAMPO "ONDE" */}
+                    <label for="manutencaoLocal">Local/Oficina</label>
                     <input type="text" id="manutencaoLocal" name="realizadaPor" placeholder="Ex: Oficina GPX7">
                 </div>
                 <div class="form-group form-group-full">
@@ -80,7 +77,6 @@
                 </div>
             </div>
 
-            {/* Seção para Próxima Troca de Óleo - Mostrada condicionalmente via JS */}
             <div id="nextOilChangeSection" style="display: none; margin-top: 20px; padding-top:15px; border-top: 1px solid #eee;">
                 <h3>Próxima Troca de Óleo (Opcional)</h3>
                 <div class="form-grid">
@@ -102,7 +98,6 @@
             </div>
         </form>
 
-        {/* Formulário para Registrar Checklist (inicialmente oculto e SEM botão de acesso direto por enquanto) */}
         <form id="formRegistrarChecklist" class="content-form card" style="display: none; margin-bottom:30px;">
             <h2>Registrar Checklist Realizado</h2>
             <div class="form-grid">
@@ -135,21 +130,17 @@
             </div>
         </form>
 
-        {/* NOVA SEÇÃO: Status dos Próximos Checklists Agendados */}
         <section class="maintenance-section card-list-section">
             <h2><i class="fas fa-calendar-alt"></i> Status dos Próximos Checklists Agendados</h2>
             <div id="upcomingChecklistsStatus" class="status-list-container">
                 <p class="loading-message text-center">Carregando status dos checklists...</p>
-                {/* */}
-            </div>
+                </div>
             <p id="messageChecklistStatus" class="message-feedback" style="margin-top: 10px;"></p>
         </section>
 
-        {/* SEÇÃO ATUALIZADA: Alertas de Manutenção Programada (Ex: Troca de Óleo) */}
         <section class="maintenance-section card-list-section">
             <h2><i class="fas fa-oil-can"></i> Alertas de Manutenção Programada (Ex: Troca de Óleo)</h2>
             <div id="programmedMaintenanceAlerts" class="status-list-container upcoming-maintenance-widgets">
-                {/* Renomeado de upcomingMaintenance para programmedMaintenanceAlerts para clareza */}
                 <p class="loading-message text-center">Carregando alertas de manutenção...</p>
             </div>
             <p id="messageProgrammedAlerts" class="message-feedback" style="margin-top: 10px;"></p>
@@ -189,7 +180,6 @@
             </div>
             <div class="table-container">
                 <table id="checklistHistoryTable" class="data-table">
-                    {/* ... (cabeçalho da tabela de histórico de checklists como antes) ... */}
                     <thead>
                         <tr>
                             <th>Veículo (Placa)</th>
