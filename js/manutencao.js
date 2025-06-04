@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const checklistNovoVeiculoSelect = document.getElementById('checklistNovoVeiculoId');
     
     // Botões dentro de modais/formulários
-    const btnGerarFormularioChecklist = document.getElementById('btnGerarFormularioChecklist'); // No modal de iniciar
+    const btnGerarFormularioChecklist = document.getElementById('btnGerarFormularioChecklist'); 
     const btnCancelChecklistResults = formRegistrarResultadosChecklist ? formRegistrarResultadosChecklist.querySelector('.cancel-checklist-results-btn') : null;
 
     // Seções de Exibição Dinâmica
@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', function() {
         hideForm(formRegistrarManutencao);
         hideForm(formRegistrarResultadosChecklist);
         hideModal(modalSelecionarVeiculoChecklist);
+        const modalTrocaOleo = document.getElementById('modalRegistrarTrocaOleo'); // Garante que este modal também seja fechado
+        if (modalTrocaOleo) hideModal(modalTrocaOleo);
         if (messageRegistro) showUserMessage(messageRegistro, '', '');
     }
 
@@ -159,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', (e) => {
             e.preventDefault(); hideAllDynamicForms();
             const form = e.target.closest('form'); if (form) form.reset();
-             const nextOilSectionLocal = formRegistrarManutencao.querySelector('#nextOilChangeSection'); // Re-check based on actual ID if this still applies
+             const nextOilSectionLocal = formRegistrarManutencao.querySelector('#nextOilChangeSection');
              if(nextOilSectionLocal && formRegistrarManutencao && formRegistrarManutencao.contains(nextOilSectionLocal)) nextOilSectionLocal.style.display = 'none';
         });
     });
@@ -249,10 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const responseData = await response.json();
                 if (response.ok) {
                     hideModal(modalSelecionarVeiculoChecklist);
-                    gerarFormularioChecklist(veiculoId, veiculoPlaca, responseData.checklist.dataIniciado); // Gera PDF/HTML para impressão
+                    gerarFormularioChecklist(veiculoId, veiculoPlaca, responseData.checklist.dataIniciado);
                     showUserMessage(messageRegistro, responseData.message || 'Checklist iniciado e pendente!', 'success');
                     carregarChecklistsPendentes(); 
-                    carregarAlertasProgramadosEStatusChecklist(); // Atualiza status dos agendados
+                    carregarAlertasProgramadosEStatusChecklist();
                 } else { showUserMessage(messageRegistro, responseData.message || 'Erro ao iniciar.', 'error'); }
             } catch (error) { console.error('Erro:', error); showUserMessage(messageRegistro, 'Erro de conexão.', 'error'); }
         });
@@ -286,15 +288,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function abrirFormularioResultadosChecklist(checklistId, veiculoPlaca, isFromScheduled = false) {
         hideAllDynamicForms();
         if(formRegistrarResultadosChecklist) formRegistrarResultadosChecklist.reset();
-        document.getElementById('checklistPendenteId').value = checklistId; // Pode ser ID de pendente ou "novo_agendado_"+veiculoId
+        document.getElementById('checklistPendenteId').value = checklistId; 
         document.getElementById('checklistVeiculoInfo').textContent = veiculoPlaca;
         document.getElementById('checklistResultadoData').valueAsDate = new Date();
         
-        // Se for de um agendado que ainda não foi "iniciado", o checklistId será o veiculoId para referência
-        // A API lidará com a criação se necessário.
         formRegistrarResultadosChecklist.dataset.isFromScheduled = isFromScheduled ? "true" : "false";
-        formRegistrarResultadosChecklist.dataset.veiculoId = isFromScheduled ? checklistId : ''; // Se for de agendado, checklistId é o veiculoId
-
+        formRegistrarResultadosChecklist.dataset.veiculoId = isFromScheduled ? checklistId : ''; 
 
         const container = document.getElementById('checklistItensContainer'); container.innerHTML = '';
         ITENS_CHECKLIST_PADRAO.forEach((itemNome, index) => {
@@ -311,40 +310,15 @@ document.addEventListener('DOMContentLoaded', function() {
         formRegistrarResultadosChecklist.addEventListener('submit', async function(event) {
             event.preventDefault();
             let checklistId = document.getElementById('checklistPendenteId').value;
-            const isFromScheduled = this.dataset.isFromScheduled === "true";
-            const veiculoIdOriginal = this.dataset.veiculoId; // Usado se for de um agendado
-
             showUserMessage(messageRegistro, 'Registrando resultados...', 'info');
-            
-            const formData = new FormData(this); 
-            const data = { itensVerificados: [] };
+            const formData = new FormData(this); const data = { itensVerificados: [] };
             formData.forEach((value, key) => { if(!key.startsWith('status_') && !key.startsWith('obs_') && key !== 'checklistPendenteId') data[key] = value; });
             ITENS_CHECKLIST_PADRAO.forEach((nomeItem, index) => {
                 const itemId = `item_${index}`; data.itensVerificados.push({ nomeItem, statusItem: formData.get(`status_${itemId}`), obsItem: formData.get(`obs_${itemId}`) || null });
             });
-
             if (!data.dataRealizacao || !data.quilometragem || !data.realizadoPor) { showUserMessage(messageRegistro, 'Preencha Data, KM e Responsável.', 'error'); return; }
-
             try {
-                let endpoint = '';
-                let method = 'POST';
-
-                if (isFromScheduled) { // Veio de um alerta de checklist agendado
-                    data.veiculoId = veiculoIdOriginal; // checklistId neste caso era o veiculoId
-                    // Primeiro, tentamos "iniciar" para criar o registro pendente, depois registramos o resultado.
-                    // Ou, a API /registrar-resultado poderia ser inteligente para criar um novo se não achar o ID.
-                    // Simplificando: vamos assumir que para "concluir" um agendado, ele precisa ser "iniciado" primeiro.
-                    // A lógica do botão "Concluir Checklist" no widget já faz o "iniciar".
-                    // Então, aqui sempre teremos um checklistId válido de um item pendente.
-                    if (!checklistId || checklistId.startsWith("novo_agendado_")) { // Salvaguarda, deveria ter ID de pendente
-                        showUserMessage(messageRegistro, 'Erro: ID de checklist pendente inválido.', 'error'); return;
-                    }
-                    endpoint = `${API_BASE_URL}/checklists/${checklistId}/registrar-resultado`;
-                } else { // Veio de um item explicitamente pendente
-                     endpoint = `${API_BASE_URL}/checklists/${checklistId}/registrar-resultado`;
-                }
-
-                const response = await fetch(endpoint, {
+                const response = await fetch(`${API_BASE_URL}/checklists/${checklistId}/registrar-resultado`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
                 });
                 const responseData = await response.json();
@@ -388,62 +362,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (item.tipoEvento === 'OLEO') { 
                         if (item.statusAlerta && item.statusAlerta.toUpperCase().startsWith("VENCIDO")) icon = 'fa-oil-can-drip'; else icon = 'fa-tint'; 
                         title = 'Troca de Óleo';
-                        // Adiciona botão "Troca Realizada" para ÓLEO
-                        actions = `<button class="button-primary button-small btn-troca-oleo-realizada" 
-                                           data-veiculo-id="${item.veiculoId}" 
-                                           data-veiculo-placa="${item.veiculoPlaca}"
-                                           data-km-atual-veiculo="${item.kmAtual || ''}">
-                                           <i class="fas fa-check"></i> Troca Realizada
-                                   </button>`;
+                        actions = `<button class="button-primary button-small btn-troca-oleo-realizada" data-veiculo-id="${item.veiculoId}" data-veiculo-placa="${item.veiculoPlaca}" data-km-atual-veiculo="${item.kmAtual || ''}"><i class="fas fa-check"></i> Troca Realizada</button>`;
                     } else if (item.tipoEvento === 'CHECKLIST') { 
                         if (item.statusAlerta === "VENCIDO_DATA") icon = 'fa-file-excel'; 
                         else if (item.statusAlerta === "AVISO_CHECKLIST") icon = 'fa-calendar-alt'; 
                         else icon = 'fa-clipboard-check'; 
                         title = 'Checklist Agendado'; 
-                        actions = `
-                            <button class="button-secondary button-small btn-print-checklist" 
-                                    data-veiculo-id="${item.veiculoId}" 
-                                    data-veiculo-placa="${item.veiculoPlaca}" 
-                                    data-data-prevista="${item.dataPrevista}">
-                                    <i class="fas fa-print"></i> Imprimir
-                            </button>
-                            <button class="button-primary button-small btn-concluir-checklist-agendado" 
-                                    data-veiculo-id="${item.veiculoId}" 
-                                    data-veiculo-placa="${item.veiculoPlaca}">
-                                    <i class="fas fa-check-circle"></i> Concluir
-                            </button>`;
+                        actions = `<button class="button-secondary button-small btn-print-checklist" data-veiculo-id="${item.veiculoId}" data-veiculo-placa="${item.veiculoPlaca}" data-data-prevista="${item.dataPrevista}"><i class="fas fa-print"></i> Imprimir</button> <button class="button-primary button-small btn-concluir-checklist-agendado" data-veiculo-id="${item.veiculoId}" data-veiculo-placa="${item.veiculoPlaca}"><i class="fas fa-check-circle"></i> Concluir</button>`;
                     }
                     widget.innerHTML = `<div class="widget-icon"><i class="fas ${icon}"></i></div><div class="widget-content"><h3 class="widget-title">${title} - ${item.veiculoPlaca||'N/A'}</h3><p class="widget-status">${statusTxt}</p><div class="widget-info-details">${details}</div><div class="widget-actions" style="margin-top:10px; display:flex; gap:8px;">${actions}</div></div>`;
                     
                     if (item.tipoEvento === 'OLEO' && programmedMaintenanceAlertsContainer) { programmedMaintenanceAlertsContainer.appendChild(widget); hasOilAlerts = true; } 
                     else if (item.tipoEvento === 'CHECKLIST' && upcomingChecklistsStatusContainer) { upcomingChecklistsStatusContainer.appendChild(widget); hasChecklistStatus = true; }
                 });
-
                  document.querySelectorAll('.btn-print-checklist').forEach(b => { b.addEventListener('click', function() { gerarFormularioChecklist(this.dataset.veiculoId, this.dataset.veiculoPlaca, this.dataset.dataPrevista); }); });
-                 document.querySelectorAll('.btn-concluir-checklist-agendado').forEach(b => { b.addEventListener('click', async function() { // NOVA LÓGICA
-                    const veiculoId = this.dataset.veiculoId;
-                    const veiculoPlaca = this.dataset.veiculoPlaca;
-                    showUserMessage(messageChecklistStatus, 'Preparando checklist para conclusão...', 'info');
+                 document.querySelectorAll('.btn-concluir-checklist-agendado').forEach(b => { b.addEventListener('click', async function() {
+                    const veiculoId = this.dataset.veiculoId; const veiculoPlaca = this.dataset.veiculoPlaca;
+                    showUserMessage(messageChecklistStatus, 'Preparando checklist...', 'info');
                     try {
-                        const response = await fetch(`${API_BASE_URL}/checklists/iniciar`, {
-                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ veiculoId })
-                        });
+                        const response = await fetch(`${API_BASE_URL}/checklists/iniciar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ veiculoId }) });
                         const responseData = await response.json();
-                        if (response.ok) {
-                            abrirFormularioResultadosChecklist(responseData.checklist._id, veiculoPlaca, true); // true indica que veio de um agendado
-                        } else { showUserMessage(messageChecklistStatus, responseData.message || 'Erro ao preparar checklist.', 'error'); }
-                    } catch (error) { showUserMessage(messageChecklistStatus, 'Erro de conexão ao preparar checklist.', 'error'); }
+                        if (response.ok) { abrirFormularioResultadosChecklist(responseData.checklist._id, veiculoPlaca, true); } 
+                        else { showUserMessage(messageChecklistStatus, responseData.message || 'Erro.', 'error'); }
+                    } catch (error) { showUserMessage(messageChecklistStatus, 'Erro de conexão.', 'error'); }
                  }); });
-                 // Listener para o novo botão "Troca de Óleo Realizada"
                  document.querySelectorAll('.btn-troca-oleo-realizada').forEach(b => {
-                    b.addEventListener('click', function() {
-                        const veiculoId = this.dataset.veiculoId;
-                        const veiculoPlaca = this.dataset.veiculoPlaca;
-                        const kmAtualVeiculo = this.dataset.kmAtualVeiculo;
-                        abrirModalTrocaOleo(veiculoId, veiculoPlaca, kmAtualVeiculo);
-                    });
+                    b.addEventListener('click', function() { abrirModalTrocaOleo(this.dataset.veiculoId, this.dataset.veiculoPlaca, this.dataset.kmAtualVeiculo); });
                  });
-
             }
             if(programmedMaintenanceAlertsContainer && !hasOilAlerts) programmedMaintenanceAlertsContainer.innerHTML = '<p class="text-center" style="padding:20px;">Nenhum alerta de óleo programado.</p>';
             if(upcomingChecklistsStatusContainer && !hasChecklistStatus) upcomingChecklistsStatusContainer.innerHTML = '<p class="text-center" style="padding:20px;">Nenhum checklist agendado.</p>';
@@ -454,67 +399,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function gerarFormularioChecklist(veiculoId, veiculoPlaca, dataPrevistaISO) {
-        // ... (código desta função mantido como na última versão completa) ...
         const dataFormatada = dataPrevistaISO ? new Date(dataPrevistaISO).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '____/____/______';
         const hojeFormatado = new Date().toLocaleDateString('pt-BR');
         let itensHtml = '';
         ITENS_CHECKLIST_PADRAO.forEach(item => { itensHtml += `<tr><td style="padding: 6px; border: 1px solid #ddd;">${item}</td><td style="text-align: center; padding: 6px; border: 1px solid #ddd;"><input type="checkbox" aria-label="OK para ${item}"></td><td style="text-align: center; padding: 6px; border: 1px solid #ddd;"><input type="checkbox" aria-label="Atenção para ${item}"></td><td style="padding: 6px; border: 1px solid #ddd;"><input type="text" style="width: 98%; border: 1px solid #ccc; padding: 4px;" aria-label="Observações para ${item}"></td></tr>`; });
         const printWindow = window.open('', '_blank', 'height=800,width=800');
-        printWindow.document.write(`<html><head><title>Formulário de Checklist Veicular - ${veiculoPlaca}</title><style>body{font-family:Arial,sans-serif;margin:20px;color:#333}h1,h2{text-align:center}table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.9em}th,td{border:1px solid #ccc;padding:6px;text-align:left}th{background-color:#f0f0f0}.info-section{padding:10px;border:1px solid #eee;margin-bottom:15px;background:#f9f9f9}.info-section p{margin:5px 0;font-size:0.95em}.info-section label{font-weight:bold}input[type=text],input[type=number],textarea{border:1px solid #ccc;padding:5px;width:calc(100% - 12px);box-sizing:border-box;margin-top:2px;margin-bottom:2px}textarea{height:60px}hr{border:0;border-top:1px solid #eee;margin:10px 0}.signature-section{margin-top:30px;text-align:center}.signature-line{display:inline-block;width:280px;border-bottom:1px solid #000;margin-top:35px}@media print{body{margin:0;font-size:10pt;color:#000}.no-print{display:none}table{font-size:8.5pt}input[type=text],input[type=number],textarea{border:1px solid #999} h1{font-size:14pt} h2{font-size:12pt}}</style></head><body><h1>Formulário de Checklist Veicular</h1><div class="info-section"><p><label>Veículo (Placa):</label> ${veiculoPlaca}</p><p><label>Data Programada do Checklist:</label> ${dataFormatada}</p><hr><p><label>Data da Inspeção:</label> <input type="text" value="${hojeFormatado}"></p><p><label>Realizado Por:</label> <input type="text"></p><p><label>Quilometragem Atual:</label> <input type="number"> km</p></div><h2>Itens de Verificação</h2><table><thead><tr><th>Item</th><th style="width:45px;text-align:center;">OK</th><th style="width:65px;text-align:center;">Atenção</th><th>Observações</th></tr></thead><tbody>${itensHtml}</tbody></table><div class="observations-section" style="margin-top:15px"><h2>Observações Gerais:</h2><textarea aria-label="Observações Gerais"></textarea></div><div class="signature-section"><p class="signature-line"></p><p>Assinatura do Responsável</p></div><div style="text-align:center; margin-top:20px;" class="no-print"><button onclick="window.print()" style="padding:10px 20px; background-color:#007bff;color:white;border:none;border-radius:4px;cursor:pointer;">Imprimir</button> <button onclick="window.close()" style="padding:10px 20px;margin-left:10px;background-color:#6c757d;color:white;border:none;border-radius:4px;cursor:pointer;">Fechar</button></div></body></html>`);
+        printWindow.document.write(
+            `<html>
+             <head>
+                <title>Formulário de Checklist Veicular - ${veiculoPlaca}</title>
+                <style>
+                    @page { size: A4 portrait; margin: 15mm; } /* Define A4 Retrato e margens */
+                    body { font-family: Arial, sans-serif; margin: 0; color: #333; font-size: 10pt; }
+                    h1,h2 { text-align: center; margin-bottom: 10px; }
+                    h1 { font-size: 16pt; margin-top:0; } h2 { font-size: 12pt; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    th,td { border: 1px solid #777; padding: 5px; text-align: left; vertical-align: top; }
+                    th { background-color: #e8e8e8; font-weight: bold; }
+                    .info-section { padding: 8px; border: 1px solid #ccc; margin-bottom: 10px; background: #fdfdfd; }
+                    .info-section p { margin: 4px 0; font-size: 0.95em; }
+                    .info-section label { font-weight: bold; }
+                    input[type=text],input[type=number],textarea { border: 1px solid #bbb; padding: 4px; width: calc(100% - 10px); box-sizing: border-box; margin-top: 1px; margin-bottom: 1px; background:#fff;}
+                    input[type=checkbox]{vertical-align:middle;}
+                    textarea { height: 50px; resize: vertical; }
+                    hr { border: 0; border-top: 1px solid #ccc; margin: 8px 0; }
+                    .signature-section { margin-top: 25px; text-align: center; }
+                    .signature-line { display: inline-block; width: 250px; border-bottom: 1px solid #000; margin-top: 30px; }
+                    .no-print { display: none; } /* Botões não aparecem na impressão por padrão */
+                    @media screen { .no-print {display: block; text-align:center; margin-top:20px;} /* Botões aparecem na tela */}
+                </style>
+             </head>
+             <body>
+                <h1>Formulário de Checklist Veicular</h1>
+                <div class="info-section">
+                    <p><label>Veículo (Placa):</label> ${veiculoPlaca}</p>
+                    <p><label>Data Programada do Checklist:</label> ${dataFormatada}</p><hr>
+                    <p><label>Data da Inspeção:</label> <input type="text" value="${hojeFormatado}" style="width:100px;"></p>
+                    <p><label>Realizado Por:</label> <input type="text" style="width:250px;"></p>
+                    <p><label>Quilometragem Atual:</label> <input type="number" style="width:100px;"> km</p>
+                </div>
+                <h2>Itens de Verificação</h2>
+                <table><thead><tr><th>Item</th><th style="width:40px;text-align:center;">OK</th><th style="width:60px;text-align:center;">Atenção</th><th>Observações</th></tr></thead><tbody>${itensHtml}</tbody></table>
+                <div class="observations-section" style="margin-top:10px"><h2>Observações Gerais:</h2><textarea aria-label="Observações Gerais"></textarea></div>
+                <div class="signature-section"><p class="signature-line"></p><p>Assinatura do Responsável</p></div>
+                <div class="no-print"><button onclick="window.print()" style="padding:10px 20px;">Imprimir</button> <button onclick="window.close()" style="padding:10px 20px;margin-left:10px;">Fechar</button></div>
+             </body>
+             </html>`);
         printWindow.document.close();
-    }
-
-    // NOVA FUNÇÃO E LÓGICA PARA O MODAL DE TROCA DE ÓLEO REALIZADA
-    const modalRegistrarTrocaOleo = document.getElementById('modalRegistrarTrocaOleo');
-    const formModalTrocaOleo = document.getElementById('formModalTrocaOleo');
-
-    function abrirModalTrocaOleo(veiculoId, veiculoPlaca, kmAtualVeiculo) {
-        hideAllDynamicForms();
-        if (formModalTrocaOleo) formModalTrocaOleo.reset();
-        document.getElementById('modalTrocaOleoVeiculoInfo').textContent = veiculoPlaca;
-        document.getElementById('modalTrocaOleoVeiculoId').value = veiculoId;
-        document.getElementById('modalTrocaOleoVeiculoPlaca').value = veiculoPlaca; // Adicionado para enviar placa
-        document.getElementById('modalTrocaOleoData').valueAsDate = new Date();
-        document.getElementById('modalTrocaOleoKm').value = kmAtualVeiculo || '';
-        document.getElementById('modalTrocaOleoKm').min = kmAtualVeiculo || 0; // Garante que a KM não seja menor
-        showModal(modalRegistrarTrocaOleo);
-    }
-    
-    if (modalRegistrarTrocaOleo) { // Para fechar o modal de troca de óleo
-        modalRegistrarTrocaOleo.querySelector('.close-modal-btn').addEventListener('click', () => hideModal(modalRegistrarTrocaOleo));
-        modalRegistrarTrocaOleo.querySelector('.button-secondary').addEventListener('click', () => hideModal(modalRegistrarTrocaOleo));
-        modalRegistrarTrocaOleo.addEventListener('click', (event) => { if(event.target === modalRegistrarTrocaOleo) hideModal(modalRegistrarTrocaOleo); });
-    }
-
-
-    if (formModalTrocaOleo) {
-        formModalTrocaOleo.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            showUserMessage(messageProgrammedAlerts, 'Registrando troca de óleo...', 'info');
-            const formData = new FormData(this);
-            const dadosTrocaOleo = Object.fromEntries(formData.entries());
-            dadosTrocaOleo.tipoManutencao = "Troca de Óleo"; // Define o tipo hardcoded
-
-            if (!dadosTrocaOleo.dataRealizacao || !dadosTrocaOleo.quilometragem) {
-                showUserMessage(messageProgrammedAlerts, 'Data da troca e KM atual são obrigatórios.', 'error'); return;
-            }
-            // Garante que proxTrocaOleoKm e proxTrocaOleoData só sejam enviados se preenchidos
-            if (dadosTrocaOleo.proxTrocaOleoKm === '') delete dadosTrocaOleo.proxTrocaOleoKm;
-            if (dadosTrocaOleo.proxTrocaOleoData === '') delete dadosTrocaOleo.proxTrocaOleoData;
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/manutencoes`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadosTrocaOleo)
-                });
-                const responseData = await response.json();
-                if (response.ok) {
-                    showUserMessage(messageProgrammedAlerts, responseData.message || 'Troca de óleo registrada!', 'success');
-                    this.reset(); hideModal(modalRegistrarTrocaOleo);
-                    loadMaintenanceHistory({ veiculoId: filtroManutVeiculoSelect.value, mes: filtroManutMesSelect.value, ano: filtroManutAnoSelect.value}); 
-                    carregarAlertasProgramadosEStatusChecklist();
-                } else { showUserMessage(messageProgrammedAlerts, responseData.message || 'Erro ao registrar troca de óleo.', 'error'); }
-            } catch (error) { console.error('Erro troca de óleo:', error); showUserMessage(messageProgrammedAlerts, 'Erro de conexão ao registrar troca.', 'error'); }
-        });
     }
     
     async function loadMaintenanceHistory(filtros = {}) {
@@ -619,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ano: filtroCheckAnoSelect.value
                         }); 
                         carregarAlertasProgramadosEStatusChecklist();
-                        carregarChecklistsPendentes(); // Recarrega pendentes pois um excluído pode ter sido pendente (embora o fluxo de exclusão de pendente seria outro)
+                        carregarChecklistsPendentes();
                     } else { 
                         throw new Error(responseData.message || `Erro ${response.status} ao excluir.`);
                     }
