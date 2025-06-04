@@ -45,38 +45,15 @@
         <p id="messageRegistro" class="message-feedback"></p>
 
         <form id="formRegistrarManutencao" class="content-form card" style="display: none; margin-bottom:30px;">
-            <h2>Registrar Manutenção Realizada</h2>
+             <h2>Registrar Manutenção Realizada</h2>
             <div class="form-grid">
-                <div class="form-group">
-                    <label for="manutencaoVeiculoId">Veículo <span class="required-asterisk">*</span></label>
-                    <select id="manutencaoVeiculoId" name="veiculoId" required>
-                        <option value="">Selecione um veículo...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="manutencaoTipo">Tipo/Motivo da Manutenção <span class="required-asterisk">*</span></label>
-                    <input type="text" id="manutencaoTipo" name="tipoManutencao" placeholder="Ex: Troca de óleo, Reparo no freio" required>
-                </div>
-                <div class="form-group">
-                    <label for="manutencaoData">Data da Realização <span class="required-asterisk">*</span></label>
-                    <input type="date" id="manutencaoData" name="dataRealizacao" required>
-                </div>
-                <div class="form-group">
-                    <label for="manutencaoKm">Quilometragem <span class="required-asterisk">*</span></label>
-                    <input type="number" id="manutencaoKm" name="quilometragem" placeholder="Km no momento da manutenção" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="manutencaoCusto">Custo (R$)</label>
-                    <input type="number" id="manutencaoCusto" name="custo" placeholder="0.00" step="0.01" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="manutencaoLocal">Local/Oficina</label>
-                    <input type="text" id="manutencaoLocal" name="realizadaPor" placeholder="Ex: Oficina GPX7">
-                </div>
-                <div class="form-group form-group-full">
-                    <label for="manutencaoDescricao">Descrição Detalhada / Peças Trocadas</label>
-                    <textarea id="manutencaoDescricao" name="descricao" rows="3" placeholder="Detalhes da manutenção, peças..."></textarea>
-                </div>
+                <div class="form-group"> <label for="manutencaoVeiculoId">Veículo <span class="required-asterisk">*</span></label> <select id="manutencaoVeiculoId" name="veiculoId" required><option value="">Selecione um veículo...</option></select> </div>
+                <div class="form-group"> <label for="manutencaoTipo">Tipo/Motivo da Manutenção <span class="required-asterisk">*</span></label> <input type="text" id="manutencaoTipo" name="tipoManutencao" placeholder="Ex: Troca de óleo, Reparo no freio" required> </div>
+                <div class="form-group"> <label for="manutencaoData">Data da Realização <span class="required-asterisk">*</span></label> <input type="date" id="manutencaoData" name="dataRealizacao" required> </div>
+                <div class="form-group"> <label for="manutencaoKm">Quilometragem <span class="required-asterisk">*</span></label> <input type="number" id="manutencaoKm" name="quilometragem" placeholder="Km no momento da manutenção" min="0" required> </div>
+                <div class="form-group"> <label for="manutencaoCusto">Custo (R$)</label> <input type="number" id="manutencaoCusto" name="custo" placeholder="0.00" step="0.01" min="0"> </div>
+                <div class="form-group"> <label for="manutencaoLocal">Local/Oficina</label> <input type="text" id="manutencaoLocal" name="realizadaPor" placeholder="Ex: Oficina GPX7"> </div>
+                <div class="form-group form-group-full"> <label for="manutencaoDescricao">Descrição Detalhada / Peças Trocadas</label> <textarea id="manutencaoDescricao" name="descricao" rows="3" placeholder="Detalhes da manutenção, peças..."></textarea> </div>
             </div>
             <div id="nextOilChangeSection" style="display: none; margin-top: 20px; padding-top:15px; border-top: 1px solid #eee;">
                 <h3>Próxima Troca de Óleo (Opcional)</h3>
@@ -95,7 +72,7 @@
                     <label for="checklistNovoVeiculoId">Veículo <span class="required-asterisk">*</span></label>
                     <select id="checklistNovoVeiculoId" name="checklistNovoVeiculoId" required>
                         <option value="">Selecione um veículo...</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="form-actions">
                     <button id="btnGerarFormularioChecklist" class="button-primary"><i class="fas fa-print"></i> Gerar Formulário e Marcar como Pendente</button>
@@ -106,69 +83,62 @@
         
         <form id="formRegistrarResultadosChecklist" class="content-form card" style="display: none; margin-bottom:30px;">
             <h2>Registrar Resultados do Checklist para <span id="checklistVeiculoInfo"></span></h2>
-            <input type="hidden" id="checklistPendenteId" name="checklistPendenteId"> <div class="form-grid">
-                <div class="form-group">
-                    <label for="checklistResultadoData">Data da Realização <span class="required-asterisk">*</span></label>
-                    <input type="date" id="checklistResultadoData" name="dataRealizacao" required>
-                </div>
-                <div class="form-group">
-                    <label for="checklistResultadoKm">Quilometragem Atual <span class="required-asterisk">*</span></label>
-                    <input type="number" id="checklistResultadoKm" name="quilometragem" placeholder="KM no momento do checklist" min="0" required>
-                </div>
-                 <div class="form-group">
-                    <label for="checklistResultadoResponsavel">Realizado Por <span class="required-asterisk">*</span></label>
-                    <input type="text" id="checklistResultadoResponsavel" name="realizadoPor" placeholder="Nome do responsável" required>
-                </div>
+            <input type="hidden" id="checklistPendenteId" name="checklistPendenteId">
+            <div class="form-grid">
+                <div class="form-group"> <label for="checklistResultadoData">Data da Realização <span class="required-asterisk">*</span></label> <input type="date" id="checklistResultadoData" name="dataRealizacao" required> </div>
+                <div class="form-group"> <label for="checklistResultadoKm">Quilometragem Atual <span class="required-asterisk">*</span></label> <input type="number" id="checklistResultadoKm" name="quilometragem" placeholder="KM no momento do checklist" min="0" required> </div>
+                 <div class="form-group"> <label for="checklistResultadoResponsavel">Realizado Por <span class="required-asterisk">*</span></label> <input type="text" id="checklistResultadoResponsavel" name="realizadoPor" placeholder="Nome do responsável" required> </div>
             </div>
-            
             <h3>Itens Verificados:</h3>
-            <div id="checklistItensContainer" class="checklist-itens-container">
-                <p class="loading-message">Carregando itens do checklist...</p>
-            </div>
-
-            <div class="form-group form-group-full" style="margin-top: 15px;">
-                <label for="checklistResultadoObservacoes">Observações Gerais / Ações Corretivas</label>
-                <textarea id="checklistResultadoObservacoes" name="observacoesGerais" rows="4" placeholder="Descreva quaisquer problemas encontrados ou ações tomadas..."></textarea>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="button-primary"><i class="fas fa-check-circle"></i> Finalizar e Salvar Checklist</button>
-                <button type="button" class="button-secondary cancel-checklist-results-btn"><i class="fas fa-times"></i> Cancelar</button>
-            </div>
+            <div id="checklistItensContainer" class="checklist-itens-container"> <p class="loading-message">Carregando itens do checklist...</p> </div>
+            <div class="form-group form-group-full" style="margin-top: 15px;"> <label for="checklistResultadoObservacoes">Observações Gerais / Ações Corretivas</label> <textarea id="checklistResultadoObservacoes" name="observacoesGerais" rows="4" placeholder="Descreva quaisquer problemas encontrados ou ações tomadas..."></textarea> </div>
+            <div class="form-actions"> <button type="submit" class="button-primary"><i class="fas fa-check-circle"></i> Finalizar e Salvar Checklist</button> <button type="button" class="button-secondary cancel-checklist-results-btn"><i class="fas fa-times"></i> Cancelar</button> </div>
         </form>
-
 
         <section class="maintenance-section card-list-section">
             <h2><i class="fas fa-hourglass-half"></i> Checklists Pendentes de Registro</h2>
-            <div id="checklistsPendentesContainer" class="status-list-container">
-                <p class="loading-message text-center">Carregando checklists pendentes...</p>
-                </div>
+            <div id="checklistsPendentesContainer" class="status-list-container"> <p class="loading-message text-center">Carregando checklists pendentes...</p> </div>
             <p id="messageChecklistsPendentes" class="message-feedback" style="margin-top: 10px;"></p>
         </section>
 
         <section class="maintenance-section card-list-section">
             <h2><i class="fas fa-calendar-alt"></i> Status dos Próximos Checklists Agendados</h2>
-            <div id="upcomingChecklistsStatus" class="status-list-container">
-                <p class="loading-message text-center">Carregando status dos checklists...</p>
-            </div>
+            <div id="upcomingChecklistsStatus" class="status-list-container"> <p class="loading-message text-center">Carregando status dos checklists...</p> </div>
             <p id="messageChecklistStatus" class="message-feedback" style="margin-top: 10px;"></p>
         </section>
 
         <section class="maintenance-section card-list-section">
             <h2><i class="fas fa-oil-can"></i> Alertas de Manutenção Programada (Ex: Troca de Óleo)</h2>
-            <div id="programmedMaintenanceAlerts" class="status-list-container upcoming-maintenance-widgets">
-                <p class="loading-message text-center">Carregando alertas de manutenção...</p>
-            </div>
+            <div id="programmedMaintenanceAlerts" class="status-list-container upcoming-maintenance-widgets"> <p class="loading-message text-center">Carregando alertas de manutenção...</p> </div>
             <p id="messageProgrammedAlerts" class="message-feedback" style="margin-top: 10px;"></p>
         </section>
 
         <section class="maintenance-section">
             <h2><i class="fas fa-history"></i> Histórico de Manutenções Gerais</h2>
-            <div class="actions-bar">
-                 <input type="text" id="searchInputMaintenance" placeholder="Buscar por veículo, tipo, descrição...">
+            <div class="history-filters actions-bar">
+                <div class="form-group">
+                    <label for="filtroManutVeiculo">Veículo:</label>
+                    <select id="filtroManutVeiculo" name="filtroManutVeiculo">
+                        <option value="todos">Todos</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroManutMes">Mês:</label>
+                    <select id="filtroManutMes" name="filtroManutMes">
+                        <option value="todos">Todos</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroManutAno">Ano:</label>
+                    <select id="filtroManutAno" name="filtroManutAno">
+                        <option value="todos">Todos</option>
+                        </select>
+                </div>
+                <button id="btnFiltrarManutencoes" class="button-secondary"><i class="fas fa-filter"></i> Filtrar</button>
             </div>
             <div class="table-container">
                 <table id="maintenanceHistoryTable" class="data-table">
-                     <thead><tr><th>Veículo (Placa)</th><th>Tipo/Motivo</th><th>Data</th><th>Custo</th><th>KM</th><th>Local/Oficina</th><th>Descrição</th><th>Ações</th></tr></thead>
+                    <thead><tr><th>Veículo (Placa)</th><th>Tipo/Motivo</th><th>Data</th><th>Custo</th><th>KM</th><th>Local/Oficina</th><th>Descrição</th><th>Ações</th></tr></thead>
                     <tbody id="maintenanceHistoryBody"><tr><td colspan="8" class="text-center">Carregando histórico...</td></tr></tbody>
                 </table>
             </div>
@@ -177,8 +147,26 @@
 
         <section class="maintenance-section">
             <h2><i class="fas fa-clipboard-list"></i> Histórico de Checklists Realizados</h2>
-             <div class="actions-bar">
-                 <input type="text" id="searchChecklistInput" placeholder="Buscar por veículo, responsável...">
+            <div class="history-filters actions-bar">
+                 <div class="form-group">
+                    <label for="filtroCheckVeiculo">Veículo:</label>
+                    <select id="filtroCheckVeiculo" name="filtroCheckVeiculo">
+                        <option value="todos">Todos</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroCheckMes">Mês:</label>
+                    <select id="filtroCheckMes" name="filtroCheckMes">
+                        <option value="todos">Todos</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroCheckAno">Ano:</label>
+                    <select id="filtroCheckAno" name="filtroCheckAno">
+                        <option value="todos">Todos</option>
+                        </select>
+                </div>
+                <button id="btnFiltrarChecklists" class="button-secondary"><i class="fas fa-filter"></i> Filtrar</button>
             </div>
             <div class="table-container">
                 <table id="checklistHistoryTable" class="data-table">
