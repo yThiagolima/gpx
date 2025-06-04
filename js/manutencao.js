@@ -37,17 +37,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return 'Data Inválida';
-        // Ajusta para exibir a data local corretamente, considerando o input como UTC ou local sem fuso
-        const offset = date.getTimezoneOffset();
-        const adjustedDate = new Date(date.getTime() + (offset * 60 * 1000));
-
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' };
         if (includeTime) {
             options.hour = '2-digit';
             options.minute = '2-digit';
         }
-        return adjustedDate.toLocaleDateString('pt-BR', options);
+        // Para datas que vêm da API como string ISO (ex: YYYY-MM-DDTHH:mm:ss.sssZ),
+        // o new Date() já interpreta corretamente como UTC.
+        // Se a data vier sem fuso (ex: YYYY-MM-DD) pode haver interpretação como local.
+        // A API deve idealmente retornar datas em formato ISO 8601 com Z ou offset.
+        // Se a data for apenas YYYY-MM-DD, o timeZone: 'UTC' na formatação ajuda a evitar shifts indesejados.
+        return date.toLocaleDateString('pt-BR', options);
     }
+
 
     function formatCurrency(value) {
         if (value === null || value === undefined || isNaN(value)) return '--';
@@ -84,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Erro ao carregar veículos para selects:', error);
-            showMessage(messageRegistro, error.message || 'Erro ao carregar lista de veículos.', 'error');
+            if(messageRegistro) showMessage(messageRegistro, error.message || 'Erro ao carregar lista de veículos.', 'error');
         }
     }
 
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('https://gpx-api-xwv1.onrender.com/api/manutencoes/proximas');
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: `Erro ${response.status} ao buscar alertas.` }));
+                const errorData = await response.json().catch(() => ({ message: `Erro ${response.status} ao buscar.` }));
                 throw new Error(errorData.message);
             }
             const data = await response.json();
@@ -107,14 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const widget = document.createElement('div');
                     widget.className = 'widget'; // Classe base
 
-                    let iconClass = 'fa-bell'; // Ícone padrão para alerta
+                    let iconClass = 'fa-bell'; 
                     let title = maint.tipo || 'Alerta';
                     let detailsHtml = `<p class="widget-description">${maint.descricao || 'Verificar detalhes.'}</p>`;
                     let actionsHtml = '';
-                    let statusClass = 'widget-ok'; // Default status class
+                    let statusClass = 'widget-ok'; 
                     let statusText = 'Programado';
 
-                    // Determinar classe de status e texto com base em maint.statusAlerta
                     if (maint.statusAlerta) {
                         switch (maint.statusAlerta.toUpperCase()) {
                             case "VENCIDO_DATA":
@@ -125,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             case "VENCIDO_KM":
                                 statusClass = 'widget-vencido widget-vencido-km';
                                 statusText = "ATENÇÃO (KM ATINGIDA)!";
-                                iconClass = 'fa-tachometer-alt-fast'; // Ícone de velocímetro mais enfático
+                                iconClass = 'fa-tachometer-alt-fast';
                                 break;
                             case "VENCIDO_DATA_KM":
                                 statusClass = 'widget-vencido widget-vencido-data-km';
@@ -133,16 +134,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                 iconClass = 'fa-exclamation-triangle';
                                 break;
                             case "OK":
-                                statusClass = 'widget-ok';
+                            default:
+                                statusClass = 'widget-ok'; // Mantém ou define se não houver status específico
                                 statusText = "Programado";
+                                // Define ícone base para tipo se OK
+                                if (maint.tipo === 'Troca de Óleo') iconClass = 'fa-tint';
+                                else if (maint.tipo === 'Checklist') iconClass = 'fa-clipboard-check';
+                                else iconClass = 'fa-tools'; // Genérico para manutenção
                                 break;
                         }
                     }
                     widget.classList.add(...statusClass.split(' '));
 
-
+                    // Sobrescreve o ícone se for Troca de Óleo e estiver vencido, para dar mais ênfase
                     if (maint.tipo === 'Troca de Óleo') {
-                        iconClass = vencidoKmOleo || vencidoDataOleo ? 'fa-oil-can-drip' : 'fa-tint'; // Ícone específico
+                        if (maint.statusAlerta && maint.statusAlerta.toUpperCase().startsWith("VENCIDO")) {
+                            iconClass = 'fa-oil-can-drip'; // Ícone de óleo pingando para urgência
+                        } else {
+                            iconClass = 'fa-tint'; // Ícone normal de óleo
+                        }
                         title = 'Troca de Óleo';
                         detailsHtml = `
                             <p><strong>Data Prevista:</strong> ${maint.dataPrevista ? formatDate(maint.dataPrevista) : 'N/A'}</p>
@@ -150,13 +160,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             <p><strong>KM Atual do Veículo:</strong> ${formatKm(maint.kmAtual)}</p>
                         `;
                     } else if (maint.tipo === 'Checklist') {
-                        iconClass = statusClass.includes('widget-vencido') ? 'fa-file-excel' : 'fa-clipboard-check';
+                        if (maint.statusAlerta && maint.statusAlerta.toUpperCase().startsWith("VENCIDO")) {
+                             iconClass = 'fa-file-excel'; // Ou outro ícone de alerta para checklist
+                        } else {
+                            iconClass = 'fa-clipboard-check';
+                        }
                         title = 'Checklist Periódico';
                         detailsHtml = `
                             <p><strong>Data Prevista:</strong> ${maint.dataPrevista ? formatDate(maint.dataPrevista) : 'N/A'}</p>
                             <p>${maint.descricao || ''}</p>
                         `;
                         actionsHtml = `<button class="button-secondary button-small btn-print-checklist" data-veiculo-id="${maint.veiculoId}" data-veiculo-placa="${maint.veiculoPlaca}" data-data-prevista="${maint.dataPrevista}"><i class="fas fa-print"></i> Imprimir Formulário</button>`;
+                    } else if (maint.tipo) { // Para outros tipos de manutenção futuros
+                         title = maint.tipo;
+                         detailsHtml = `<p><strong>Data Prevista:</strong> ${maint.dataPrevista ? formatDate(maint.dataPrevista) : 'N/A'}</p><p>${maint.descricao || ''}</p>`;
                     }
                     
                     widget.innerHTML = `
@@ -289,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideAllForms() {
         if (formRegistrarManutencao) formRegistrarManutencao.style.display = 'none';
         if (formRegistrarChecklist) formRegistrarChecklist.style.display = 'none';
-        if (messageRegistro) showMessage(messageRegistro, '', ''); // Limpa mensagem do formulário
+        if (messageRegistro) showMessage(messageRegistro, '', '');
     }
 
     if (showMaintenanceFormBtn) {
