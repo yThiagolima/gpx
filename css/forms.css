@@ -1,0 +1,124 @@
+/* frontend/css/forms.css */
+
+.content-form {
+    margin-top: 25px;
+    padding: 25px;
+    background-color: #fdfdfd; /* Um branco levemente diferente do container, opcional */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.content-form h1, .content-form h3 { /* Títulos dentro do formulário ou da página */
+    margin-bottom: 20px;
+    color: var(--primary-blue);
+}
+.content-form h1 i {
+    margin-right: 10px;
+}
+.content-form h3 {
+    font-size: 1.2em;
+    color: var(--text-dark);
+    border-bottom: 1px solid var(--neutral-medium-gray);
+    padding-bottom: 8px;
+    margin-top: 15px; /* Espaço antes de um subtítulo de seção */
+}
+
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Layout de grade responsivo */
+    gap: 20px; /* Espaço entre os campos */
+    margin-bottom: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.form-group-full { /* Para campos que ocupam a largura total da linha no grid */
+    grid-column: 1 / -1; /* Ocupa todas as colunas */
+}
+
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9em;
+    color: var(--text-dark);
+}
+
+.form-group label .required-asterisk {
+    color: var(--error-red);
+    margin-left: 2px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1em;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--neutral-white);
+    color: var(--text-dark);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.15);
+}
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+    font-size: 0.95em;
+}
+
+
+.form-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px; /* Espaço entre os botões */
+    justify-content: flex-start; /* Alinha botões à esquerda por padrão */
+    border-top: 1px solid var(--neutral-medium-gray);
+    padding-top: 20px;
+}
+
+.button-primary, .button-secondary {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex; /* Para alinhar ícone e texto */
+    align-items: center;
+    gap: 8px; /* Espaço entre ícone e texto no botão */
+}
+
+.button-primary {
+    background-color: var(--primary-orange);
+    color: var(--neutral-white);
+}
+.button-primary:hover {
+    background-color: #e66800; /* Laranja mais escuro */
+    box-shadow: var(--shadow-sm);
+}
+
+.button-secondary {
+    background-color: var(--neutral-medium-gray);
+    color: var(--text-dark);
+}
+.button-secondary:hover {
+    background-color: #c5cdd3; /* Cinza um pouco mais escuro */
+    box-shadow: var(--shadow-sm);
+}
