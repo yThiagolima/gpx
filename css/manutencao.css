@@ -1,0 +1,54 @@
+/* css/manutencao.css */
+.card-list-section h2 {
+    font-size: 1.2em; /* um pouco menor para seções dentro da página */
+    margin-bottom: 15px;
+}
+
+.status-list-container .widget,
+.upcoming-maintenance-widgets .widget {
+    margin-bottom: 15px;
+    /* Estilos de widget já definidos em dashboard.css podem ser herdados ou ajustados */
+}
+
+/* Cores de status para checklists e alertas */
+.status-amarelo, .widget.widget-aviso { /* Para itens com aviso (ex: checklist próximo) */
+    background-color: #fff8e1 !important;
+    border-left: 5px solid #ffc107 !important;
+}
+.status-amarelo .widget-title, .widget-aviso .widget-title,
+.status-amarelo .widget-status, .widget-aviso .widget-status {
+    color: #ffa000 !important;
+}
+
+.status-vermelho, .widget.widget-vencido { /* Para itens vencidos/atrasados */
+    background-color: #ffebee !important;
+    border-left: 5px solid #e53935 !important;
+}
+.status-vermelho .widget-title, .widget.widget-vencido .widget-title,
+.status-vermelho .widget-status, .widget.widget-vencido .widget-status {
+    color: #c62828 !important;
+}
+
+.status-ok, .widget.widget-ok { /* Para itens em dia/programados */
+    background-color: #e8f5e9 !important;
+    border-left: 5px solid #4caf50 !important;
+}
+.status-ok .widget-title, .widget.widget-ok .widget-title,
+.status-ok .widget-status, .widget.widget-ok .widget-status {
+    color: #388e3c !important;
+}
+
+.widget-status {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+.widget-info p {
+    margin: 4px 0;
+    font-size: 0.9em;
+}
+.widget-description {
+    font-size: 0.85em;
+    color: #555;
+    margin-top: 5px;
+}
