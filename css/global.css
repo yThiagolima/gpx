@@ -1,0 +1,90 @@
+/* frontend/css/global.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-blue: #005cbf;    /* Azul mais escuro e corporativo */
+    --primary-orange: #ff6600;  /* Laranja vibrante */
+    --neutral-white: #ffffff;
+    --neutral-light-gray: #f4f7fc; 
+    --neutral-medium-gray: #e9ecef;
+    --text-dark: #212529;
+    --text-light: #f8f9fa;
+    --text-muted: #6c757d;
+    --border-color: #ced4da;
+    --success-green: #28a745;
+    --error-red: #dc3545;
+    --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+    --shadow-md: 0 .5rem 1rem rgba(0,0,0,.15);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    background-color: var(--neutral-light-gray);
+    color: var(--text-dark);
+    font-size: 16px; /* Base font size */
+}
+
+a {
+    color: var(--primary-orange);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary-blue);
+    text-decoration: underline;
+}
+
+button {
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+    border-radius: 0.25rem; /* Arredondamento padrão para botões */
+}
+
+input {
+    font-family: 'Roboto', sans-serif;
+    border-radius: 0.25rem; /* Arredondamento padrão para inputs */
+}
+
+.container { /* Para conteúdo principal da dashboard */
+    width: 90%;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: var(--neutral-white);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+}
+
+/* Feedback Messages */
+.message-feedback {
+    margin-top: 15px;
+    font-size: 0.9em;
+    min-height: 20px;
+    font-weight: 500;
+    padding: 10px;
+    border-radius: 4px;
+    display: none; /* Escondido por padrão, mostrado via JS */
+}
+.message-feedback.success {
+    color: var(--success-green);
+    background-color: #e9f7ef;
+    border: 1px solid var(--success-green);
+    display: block;
+}
+.message-feedback.error {
+    color: var(--error-red);
+    background-color: #fdecea;
+    border: 1px solid var(--error-red);
+    display: block;
+}
+.message-feedback.info {
+    color: var(--primary-blue);
+    background-color: #e7f3fe;
+    border: 1px solid var(--primary-blue);
+    display: block;
+}

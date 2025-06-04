@@ -1,0 +1,166 @@
+/* frontend/css/dashboard.css */
+body { /* Garante que o body da dashboard use flex */
+    display: flex;
+    flex-direction: column;
+}
+
+.main-header {
+    background-color: var(--neutral-white); /* Cabeçalho branco */
+    color: var(--text-dark);
+    padding: 0px 5%; 
+    box-shadow: var(--shadow-sm);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky; /* Cabeçalho fixo no topo */
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%; /* Ocupa toda largura */
+    margin: 0 auto;
+    height: 65px; /* Altura fixa para o header */
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-logo {
+    height: 35px; 
+    margin-right: 12px;
+}
+
+.navbar-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-links li {
+    margin-left: 10px; /* Espaçamento entre links */
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 15px; /* Padding horizontal */
+    border-radius: 4px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    height: 100%; /* Ocupa altura do li */
+    border-bottom: 3px solid transparent; /* Borda inferior para indicar ativo */
+}
+.nav-links a i { /* Ícones nos links */
+    margin-right: 8px;
+    font-size: 0.95em;
+}
+
+.nav-links a.active,
+.nav-links a:hover {
+    color: var(--primary-orange);
+    background-color: transparent; /* Sem fundo no hover */
+    border-bottom: 3px solid var(--primary-orange);
+}
+
+
+.user-menu {
+    display: flex;
+    align-items: center;
+}
+
+.user-menu #welcomeMessage { /* ID adicionado ao span no HTML */
+    margin-right: 15px;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.logout-button {
+    background-color: var(--primary-orange);
+    color: var(--neutral-white);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+.logout-button i {
+    margin-right: 6px;
+}
+
+.logout-button:hover {
+    background-color: #e66800;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Estilos para o conteúdo da dashboard */
+main.container h1 {
+    color: var(--primary-blue);
+    margin-bottom: 8px;
+    font-size: 1.8em;
+}
+main.container p {
+    margin-bottom: 25px;
+    color: var(--text-muted);
+    font-size: 1em;
+}
+
+.dashboard-widgets {
+    display: grid; /* Usando grid para melhor controle */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsivo */
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.widget {
+    background-color: var(--neutral-white);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center; /* Alinha ícone e conteúdo */
+}
+
+.widget-icon {
+    font-size: 1.8em; /* Tamanho do ícone */
+    padding: 15px;
+    border-radius: 50%; /* Círculo */
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+}
+
+.widget-content h2 {
+    font-size: 1.1em; /* Menor */
+    color: var(--text-dark);
+    margin-bottom: 5px; /* Menor */
+    font-weight: 500;
+}
+
+.widget-data {
+    font-size: 1.8em; /* Menor */
+    font-weight: 700; /* Bold */
+    color: var(--text-dark); /* Cor mais escura */
+}
