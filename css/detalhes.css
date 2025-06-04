@@ -1,0 +1,54 @@
+/* frontend/css/detalhes.css */
+
+.details-content-wrapper {
+    background-color: #fdfdfd;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: var(--neutral-light-gray);
+    border-left: 4px solid var(--primary-orange);
+    border-radius: 0 4px 4px 0;
+}
+
+.detail-item strong {
+    display: block;
+    color: var(--primary-blue);
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+.detail-item span {
+    color: var(--text-dark);
+    font-size: 1em;
+}
+
+.loading-message, .error-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1em;
+    color: var(--text-muted);
+}
+
+.page-actions { /* Reutiliza a classe actions-bar-details para os botões de ação da página */
+    display: flex;
+    justify-content: space-between; /* Ou flex-end se preferir os botões à direita */
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--neutral-medium-gray);
+}
