@@ -18,10 +18,7 @@
             </div>
             <ul class="nav-links">
                 <li><a href="dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="#"><i class="fas fa-truck"></i> Veículos</a></li>
-                <li><a href="#"><i class="fas fa-tools"></i> Manutenções</a></li>
-                <li><a href="#"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
-            </ul>
+                <li><a href="cadastrar_veiculo.html"><i class="fas fa-plus-circle"></i> Cadastrar Carros</a></li> <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li> <li><a href="manutencao.html"><i class="fas fa-tools"></i> Manutenção</a></li> <li><a href="relatorios.html"><i class="fas fa-chart-bar"></i> Relatório</a></li> </ul>
             <div class="user-menu">
                 <span id="welcomeMessage">Olá, Usuário!</span>
                 <button id="logoutButton" class="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</button>
@@ -29,33 +26,39 @@
         </nav>
     </header>
 
-    <main class="container">
-        <h1>Painel de Controle</h1>
-        <p>Visão geral do sistema de controle de veículos.</p>
+    <main class="container" id="mainContent">
+        <h1>Painel de Controle Principal</h1>
+        <p>Visão geral da frota, alertas e indicadores importantes.</p>
         
         <section class="dashboard-widgets">
             <div class="widget">
                 <div class="widget-icon" style="background-color: rgba(0, 92, 191, 0.1);"><i class="fas fa-truck" style="color: var(--primary-blue);"></i></div>
                 <div class="widget-content">
                     <h2>Total de Veículos</h2>
-                    <p class="widget-data">25</p> </div>
+                    <p class="widget-data" id="totalVeiculosData">--</p> </div>
             </div>
             <div class="widget">
                 <div class="widget-icon" style="background-color: rgba(255, 102, 0, 0.1);"><i class="fas fa-exclamation-triangle" style="color: var(--primary-orange);"></i></div>
                 <div class="widget-content">
                     <h2>Alertas Ativos</h2>
-                    <p class="widget-data">3</p> </div>
+                    <p class="widget-data" id="alertasAtivosData">--</p> </div>
             </div>
             <div class="widget">
                  <div class="widget-icon" style="background-color: rgba(40, 167, 69, 0.1);"><i class="fas fa-calendar-check" style="color: var(--success-green);"></i></div>
                  <div class="widget-content">
                     <h2>Manutenções Agendadas</h2>
-                    <p class="widget-data">7</p> </div>
+                    <p class="widget-data" id="manutencoesAgendadasData">--</p> </div>
             </div>
         </section>
         
-        </main>
+        <section class="recent-activity">
+            <h2>Atividade Recente</h2>
+            <ul id="listaAtividadeRecente">
+                <li>Nenhuma atividade recente para mostrar.</li> </ul>
+        </section>
+
+    </main>
 
     <script src="../js/dashboard.js"></script>
-</body>
+    </body>
 </html>
