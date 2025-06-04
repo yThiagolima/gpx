@@ -1,5 +1,8 @@
 // frontend/js/relatorios.js
 document.addEventListener('DOMContentLoaded', function () {
+    // CONSTANTE PARA A URL BASE DA API
+    const API_BASE_URL = 'https://gpx-api-xwv1.onrender.com/api'; // Sua URL base da API no Render
+
     // Elementos de Filtro
     const filtroVeiculoSelect = document.getElementById('filtroVeiculo');
     const filtroMesSelect = document.getElementById('filtroMes');
@@ -28,10 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
             messageRelatorios.textContent = text;
             messageRelatorios.className = 'message-feedback';
             if (type) messageRelatorios.classList.add(type);
-
-            // Limpar mensagem após alguns segundos
             setTimeout(() => {
-                if (messageRelatorios.textContent === text) { // Só limpa se for a mesma mensagem
+                if (messageRelatorios.textContent === text) {
                     messageRelatorios.textContent = '';
                     messageRelatorios.className = 'message-feedback';
                 }
@@ -48,8 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return 'Data Inválida';
-        // As datas da API já devem estar em UTC ou consistentes. Exibimos como local.
-        return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' }); // Exibe a data como se fosse UTC para evitar shifts de fuso na exibição
+        return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
     }
 
     function formatNumber(value, minDigits = 0, maxDigits = 2) {
@@ -61,15 +61,11 @@ document.addEventListener('DOMContentLoaded', function () {
     async function popularFiltroVeiculos() {
         if (!filtroVeiculoSelect) return;
         try {
-            const response = await fetch('https://gpx-api-xwv1.onrender.com/api/veiculos');
+            // USA A CONSTANTE API_BASE_URL para veículos
+            const response = await fetch(`${API_BASE_URL}/veiculos`); 
             if (!response.ok) throw new Error('Falha ao carregar veículos para filtro.');
             const veiculos = await response.json();
-            
-            // Limpa opções existentes exceto a primeira ("Todos os Veículos")
-            while (filtroVeiculoSelect.options.length > 1) {
-                filtroVeiculoSelect.remove(1);
-            }
-
+            while (filtroVeiculoSelect.options.length > 1) filtroVeiculoSelect.remove(1);
             veiculos.forEach(v => {
                 const option = document.createElement('option');
                 option.value = v._id;
@@ -84,10 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function popularFiltroMeses() {
         if (!filtroMesSelect) return;
-        // Limpa opções existentes exceto a primeira ("Todos os Meses")
-        while (filtroMesSelect.options.length > 1) {
-            filtroMesSelect.remove(1);
-        }
+        while (filtroMesSelect.options.length > 1) filtroMesSelect.remove(1);
         const meses = [
             { valor: 1, nome: "Janeiro" }, { valor: 2, nome: "Fevereiro" }, { valor: 3, nome: "Março" },
             { valor: 4, nome: "Abril" }, { valor: 5, nome: "Maio" }, { valor: 6, nome: "Junho" },
@@ -104,10 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function popularFiltroAnos() {
         if (!filtroAnoSelect) return;
-        // Limpa opções existentes exceto a primeira ("Todos os Anos")
-        while (filtroAnoSelect.options.length > 1) {
-            filtroAnoSelect.remove(1);
-        }
+        while (filtroAnoSelect.options.length > 1) filtroAnoSelect.remove(1);
         const anoAtual = new Date().getFullYear();
         for (let i = 0; i < 5; i++) { 
             const ano = anoAtual - i;
@@ -116,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
             option.textContent = ano;
             filtroAnoSelect.appendChild(option);
         }
-        filtroAnoSelect.value = anoAtual; // Define o ano atual como padrão
+        filtroAnoSelect.value = anoAtual;
     }
 
     // --- Funções de Carregamento de Dados dos Relatórios ---
@@ -131,7 +121,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (ano && ano !== 'todos') params.append('ano', ano);
 
         try {
-            const response = await fetch(`/api/relatorios/gastos-detalhados?${params.toString()}`);
+            // USA A CONSTANTE API_BASE_URL
+            const response = await fetch(`${API_BASE_URL}/relatorios/gastos-detalhados?${params.toString()}`);
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({message: "Erro ao buscar dados."}));
                 throw new Error(errData.message || `Erro ${response.status}`);
@@ -139,27 +130,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await response.json();
 
             if (data.detalhes && data.detalhes.length > 0) {
-                let tableHtml = `
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Veículo (Placa)</th>
-                                <th>Tipo de Gasto</th>
-                                <th>Descrição</th>
-                                <th style="text-align:right;">Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
+                let tableHtml = `<table class="data-table"><thead><tr><th>Data</th><th>Veículo (Placa)</th><th>Tipo de Gasto</th><th>Descrição</th><th style="text-align:right;">Valor</th></tr></thead><tbody>`;
                 data.detalhes.forEach(gasto => {
-                    tableHtml += `
-                        <tr>
-                            <td>${formatDate(gasto.data)}</td>
-                            <td><a href="detalhes_veiculo.html?id=${gasto.veiculoId}" title="Ver detalhes do veículo">${gasto.veiculoPlaca || 'N/A'}</a></td>
-                            <td>${gasto.tipoGasto || 'N/A'}</td>
-                            <td>${gasto.descricaoGasto || 'N/A'}</td>
-                            <td style="text-align:right;">${formatCurrency(gasto.valorGasto)}</td>
-                        </tr>`;
+                    tableHtml += `<tr><td>${formatDate(gasto.data)}</td><td><a href="detalhes_veiculo.html?id=${gasto.veiculoId}" title="Ver detalhes do veículo">${gasto.veiculoPlaca || 'N/A'}</a></td><td>${gasto.tipoGasto || 'N/A'}</td><td>${gasto.descricaoGasto || 'N/A'}</td><td style="text-align:right;">${formatCurrency(gasto.valorGasto)}</td></tr>`;
                 });
                 tableHtml += `</tbody></table>`;
                 gastosTableContainer.innerHTML = tableHtml;
@@ -182,59 +155,31 @@ document.addEventListener('DOMContentLoaded', function () {
         
         const params = new URLSearchParams();
         if (veiculoId && veiculoId !== 'todos') params.append('veiculoId', veiculoId);
-        // Se 'anoParam' for 'todos', a API deve usar o ano atual ou retornar erro/sem dados.
-        // A API /api/relatorios/gastos-mensais espera um 'ano'. Se 'todos', usamos o ano atual.
         const anoParaAPI = (anoParam && anoParam !== 'todos') ? anoParam : new Date().getFullYear().toString();
         params.append('ano', anoParaAPI);
 
         try {
-            const response = await fetch(`/api/relatorios/gastos-mensais?${params.toString()}`);
+            // USA A CONSTANTE API_BASE_URL
+            const response = await fetch(`${API_BASE_URL}/relatorios/gastos-mensais?${params.toString()}`);
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({message: "Erro ao buscar dados."}));
                 throw new Error(errData.message || `Erro ${response.status}`);
             }
             const chartData = await response.json();
 
-            if (gastosChart) {
-                gastosChart.destroy(); 
-            }
-            // Garante que o container do canvas existe e está limpo
+            if (gastosChart) gastosChart.destroy(); 
             graficoGastosContainer.innerHTML = '<canvas id="graficoGastosCanvas"></canvas>'; 
             const ctx = document.getElementById('graficoGastosCanvas').getContext('2d');
             
             gastosChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.labels, 
-                    datasets: chartData.datasets 
-                },
+                type: 'bar', data: { labels: chartData.labels, datasets: chartData.datasets },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { callback: function(value) { return formatCurrency(value); } }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatCurrency(value); } } } },
                     plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
-                            }
-                        },
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: `Gastos Mensais em ${anoParaAPI}${ (veiculoId && veiculoId !== 'todos') ? ' - Veículo Específico' : ''}`
-                        }
+                        tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) label += ': '; if (context.parsed.y !== null) label += formatCurrency(context.parsed.y); return label; } } },
+                        legend: { position: 'top' },
+                        title: { display: true, text: `Gastos Mensais em ${anoParaAPI}${ (veiculoId && veiculoId !== 'todos') ? ' - Veículo Específico' : ''}` }
                     }
                 }
             });
@@ -248,11 +193,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function carregarRelatorioCombustivel(veiculoId, mes, ano) {
         if (!combustivelTableContainer || !sumarioTotalCombustivelEl || !sumarioConsumoMedioEl || !sumarioCustoKmEl) return;
-        
         combustivelTableContainer.innerHTML = '<p class="loading-message">Carregando dados de combustível...</p>';
-        sumarioTotalCombustivelEl.textContent = 'Calculando...';
-        sumarioConsumoMedioEl.textContent = 'Calculando...';
-        sumarioCustoKmEl.textContent = 'Calculando...';
+        sumarioTotalCombustivelEl.textContent = 'Calculando...'; sumarioConsumoMedioEl.textContent = 'Calculando...'; sumarioCustoKmEl.textContent = 'Calculando...';
 
         const params = new URLSearchParams();
         if (veiculoId && veiculoId !== 'todos') params.append('veiculoId', veiculoId);
@@ -260,7 +202,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (ano && ano !== 'todos') params.append('ano', ano);
         
         try {
-            const response = await fetch(`/api/relatorios/analise-combustivel?${params.toString()}`);
+            // USA A CONSTANTE API_BASE_URL
+            const response = await fetch(`${API_BASE_URL}/relatorios/analise-combustivel?${params.toString()}`);
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({message: "Erro ao buscar dados."}));
                 throw new Error(errData.message || `Erro ${response.status}`);
@@ -268,33 +211,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await response.json();
 
             if (data.detalhes && data.detalhes.length > 0) {
-                let tableHtml = `
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Veículo (Placa)</th>
-                                <th style="text-align:right;">Litros</th>
-                                <th style="text-align:right;">Valor/L</th>
-                                <th style="text-align:right;">Custo Total</th>
-                                <th style="text-align:right;">KM Atual</th>
-                                <th style="text-align:right;">KM Rodados</th>
-                                <th style="text-align:right;">Consumo (Km/L)</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
+                let tableHtml = `<table class="data-table"><thead><tr><th>Data</th><th>Veículo (Placa)</th><th style="text-align:right;">Litros</th><th style="text-align:right;">Valor/L</th><th style="text-align:right;">Custo Total</th><th style="text-align:right;">KM Atual</th><th style="text-align:right;">KM Rodados</th><th style="text-align:right;">Consumo (Km/L)</th></tr></thead><tbody>`;
                 data.detalhes.forEach(abast => {
-                    tableHtml += `
-                        <tr>
-                            <td>${formatDate(abast.data)}</td>
-                            <td><a href="detalhes_veiculo.html?id=${abast.veiculoId}" title="Ver detalhes do veículo">${abast.veiculoPlaca || 'N/A'}</a></td>
-                            <td style="text-align:right;">${formatNumber(abast.litros, 2, 2)}</td>
-                            <td style="text-align:right;">${formatCurrency(abast.valorPorLitro).replace('R$', '')}</td> 
-                            <td style="text-align:right;">${formatCurrency(abast.custoTotal)}</td>
-                            <td style="text-align:right;">${formatNumber(abast.quilometragemAtual, 0, 0)}</td>
-                            <td style="text-align:right;">${abast.kmRodados !== null ? formatNumber(abast.kmRodados, 0, 0) : 'N/A'}</td>
-                            <td style="text-align:right;">${abast.consumoNoTrecho !== null ? formatNumber(abast.consumoNoTrecho, 1, 2) : 'N/A'}</td>
-                        </tr>`;
+                    tableHtml += `<tr><td>${formatDate(abast.data)}</td><td><a href="detalhes_veiculo.html?id=${abast.veiculoId}" title="Ver detalhes do veículo">${abast.veiculoPlaca || 'N/A'}</a></td><td style="text-align:right;">${formatNumber(abast.litros, 2, 2)}</td><td style="text-align:right;">${formatCurrency(abast.valorPorLitro).replace('R$', '')}</td> <td style="text-align:right;">${formatCurrency(abast.custoTotal)}</td><td style="text-align:right;">${formatNumber(abast.quilometragemAtual, 0, 0)}</td><td style="text-align:right;">${abast.kmRodados !== null ? formatNumber(abast.kmRodados, 0, 0) : 'N/A'}</td><td style="text-align:right;">${abast.consumoNoTrecho !== null ? formatNumber(abast.consumoNoTrecho, 1, 2) : 'N/A'}</td></tr>`;
                 });
                 tableHtml += `</tbody></table>`;
                 combustivelTableContainer.innerHTML = tableHtml;
@@ -321,18 +240,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const veiculoId = filtroVeiculoSelect.value;
             const mes = filtroMesSelect.value;
             const ano = filtroAnoSelect.value;
-
             showMessage('Aplicando filtros e carregando relatórios...', 'info');
-
             carregarRelatorioGastos(veiculoId, mes, ano);
-            carregarGraficoGastos(veiculoId, ano); // Gráfico é geralmente anual ou para todos os anos se 'ano' for 'todos'
+            carregarGraficoGastos(veiculoId, ano);
             carregarRelatorioCombustivel(veiculoId, mes, ano);
         });
     }
 
     // --- Inicialização da Página ---
     function initRelatoriosPage() {
-        if (document.getElementById('relatorioGastosPorCarro')) { // Verifica se estamos na página de relatórios
+        if (document.getElementById('relatorioGastosPorCarro')) {
             popularFiltroVeiculos();
             popularFiltroMeses();
             popularFiltroAnos();
@@ -341,6 +258,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if(sumarioTotalCombustivelEl) sumarioTotalCombustivelEl.textContent = formatCurrency(0);
             if(sumarioConsumoMedioEl) sumarioConsumoMedioEl.textContent = '-- Km/L';
             if(sumarioCustoKmEl) sumarioCustoKmEl.textContent = 'R$ -- /Km';
+            // Disparar filtros com ano atual por padrão ao carregar a página
+            // btnAplicarFiltros.click(); // Descomente se quiser carregar com filtros padrão
         }
     }
 
@@ -348,7 +267,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessageEl = document.getElementById('welcomeMessage');
     const storedUser = localStorage.getItem('gpx7User');
-
     if (storedUser) {
         try {
             const user = JSON.parse(storedUser);
