@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // !!! SUBSTITUA PELA SUA URL DO RENDER !!!
-            const backendUrl = 'https://SUA_URL_DO_BACKEND_NO_RENDER.onrender.com/login';
+            const backendUrl = 'https://gpx-api-xwv1.onrender.com/login';
 
             const response = await fetch(backendUrl, {
                 method: 'POST',
