@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const formRegistrarManutencao = document.getElementById('formRegistrarManutencao');
     const modalSelecionarVeiculoChecklist = document.getElementById('modalSelecionarVeiculoChecklist');
     const formRegistrarResultadosChecklist = document.getElementById('formRegistrarResultadosChecklist');
+    const modalRegistrarTrocaOleoEl = document.getElementById('modalRegistrarTrocaOleo');
+    const formModalTrocaOleoEl = document.getElementById('formModalTrocaOleo');
 
     // Selects nos formulários/modais
     const manutencaoVeiculoSelect = document.getElementById('manutencaoVeiculoId');
@@ -34,13 +36,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageHistory = document.getElementById('messageHistory');
     const messageChecklistHistory = document.getElementById('messageChecklistHistory');
 
-    // Filtros para Histórico de Manutenções
+    // Filtros para Histórico de Manutenções e Checklists (já definidos no HTML)
     const filtroManutVeiculoSelect = document.getElementById('filtroManutVeiculo');
     const filtroManutMesSelect = document.getElementById('filtroManutMes');
     const filtroManutAnoSelect = document.getElementById('filtroManutAno');
     const btnFiltrarManutencoes = document.getElementById('btnFiltrarManutencoes');
-
-    // Filtros para Histórico de Checklists
     const filtroCheckVeiculoSelect = document.getElementById('filtroCheckVeiculo');
     const filtroCheckMesSelect = document.getElementById('filtroCheckMes');
     const filtroCheckAnoSelect = document.getElementById('filtroCheckAno');
@@ -66,8 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         hideForm(formRegistrarManutencao);
         hideForm(formRegistrarResultadosChecklist);
         hideModal(modalSelecionarVeiculoChecklist);
-        const modalTrocaOleo = document.getElementById('modalRegistrarTrocaOleo');
-        if (modalTrocaOleo) hideModal(modalTrocaOleo);
+        if (modalRegistrarTrocaOleoEl) hideModal(modalRegistrarTrocaOleoEl);
         if (messageRegistro) showUserMessage(messageRegistro, '', '');
     }
 
@@ -236,14 +235,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    const modalRegistrarTrocaOleo = document.getElementById('modalRegistrarTrocaOleo');
-    if (modalRegistrarTrocaOleo) {
-        modalRegistrarTrocaOleo.addEventListener('click', (event) => {
-            if (event.target === modalRegistrarTrocaOleo) {
-                hideModal(modalRegistrarTrocaOleo);
+    if (modalRegistrarTrocaOleoEl) { // Adicionado listener para o modal de troca de óleo
+        modalRegistrarTrocaOleoEl.addEventListener('click', (event) => {
+            if (event.target === modalRegistrarTrocaOleoEl) {
+                hideModal(modalRegistrarTrocaOleoEl);
             }
         });
     }
+
 
     if (btnGerarFormularioChecklistModal) {
         btnGerarFormularioChecklistModal.addEventListener('click', async () => {
@@ -253,16 +252,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!veiculoId) { showUserMessage(messageRegistro, 'Selecione um veículo.', 'error'); return; }
             showUserMessage(messageRegistro, 'Iniciando checklist...', 'info');
             try {
+                // A API `/api/checklists/iniciar` precisa retornar o objeto do checklist criado, incluindo o _id
                 const response = await fetch(`${API_BASE_URL}/checklists/iniciar`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ veiculoId })
                 });
                 const responseData = await response.json();
-                if (response.ok) {
+                if (response.ok && responseData.checklist && responseData.checklist._id) {
                     hideModal(modalSelecionarVeiculoChecklist);
                     gerarFormularioChecklist(veiculoId, veiculoPlaca, responseData.checklist.dataIniciado);
                     showUserMessage(messageRegistro, responseData.message || 'Checklist iniciado e pendente!', 'success');
                     carregarChecklistsPendentes(); 
-                    carregarAlertasProgramadosEStatusChecklist();
+                    carregarAlertasProgramadosEStatusChecklist(); // Para que o agendado original suma
                 } else { showUserMessage(messageRegistro, responseData.message || 'Erro ao iniciar.', 'error'); }
             } catch (error) { console.error('Erro:', error); showUserMessage(messageRegistro, 'Erro de conexão.', 'error'); }
         });
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (checklistsPendentesContainer) {
-        checklistsPendentesContainer.addEventListener('click', function(event) {
+        checklistsPendentesContainer.addEventListener('click', function(event) { // Delegação de evento
             const targetRegistrar = event.target.closest('.btn-registrar-resultados-checklist');
             const targetReimprimir = event.target.closest('.btn-reimprimir-checklist');
 
@@ -321,16 +321,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function abrirFormularioResultadosChecklist(checklistId, veiculoPlaca, isFromScheduled = false) {
+    function abrirFormularioResultadosChecklist(checklistId, veiculoPlaca) { // Removido isFromScheduled
         hideAllDynamicForms();
         if(formRegistrarResultadosChecklist) formRegistrarResultadosChecklist.reset();
         document.getElementById('checklistPendenteId').value = checklistId; 
         document.getElementById('checklistVeiculoInfo').textContent = veiculoPlaca;
         document.getElementById('checklistResultadoData').valueAsDate = new Date();
         
-        formRegistrarResultadosChecklist.dataset.isFromScheduled = isFromScheduled ? "true" : "false";
-        formRegistrarResultadosChecklist.dataset.veiculoId = isFromScheduled ? checklistId : ''; 
-
         const container = document.getElementById('checklistItensContainer'); container.innerHTML = '';
         ITENS_CHECKLIST_PADRAO.forEach((itemNome, index) => {
             const itemId = `item_${index}`; const itemRow = document.createElement('div'); itemRow.className = 'checklist-item-row';
@@ -374,20 +371,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Função para abrir o modal de troca de óleo (precisa ser definida antes do listener que a usa)
+    function abrirModalTrocaOleo(veiculoId, veiculoPlaca, kmAtualVeiculo) {
+        hideAllDynamicForms();
+        if (formModalTrocaOleoEl) formModalTrocaOleoEl.reset();
+        document.getElementById('modalTrocaOleoVeiculoInfo').textContent = veiculoPlaca;
+        document.getElementById('modalTrocaOleoVeiculoId').value = veiculoId;
+        document.getElementById('modalTrocaOleoVeiculoPlaca').value = veiculoPlaca;
+        document.getElementById('modalTrocaOleoData').valueAsDate = new Date();
+        const kmInput = document.getElementById('modalTrocaOleoKm');
+        kmInput.value = kmAtualVeiculo || '';
+        kmInput.min = kmAtualVeiculo || 0;
+        showModal(modalRegistrarTrocaOleoEl);
+    }
+
+
     async function carregarAlertasProgramadosEStatusChecklist() {
-        if (!programmedMaintenanceAlertsContainer && !upcomingChecklistsStatusContainer) return;
-        if(programmedMaintenanceAlertsContainer) programmedMaintenanceAlertsContainer.innerHTML = '<p class="loading-message text-center">Carregando alertas...</p>';
-        if(upcomingChecklistsStatusContainer) upcomingChecklistsStatusContainer.innerHTML = '<p class="loading-message text-center">Carregando status...</p>';
+        const containerTargetMapping = {
+            OLEO: programmedMaintenanceAlertsContainer,
+            CHECKLIST: upcomingChecklistsStatusContainer
+        };
+        Object.values(containerTargetMapping).forEach(container => {
+            if (container) container.innerHTML = '<p class="loading-message text-center">Carregando...</p>';
+        });
+
         try {
             const response = await fetch(`${API_BASE_URL}/manutencoes/proximas`);
             if (!response.ok) { const err = await response.json().catch(()=>({message: `Erro ${response.status}`})); throw new Error(err.message); }
             const eventos = await response.json();
-            if(programmedMaintenanceAlertsContainer) programmedMaintenanceAlertsContainer.innerHTML = '';
-            if(upcomingChecklistsStatusContainer) upcomingChecklistsStatusContainer.innerHTML = '';
-            let hasOilAlerts = false, hasChecklistStatus = false;
+
+            Object.values(containerTargetMapping).forEach(container => { if (container) container.innerHTML = ''; }); // Limpa containers
+            let counters = { OLEO: 0, CHECKLIST: 0 };
 
             if (eventos && eventos.length > 0) {
                 eventos.forEach(item => {
+                    const targetContainer = containerTargetMapping[item.tipoEvento];
+                    if (!targetContainer) return;
+
                     const widget = document.createElement('div'); widget.className = 'widget';
                     let icon = 'fa-bell', title = item.tipoEvento || 'Evento', details = `<p class="widget-description">${item.descricao||''}</p><div class="widget-info">${item.detalhes||''}</div>`, actions = '', statusCls = 'widget-ok', statusTxt = 'Programado';
                     if (item.statusAlerta) { 
@@ -414,31 +434,55 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     widget.innerHTML = `<div class="widget-icon"><i class="fas ${icon}"></i></div><div class="widget-content"><h3 class="widget-title">${title} - ${item.veiculoPlaca||'N/A'}</h3><p class="widget-status">${statusTxt}</p><div class="widget-info-details">${details}</div><div class="widget-actions" style="margin-top:10px; display:flex; gap:8px;">${actions}</div></div>`;
                     
-                    if (item.tipoEvento === 'OLEO' && programmedMaintenanceAlertsContainer) { programmedMaintenanceAlertsContainer.appendChild(widget); hasOilAlerts = true; } 
-                    else if (item.tipoEvento === 'CHECKLIST' && upcomingChecklistsStatusContainer) { upcomingChecklistsStatusContainer.appendChild(widget); hasChecklistStatus = true; }
+                    targetContainer.appendChild(widget);
+                    counters[item.tipoEvento]++;
                 });
-                 document.querySelectorAll('.btn-print-checklist').forEach(b => { b.addEventListener('click', function() { gerarFormularioChecklist(this.dataset.veiculoId, this.dataset.veiculoPlaca, this.dataset.dataPrevista); }); });
-                 document.querySelectorAll('.btn-concluir-checklist-agendado').forEach(b => { b.addEventListener('click', async function() {
-                    const veiculoId = this.dataset.veiculoId; const veiculoPlaca = this.dataset.veiculoPlaca;
-                    showUserMessage(messageChecklistStatus, 'Preparando checklist...', 'info');
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/checklists/iniciar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ veiculoId }) });
-                        const responseData = await response.json();
-                        if (response.ok) { abrirFormularioResultadosChecklist(responseData.checklist._id, veiculoPlaca, false); } 
-                        else { showUserMessage(messageChecklistStatus, responseData.message || 'Erro.', 'error'); }
-                    } catch (error) { showUserMessage(messageChecklistStatus, 'Erro de conexão.', 'error'); }
-                 }); });
-                 document.querySelectorAll('.btn-troca-oleo-realizada').forEach(b => {
-                    b.addEventListener('click', function() { abrirModalTrocaOleo(this.dataset.veiculoId, this.dataset.veiculoPlaca, this.dataset.kmAtualVeiculo); });
-                 });
             }
-            if(programmedMaintenanceAlertsContainer && !hasOilAlerts) programmedMaintenanceAlertsContainer.innerHTML = '<p class="text-center" style="padding:20px;">Nenhum alerta de óleo programado.</p>';
-            if(upcomingChecklistsStatusContainer && !hasChecklistStatus) upcomingChecklistsStatusContainer.innerHTML = '<p class="text-center" style="padding:20px;">Nenhum checklist agendado.</p>';
+            if(programmedMaintenanceAlertsContainer && counters.OLEO === 0) programmedMaintenanceAlertsContainer.innerHTML = '<p class="text-center" style="padding:20px;">Nenhum alerta de óleo programado.</p>';
+            if(upcomingChecklistsStatusContainer && counters.CHECKLIST === 0) upcomingChecklistsStatusContainer.innerHTML = '<p class="text-center" style="padding:20px;">Nenhum checklist agendado.</p>';
+        
         } catch (error) {
+            console.error("Erro ao carregar alertas/status:", error);
             if(programmedMaintenanceAlertsContainer) programmedMaintenanceAlertsContainer.innerHTML = `<p class="error-message text-center" style="padding:20px;">Erro ao carregar alertas.</p>`;
             if(upcomingChecklistsStatusContainer) upcomingChecklistsStatusContainer.innerHTML = `<p class="error-message text-center" style="padding:20px;">Erro ao carregar status dos checklists.</p>`;
         }
     }
+
+    // Delegação de eventos para botões dinâmicos nos widgets de alertas/status
+    const alertasEStatusContainers = [programmedMaintenanceAlertsContainer, upcomingChecklistsStatusContainer];
+    alertasEStatusContainers.forEach(container => {
+        if (container) {
+            container.addEventListener('click', async function(event) {
+                const printButton = event.target.closest('.btn-print-checklist');
+                const concluirChecklistButton = event.target.closest('.btn-concluir-checklist-agendado');
+                const trocaOleoRealizadaButton = event.target.closest('.btn-troca-oleo-realizada');
+
+                if (printButton) {
+                    gerarFormularioChecklist(printButton.dataset.veiculoId, printButton.dataset.veiculoPlaca, printButton.dataset.dataPrevista);
+                } else if (concluirChecklistButton) {
+                    const veiculoId = concluirChecklistButton.dataset.veiculoId;
+                    const veiculoPlaca = concluirChecklistButton.dataset.veiculoPlaca;
+                    showUserMessage(messageChecklistStatus, 'Preparando checklist para conclusão...', 'info');
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/checklists/iniciar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ veiculoId }) });
+                        const responseData = await response.json();
+                        if (response.ok && responseData.checklist && responseData.checklist._id) {
+                            showUserMessage(messageChecklistStatus, 'Checklist movido para pendentes. Preencha os resultados.', 'success');
+                            carregarChecklistsPendentes(); // Atualiza a lista de pendentes
+                            carregarAlertasProgramadosEStatusChecklist(); // Atualiza a lista de agendados
+                            // Não abre o formulário de resultados aqui, conforme novo fluxo
+                        } else { 
+                            showUserMessage(messageChecklistStatus, responseData.message || 'Erro ao mover checklist para pendentes.', 'error'); 
+                        }
+                    } catch (error) { 
+                        showUserMessage(messageChecklistStatus, 'Erro de conexão ao mover checklist.', 'error'); 
+                    }
+                } else if (trocaOleoRealizadaButton) {
+                    abrirModalTrocaOleo(trocaOleoRealizadaButton.dataset.veiculoId, trocaOleoRealizadaButton.dataset.veiculoPlaca, trocaOleoRealizadaButton.dataset.kmAtualVeiculo);
+                }
+            });
+        }
+    });
     
     function gerarFormularioChecklist(veiculoId, veiculoPlaca, dataPrevistaISO) {
         const dataFormatada = dataPrevistaISO ? new Date(dataPrevistaISO).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '____/____/______';
@@ -482,6 +526,33 @@ document.addEventListener('DOMContentLoaded', function() {
              </body>
              </html>`);
         printWindow.document.close();
+    }
+    
+    if (formModalTrocaOleoEl) {
+        formModalTrocaOleoEl.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            showUserMessage(messageProgrammedAlerts, 'Registrando troca de óleo...', 'info');
+            const formData = new FormData(this);
+            const dadosTrocaOleo = Object.fromEntries(formData.entries());
+            dadosTrocaOleo.tipoManutencao = "Troca de Óleo"; 
+            if (!dadosTrocaOleo.dataRealizacao || !dadosTrocaOleo.quilometragem) {
+                showUserMessage(messageProgrammedAlerts, 'Data da troca e KM atual são obrigatórios.', 'error'); return;
+            }
+            if (dadosTrocaOleo.proxTrocaOleoKm === '') delete dadosTrocaOleo.proxTrocaOleoKm;
+            if (dadosTrocaOleo.proxTrocaOleoData === '') delete dadosTrocaOleo.proxTrocaOleoData;
+            try {
+                const response = await fetch(`${API_BASE_URL}/manutencoes`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadosTrocaOleo)
+                });
+                const responseData = await response.json();
+                if (response.ok) {
+                    showUserMessage(messageProgrammedAlerts, responseData.message || 'Troca de óleo registrada!', 'success');
+                    this.reset(); hideModal(modalRegistrarTrocaOleoEl);
+                    loadMaintenanceHistory({ veiculoId: filtroManutVeiculoSelect.value, mes: filtroManutMesSelect.value, ano: filtroManutAnoSelect.value}); 
+                    carregarAlertasProgramadosEStatusChecklist();
+                } else { showUserMessage(messageProgrammedAlerts, responseData.message || 'Erro ao registrar troca de óleo.', 'error'); }
+            } catch (error) { console.error('Erro troca de óleo:', error); showUserMessage(messageProgrammedAlerts, 'Erro de conexão ao registrar troca.', 'error'); }
+        });
     }
     
     async function loadMaintenanceHistory(filtros = {}) {
