@@ -117,8 +117,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     showMessage(responseData.message || 'Veículo atualizado com sucesso!', 'success');
                     setTimeout(() => {
+                        // Volta para a página de detalhes após salvar
                         window.location.href = `detalhes_veiculo.html?id=${veiculoId}`;
-                    }, 2000);
+                    }, 1500); // Reduzido o tempo para feedback mais rápido
                 } else {
                     showMessage(responseData.message || `Erro ${response.status}: Não foi possível atualizar o veículo.`, 'error');
                 }
@@ -129,16 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Event listener para o botão "Cancelar"
     if (btnCancelarEdicao) {
         btnCancelarEdicao.addEventListener('click', function() {
-            if (veiculoId) {
-                window.location.href = `detalhes_veiculo.html?id=${veiculoId}`;
-            } else {
-                window.location.href = 'veiculos.html'; 
-            }
+            // Volta para a página anterior no histórico do navegador
+            window.history.back(); 
         });
     }
     
+    // Lógica do header (logout/welcome)
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessage = document.getElementById('welcomeMessage');
     const storedUser = localStorage.getItem('gpx7User');
