@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/table-styles.css">
     <link rel="stylesheet" href="../css/forms.css"> 
-    <link rel="stylesheet" href="../css/manutencao.css"> <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/manutencao.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -35,11 +36,12 @@
 
     <main class="container">
         <h1><i class="fas fa-wrench"></i> Manutenções e Checklists</h1> 
-        <p>Registre manutenções realizadas e acompanhe os próximos checklists e alertas.</p>
+        <p>Registre manutenções, inicie e conclua checklists, e acompanhe alertas.</p>
 
         <div class="page-actions-bar" style="margin-bottom: 20px;">
             <button id="showNewMaintenanceFormBtn" class="button-primary"><i class="fas fa-plus"></i> Registrar Manutenção Realizada</button>
-            </div>
+            <button id="btnIniciarNovoChecklist" class="button-primary"><i class="fas fa-play-circle"></i> Iniciar Novo Checklist</button>
+        </div>
         <p id="messageRegistro" class="message-feedback"></p>
 
         <form id="formRegistrarManutencao" class="content-form card" style="display: none; margin-bottom:30px;">
@@ -76,65 +78,78 @@
                     <textarea id="manutencaoDescricao" name="descricao" rows="3" placeholder="Detalhes da manutenção, peças..."></textarea>
                 </div>
             </div>
-
             <div id="nextOilChangeSection" style="display: none; margin-top: 20px; padding-top:15px; border-top: 1px solid #eee;">
                 <h3>Próxima Troca de Óleo (Opcional)</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="manutencaoProxOleoKm">Próxima Troca por KM:</label>
-                        <input type="number" id="manutencaoProxOleoKm" name="proxTrocaOleoKm" placeholder="KM da próxima troca">
-                    </div>
-                    <div class="form-group">
-                        <label for="manutencaoProxOleoData">Próxima Troca por Data:</label>
-                        <input type="date" id="manutencaoProxOleoData" name="proxTrocaOleoData">
-                    </div>
-                </div>
+                <div class="form-grid"> <div class="form-group"> <label for="manutencaoProxOleoKm">Próxima Troca por KM:</label> <input type="number" id="manutencaoProxOleoKm" name="proxTrocaOleoKm" placeholder="KM da próxima troca"> </div> <div class="form-group"> <label for="manutencaoProxOleoData">Próxima Troca por Data:</label> <input type="date" id="manutencaoProxOleoData" name="proxTrocaOleoData"> </div> </div>
                 <p style="font-size: 0.85em; color: #555;">Deixe em branco para manter o agendamento atual do veículo ou se não aplicável.</p>
             </div>
-
-            <div class="form-actions">
-                <button type="submit" class="button-primary"><i class="fas fa-save"></i> Salvar Manutenção</button>
-                <button type="button" class="button-secondary cancel-form-btn"><i class="fas fa-times"></i> Cancelar</button>
-            </div>
+            <div class="form-actions"> <button type="submit" class="button-primary"><i class="fas fa-save"></i> Salvar Manutenção</button> <button type="button" class="button-secondary cancel-form-btn"><i class="fas fa-times"></i> Cancelar</button> </div>
         </form>
 
-        <form id="formRegistrarChecklist" class="content-form card" style="display: none; margin-bottom:30px;">
-            <h2>Registrar Checklist Realizado</h2>
-            <div class="form-grid">
+        <div id="modalSelecionarVeiculoChecklist" class="modal" style="display: none;">
+            <div class="modal-content card">
+                <span class="close-modal-btn" onclick="document.getElementById('modalSelecionarVeiculoChecklist').style.display='none'">&times;</span>
+                <h2>Iniciar Novo Checklist</h2>
+                <p>Selecione o veículo para o qual deseja gerar o formulário de checklist.</p>
                 <div class="form-group">
-                    <label for="checklistVeiculoId">Veículo <span class="required-asterisk">*</span></label>
-                    <select id="checklistVeiculoId" name="veiculoId" required>
+                    <label for="checklistNovoVeiculoId">Veículo <span class="required-asterisk">*</span></label>
+                    <select id="checklistNovoVeiculoId" name="checklistNovoVeiculoId" required>
                         <option value="">Selecione um veículo...</option>
-                    </select>
+                        </select>
+                </div>
+                <div class="form-actions">
+                    <button id="btnGerarFormularioChecklist" class="button-primary"><i class="fas fa-print"></i> Gerar Formulário e Marcar como Pendente</button>
+                    <button type="button" class="button-secondary" onclick="document.getElementById('modalSelecionarVeiculoChecklist').style.display='none'">Cancelar</button>
+                </div>
+            </div>
+        </div>
+        
+        <form id="formRegistrarResultadosChecklist" class="content-form card" style="display: none; margin-bottom:30px;">
+            <h2>Registrar Resultados do Checklist para <span id="checklistVeiculoInfo"></span></h2>
+            <input type="hidden" id="checklistPendenteId" name="checklistPendenteId"> <div class="form-grid">
+                <div class="form-group">
+                    <label for="checklistResultadoData">Data da Realização <span class="required-asterisk">*</span></label>
+                    <input type="date" id="checklistResultadoData" name="dataRealizacao" required>
                 </div>
                 <div class="form-group">
-                    <label for="checklistData">Data da Realização <span class="required-asterisk">*</span></label>
-                    <input type="date" id="checklistData" name="dataRealizacao" required>
+                    <label for="checklistResultadoKm">Quilometragem Atual <span class="required-asterisk">*</span></label>
+                    <input type="number" id="checklistResultadoKm" name="quilometragem" placeholder="KM no momento do checklist" min="0" required>
                 </div>
-                <div class="form-group">
-                    <label for="checklistKm">Quilometragem <span class="required-asterisk">*</span></label>
-                    <input type="number" id="checklistKm" name="quilometragem" placeholder="Km no momento do checklist" min="0" required>
+                 <div class="form-group">
+                    <label for="checklistResultadoResponsavel">Realizado Por <span class="required-asterisk">*</span></label>
+                    <input type="text" id="checklistResultadoResponsavel" name="realizadoPor" placeholder="Nome do responsável" required>
                 </div>
-                <div class="form-group">
-                    <label for="checklistRealizadoPor">Realizado Por</label>
-                    <input type="text" id="checklistRealizadoPor" name="realizadoPor" placeholder="Nome do responsável">
-                </div>
-                <div class="form-group form-group-full">
-                    <label for="checklistObservacoes">Observações / Itens Pendentes</label>
-                    <textarea id="checklistObservacoes" name="observacoes" rows="3" placeholder="Anotações do checklist..."></textarea>
-                </div>
+            </div>
+            
+            <h3>Itens Verificados:</h3>
+            <div id="checklistItensContainer" class="checklist-itens-container">
+                <p class="loading-message">Carregando itens do checklist...</p>
+            </div>
+
+            <div class="form-group form-group-full" style="margin-top: 15px;">
+                <label for="checklistResultadoObservacoes">Observações Gerais / Ações Corretivas</label>
+                <textarea id="checklistResultadoObservacoes" name="observacoesGerais" rows="4" placeholder="Descreva quaisquer problemas encontrados ou ações tomadas..."></textarea>
             </div>
             <div class="form-actions">
-                <button type="submit" class="button-primary"><i class="fas fa-save"></i> Salvar Checklist</button>
-                <button type="button" class="button-secondary cancel-form-btn"><i class="fas fa-times"></i> Cancelar</button>
+                <button type="submit" class="button-primary"><i class="fas fa-check-circle"></i> Finalizar e Salvar Checklist</button>
+                <button type="button" class="button-secondary cancel-checklist-results-btn"><i class="fas fa-times"></i> Cancelar</button>
             </div>
         </form>
+
+
+        <section class="maintenance-section card-list-section">
+            <h2><i class="fas fa-hourglass-half"></i> Checklists Pendentes de Registro</h2>
+            <div id="checklistsPendentesContainer" class="status-list-container">
+                <p class="loading-message text-center">Carregando checklists pendentes...</p>
+                </div>
+            <p id="messageChecklistsPendentes" class="message-feedback" style="margin-top: 10px;"></p>
+        </section>
 
         <section class="maintenance-section card-list-section">
             <h2><i class="fas fa-calendar-alt"></i> Status dos Próximos Checklists Agendados</h2>
             <div id="upcomingChecklistsStatus" class="status-list-container">
                 <p class="loading-message text-center">Carregando status dos checklists...</p>
-                </div>
+            </div>
             <p id="messageChecklistStatus" class="message-feedback" style="margin-top: 10px;"></p>
         </section>
 
@@ -153,21 +168,8 @@
             </div>
             <div class="table-container">
                 <table id="maintenanceHistoryTable" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Veículo (Placa)</th>
-                            <th>Tipo/Motivo</th>
-                            <th>Data</th>
-                            <th>Custo</th>
-                            <th>KM</th>
-                            <th>Local/Oficina</th>
-                            <th>Descrição</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="maintenanceHistoryBody">
-                        <tr><td colspan="8" class="text-center">Carregando histórico...</td></tr>
-                    </tbody>
+                     <thead><tr><th>Veículo (Placa)</th><th>Tipo/Motivo</th><th>Data</th><th>Custo</th><th>KM</th><th>Local/Oficina</th><th>Descrição</th><th>Ações</th></tr></thead>
+                    <tbody id="maintenanceHistoryBody"><tr><td colspan="8" class="text-center">Carregando histórico...</td></tr></tbody>
                 </table>
             </div>
             <p id="messageHistory" class="message-feedback" style="margin-top: 10px;"></p>
@@ -180,19 +182,8 @@
             </div>
             <div class="table-container">
                 <table id="checklistHistoryTable" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Veículo (Placa)</th>
-                            <th>Data Realização</th>
-                            <th>KM</th>
-                            <th>Realizado Por</th>
-                            <th>Observações</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="checklistHistoryBody">
-                        <tr><td colspan="6" class="text-center">Carregando histórico de checklists...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Veículo (Placa)</th><th>Data Realização</th><th>KM</th><th>Realizado Por</th><th>Observações</th><th>Ações</th></tr></thead>
+                    <tbody id="checklistHistoryBody"><tr><td colspan="6" class="text-center">Carregando histórico de checklists...</td></tr></tbody>
                 </table>
             </div>
             <p id="messageChecklistHistory" class="message-feedback" style="margin-top: 10px;"></p>
