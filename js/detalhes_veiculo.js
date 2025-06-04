@@ -4,46 +4,54 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageElement = document.getElementById('messageDetalhes');
     const btnEditarVeiculo = document.getElementById('btnEditarVeiculo');
 
-    // Função auxiliar para exibir mensagens de feedback
     function showMessage(text, type) {
         if (!messageElement) return;
         messageElement.textContent = text;
-        messageElement.className = 'message-feedback'; // Reseta classes
+        messageElement.className = 'message-feedback';
         if (type) {
             messageElement.classList.add(type);
         }
     }
 
-    // Pega o ID do veículo da URL (ex: detalhes_veiculo.html?id=12345)
     const urlParams = new URLSearchParams(window.location.search);
     const veiculoId = urlParams.get('id');
 
     async function carregarDetalhesVeiculo() {
         if (!veiculoId) {
             showMessage('ID do veículo não fornecido na URL.', 'error');
-            if (detalhesVeiculoContent) detalhesVeiculoContent.innerHTML = '<p class="error-message">ID do veículo não especificado.</p>';
+            if (detalhesVeiculoContent) detalhesVeiculoContent.innerHTML = '<p class="error-message" style="text-align:center; color:var(--error-red);">ID do veículo não especificado na URL.</p>';
             return;
         }
-        if (!detalhesVeiculoContent) return;
+        if (!detalhesVeiculoContent) {
+            console.error("Elemento 'detalhesVeiculoContent' não encontrado no DOM.");
+            return;
+        }
 
-        showMessage('Carregando...', 'info');
+        detalhesVeiculoContent.innerHTML = '<p class="loading-message" style="text-align:center;">Carregando detalhes do veículo...</p>';
+        showMessage('', 'info'); // Limpa mensagens anteriores
 
         try {
             const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
-            // const token = localStorage.getItem('authToken'); // Para quando tivermos JWT
+            // const token = localStorage.getItem('authToken');
             // const headers = { 'Authorization': `Bearer ${token}` };
 
-            const response = await fetch(backendUrl /*, { headers } */); // Adicionar headers com token futuramente
+            const response = await fetch(backendUrl /*, { headers } */);
             
             if (response.ok) {
                 const veiculo = await response.json();
+                if (!veiculo || Object.keys(veiculo).length === 0) { // Checa se o objeto veículo é vazio
+                    showMessage('Dados do veículo não encontrados ou veículo inválido.', 'error');
+                    detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">Veículo não encontrado.</p>`;
+                    return;
+                }
                 showMessage(''); // Limpa mensagem de carregando/erro
                 
-                // Formata as datas para exibição (dd/mm/yyyy)
                 const formatDate = (dateString) => {
                     if (!dateString) return '--';
                     const date = new Date(dateString);
-                    return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' }); // UTC para evitar problemas de fuso
+                    // Verifica se a data é válida antes de formatar
+                    if (isNaN(date.getTime())) return '--'; 
+                    return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                 };
 
                 detalhesVeiculoContent.innerHTML = `
@@ -56,12 +64,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="detail-item"><strong>Cor:</strong> <span>${veiculo.cor || '--'}</span></div>
                         <div class="detail-item"><strong>Chassi (VIN):</strong> <span>${veiculo.chassi || '--'}</span></div>
                         <div class="detail-item"><strong>Renavam:</strong> <span>${veiculo.renavam || '--'}</span></div>
-                        <div class="detail-item"><strong>Km Atual:</strong> <span>${veiculo.quilometragemAtual !== null ? veiculo.quilometragemAtual.toLocaleString('pt-BR') + ' km' : '--'}</span></div>
+                        <div class="detail-item"><strong>Km Atual:</strong> <span>${veiculo.quilometragemAtual !== null && veiculo.quilometragemAtual !== undefined ? veiculo.quilometragemAtual.toLocaleString('pt-BR') + ' km' : '--'}</span></div>
                         <div class="detail-item"><strong>Data de Cadastro:</strong> <span>${formatDate(veiculo.dataCadastro)}</span></div>
                     </div>
                     <h3>Informações de Manutenção</h3>
                     <div class="details-grid">
-                        <div class="detail-item"><strong>Próx. Troca de Óleo (Km):</strong> <span>${veiculo.manutencaoInfo?.proxTrocaOleoKm || '--'} km</span></div>
+                        <div class="detail-item"><strong>Próx. Troca de Óleo (Km):</strong> <span>${veiculo.manutencaoInfo?.proxTrocaOleoKm ? veiculo.manutencaoInfo.proxTrocaOleoKm.toLocaleString('pt-BR') + ' km' : '--'}</span></div>
                         <div class="detail-item"><strong>Próx. Troca de Óleo (Data):</strong> <span>${formatDate(veiculo.manutencaoInfo?.proxTrocaOleoData)}</span></div>
                         <div class="detail-item"><strong>Frequência Checklist:</strong> <span>${veiculo.manutencaoInfo?.frequenciaChecklistDias ? veiculo.manutencaoInfo.frequenciaChecklistDias + ' dias' : '--'}</span></div>
                         <div class="detail-item"><strong>Próximo Checklist (Data):</strong> <span>${formatDate(veiculo.manutencaoInfo?.dataProxChecklist)}</span></div>
@@ -76,14 +84,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
             } else {
-                const errorData = await response.json().catch(() => ({ message: `Veículo não encontrado ou erro ${response.status}.` }));
-                showMessage(errorData.message || `Erro ${response.status}: Não foi possível buscar os detalhes do veículo.`, 'error');
-                detalhesVeiculoContent.innerHTML = `<p class="error-message">${errorData.message || 'Veículo não encontrado.'}</p>`;
+                const errorData = await response.json().catch(() => ({ message: `Veículo não encontrado ou erro ${response.status} ao buscar dados.` }));
+                showMessage(errorData.message || `Erro ${response.status}.`, 'error');
+                detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">${errorData.message || 'Não foi possível carregar os detalhes do veículo.'}</p>`;
             }
         } catch (error) {
             console.error('Erro ao buscar detalhes do veículo:', error);
             showMessage('Falha na conexão ao buscar detalhes. Verifique sua internet ou tente novamente.', 'error');
-            detalhesVeiculoContent.innerHTML = `<p class="error-message">Erro de conexão ao carregar detalhes.</p>`;
+            detalhesVeiculoContent.innerHTML = `<p class="error-message" style="text-align:center; color:var(--error-red);">Erro de conexão. Não foi possível carregar os detalhes.</p>`;
         }
     }
 
