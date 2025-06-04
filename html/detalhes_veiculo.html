@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Veículo - GPX7 Controle de Veículos</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/dashboard.css"> <link rel="stylesheet" href="../css/detalhes.css">   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <nav class="navbar">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/ixmFdu4.png" alt="Logo GPX7" class="navbar-logo">
+                <span class="navbar-title">GPX7</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="cadastrar_veiculo.html"><i class="fas fa-plus-circle"></i> Cadastrar Carros</a></li>
+                <li><a href="veiculos.html" class="active"><i class="fas fa-truck"></i> Veículos</a></li> <li><a href="manutencao.html"><i class="fas fa-tools"></i> Manutenção</a></li>
+                <li><a href="relatorios.html"><i class="fas fa-chart-bar"></i> Relatório</a></li>
+            </ul>
+            <div class="user-menu">
+                <span id="welcomeMessage">Olá, Usuário!</span>
+                <button id="logoutButton" class="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1><i class="fas fa-info-circle"></i> Detalhes do Veículo</h1>
+        <div id="detalhesVeiculoContent" class="details-content-wrapper">
+            <p class="loading-message">Carregando detalhes do veículo...</p>
+        </div>
+        <div class="actions-bar-details page-actions">
+            <a href="veiculos.html" class="button-secondary"><i class="fas fa-arrow-left"></i> Voltar para Lista</a>
+            <button id="btnEditarVeiculo" class="button-primary"><i class="fas fa-edit"></i> Editar Veículo</button>
+        </div>
+        <p id="messageDetalhes" class="message-feedback" style="margin-top: 20px;"></p>
+    </main>
+
+    <script src="../js/dashboard.js"></script> <script src="../js/detalhes_veiculo.js"></script> </body>
+</html>
