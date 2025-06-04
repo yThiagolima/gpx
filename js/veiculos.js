@@ -1,12 +1,12 @@
 // frontend/js/veiculos.js
 document.addEventListener('DOMContentLoaded', function () {
     const corpoTabelaVeiculos = document.getElementById('corpoTabelaVeiculos');
-    const messageElement = document.getElementById('messageVeiculos'); // Elemento de mensagem específico desta página
+    const messageElement = document.getElementById('messageVeiculos');
 
     function showMessage(text, type) {
         if (!messageElement) return;
         messageElement.textContent = text;
-        messageElement.className = 'message-feedback'; // Reseta classes
+        messageElement.className = 'message-feedback';
         if (type) {
             messageElement.classList.add(type);
         }
@@ -16,19 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!corpoTabelaVeiculos) return; 
         
         corpoTabelaVeiculos.innerHTML = '<tr><td colspan="7" class="text-center">Carregando veículos...</td></tr>';
-        showMessage('', 'info'); // Limpa mensagens anteriores
+        showMessage('', 'info');
 
         try {
             const backendUrl = 'https://gpx-api-xwv1.onrender.com/api/veiculos';
-            // const token = localStorage.getItem('authToken'); // Para quando tivermos JWT
-            // const headers = { 
-            //     'Content-Type': 'application/json',
-            //     'Authorization': `Bearer ${token}` 
-            // };
-
-            const response = await fetch(backendUrl /*, { headers } */); // Adicionar headers com token futuramente
+            const response = await fetch(backendUrl);
             
-            if (!response.ok) { // Verifica se a resposta HTTP não foi bem-sucedida
+            if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ message: `Erro ${response.status} ao buscar veículos.` }));
                 throw new Error(errorData.message);
             }
@@ -36,10 +30,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const veiculos = await response.json();
 
             if (veiculos && veiculos.length > 0) {
-                corpoTabelaVeiculos.innerHTML = ''; // Limpa a mensagem "Carregando..."
+                corpoTabelaVeiculos.innerHTML = '';
                 veiculos.forEach(veiculo => {
                     const tr = document.createElement('tr');
-                    tr.setAttribute('data-vehicle-id', veiculo._id); // Adiciona ID à linha para referência futura
+                    tr.setAttribute('data-vehicle-id', veiculo._id);
                     tr.innerHTML = `
                         <td>${veiculo.placa || '--'}</td>
                         <td>${veiculo.marca || '--'}</td>
@@ -65,12 +59,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Delegação de eventos para os botões de ação na tabela
     if (corpoTabelaVeiculos) {
         corpoTabelaVeiculos.addEventListener('click', async function(event) {
-            const targetButton = event.target.closest('button.btn-action'); // Pega o botão de ação mais próximo
+            const targetButton = event.target.closest('button.btn-action');
 
-            if (!targetButton) return; // Sai se não foi um botão de ação
+            if (!targetButton) return;
 
             const veiculoId = targetButton.dataset.id;
 
@@ -82,12 +75,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (targetButton.classList.contains('view')) {
                 console.log("Botão Detalhes clicado para ID:", veiculoId);
-                window.location.href = `detalhes_veiculo.html?id=${veiculoId}`; // Redireciona para a página de detalhes
+                window.location.href = `detalhes_veiculo.html?id=${veiculoId}`;
             
             } else if (targetButton.classList.contains('edit')) {
-                console.log("Botão Editar clicado para ID:", veiculoId);
-                // window.location.href = `editar_veiculo.html?id=${veiculoId}`; // Será implementado
-                alert(`Funcionalidade "Editar" para ID ${veiculoId} ainda não implementada.`);
+                console.log("Botão Editar (da lista) clicado para ID:", veiculoId, "Redirecionando...");
+                window.location.href = `editar_veiculo.html?id=${veiculoId}`; 
             
             } else if (targetButton.classList.contains('delete')) {
                 const veiculoRow = targetButton.closest('tr');
@@ -97,13 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showMessage('Excluindo veículo...', 'info');
                     try {
                         const backendUrl = `https://gpx-api-xwv1.onrender.com/api/veiculos/${veiculoId}`;
-                        // const token = localStorage.getItem('authToken');
-                        // const headers = { 'Authorization': `Bearer ${token}` };
-
-                        const response = await fetch(backendUrl, {
-                            method: 'DELETE',
-                            // headers: headers // Adicionar quando tiver JWT
-                        });
+                        const response = await fetch(backendUrl, { method: 'DELETE' });
                         
                         if (!response.ok) {
                             const errorData = await response.json().catch(() => ({ message: `Erro ${response.status} ao excluir o veículo.` }));
@@ -114,9 +100,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         showMessage(data.message || 'Veículo excluído com sucesso!', 'success');
                         if (veiculoRow) {
-                            veiculoRow.remove(); // Remove a linha da tabela no frontend
+                            veiculoRow.remove();
                         }
-                        // Verificar se a tabela ficou vazia após a exclusão
                         if (corpoTabelaVeiculos.children.length === 0) {
                             corpoTabelaVeiculos.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum veículo cadastrado ainda.</td></tr>';
                         }
@@ -129,10 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Lógica do header (logout/welcome) - Copiada do dashboard.js para consistência
     const logoutButton = document.getElementById('logoutButton');
     const welcomeMessage = document.getElementById('welcomeMessage');
-    const storedUser = localStorage.getItem('gpx7User'); // Deve ser a mesma chave usada no login.js
+    const storedUser = localStorage.getItem('gpx7User');
     if (storedUser) {
         try {
             const user = JSON.parse(storedUser);
@@ -144,12 +128,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (logoutButton) {
         logoutButton.addEventListener('click', function() {
             localStorage.removeItem('gpx7User');
-            // localStorage.removeItem('authToken'); // Remover token JWT futuramente
-            window.location.href = 'login.html'; // Redireciona para a página de login
+            window.location.href = 'login.html';
         });
     }
 
-    // Só carrega os dados se estivermos na página de veículos
     if (window.location.pathname.includes('veiculos.html')) {
         carregarVeiculos();
     }
