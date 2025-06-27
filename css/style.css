@@ -303,3 +303,26 @@ form .button { width: 100%; background-color: var(--cor-sucesso); color: white; 
 .status-producao { background-color: var(--cor-alerta); color: var(--cor-texto); }
 .status-concluido { background-color: var(--cor-sucesso); }
 .status-aguardando { background-color: var(--cor-perigo); }
+/* ---------------------------------- */
+/* 7. NOVO: Estilos para Formulários  */
+/* com Grupos                      */
+/* ---------------------------------- */
+
+.form-group-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Duas colunas de tamanho igual */
+    gap: 20px; /* Espaço entre as colunas */
+}
+
+/* Estilos para o card de resultado da OS */
+#os-result-card ul {
+    list-style: none;
+    padding: 0;
+}
+#os-result-card ul li {
+    font-size: 1.1rem;
+    padding: 10px 0;
+}
+#os-result-card ul li strong {
+    color: var(--cor-primaria);
+}
