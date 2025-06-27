@@ -4,30 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle - Sistema de OS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="navbar">
         <h1>Sistema de Impressão Digital</h1>
-        <button class="logout-button">Sair</button>
+        <a href="#" class="button button-danger">Sair</a>
     </header>
 
     <main class="container">
-        <h2>Painel de Controle</h2>
+        <h2 class="main-title">Painel de Controle</h2>
         <div class="main-menu">
-            <a href="clientes/novo.html" class="menu-button">
+            <a href="clientes/novo.html" class="menu-link">
                 <h3>Cadastrar Cliente</h3>
                 <p>Adicionar um novo cliente à base de dados.</p>
             </a>
-            <a href="clientes/index.html" class="menu-button">
+            <a href="clientes/index.html" class="menu-link">
                 <h3>Ver Clientes</h3>
                 <p>Listar e gerenciar todos os clientes cadastrados.</p>
             </a>
-            <a href="ordens/nova.html" class="menu-button">
+            <a href="ordens/nova.html" class="menu-link">
                 <h3>Gerar Nova OS</h3>
                 <p>Criar uma nova Ordem de Serviço para um cliente.</p>
             </a>
-            <a href="ordens/index.html" class="menu-button">
+            <a href="ordens/index.html" class="menu-link">
                 <h3>Ver Ordens de Serviço</h3>
                 <p>Visualizar o histórico de todas as OS geradas.</p>
             </a>
