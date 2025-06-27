@@ -117,6 +117,7 @@ form input:focus, form textarea:focus, form select:focus {
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
 }
 form .button { width: 100%; background-color: var(--cor-sucesso); color: white; font-size: 1.1rem; }
+input[disabled] { background-color: #e9ecef; font-weight: bold; cursor: not-allowed; }
 
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { border-bottom: 1px solid #dee2e6; padding: 16px; text-align: left; vertical-align: middle; }
@@ -133,7 +134,7 @@ form .button { width: 100%; background-color: var(--cor-sucesso); color: white; 
 }
 
 /* ---------------------------------- */
-/* 4. ESTILOS ESPECÍFICOS        */
+/* 4. ESTILOS DE PÁGINAS         */
 /* ---------------------------------- */
 
 .menu-link {
@@ -158,7 +159,6 @@ form .button { width: 100%; background-color: var(--cor-sucesso); color: white; 
 .table-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
 .table-header h2 { margin: 0; padding: 0; border: none; }
 
-
 /* ---------------------------------- */
 /* 5. Estilos do Dashboard          */
 /* ---------------------------------- */
@@ -177,118 +177,30 @@ form .button { width: 100%; background-color: var(--cor-sucesso); color: white; 
     font-weight: 500;
 }
 
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 30px;
-}
+.dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
+@media (min-width: 992px) { .dashboard-grid { grid-template-columns: 1fr 1.5fr; } }
 
-@media (min-width: 992px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr 1.5fr;
-    }
-}
+.main-actions { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 576px) { .main-actions { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 992px) { .main-actions { grid-template-columns: 1fr; } }
 
-.main-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-}
+.info-panel { display: flex; flex-direction: column; gap: 30px; }
+.info-panel .card { margin-top: 0; }
 
-@media (min-width: 576px) {
-    .main-actions {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-@media (min-width: 992px) {
-    .main-actions {
-        grid-template-columns: 1fr;
-    }
-}
+.stats-grid { display: flex; justify-content: space-around; text-align: center; margin-top: 20px; }
+.stat-number { display: block; font-size: 2rem; font-weight: 700; color: var(--cor-primaria); }
+.stat-label { font-size: 0.9rem; color: var(--cor-texto-secundario); }
 
-.info-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-.info-panel .card {
-    margin-top: 0;
-}
+.recent-list, .machine-list { list-style: none; padding: 0; margin: 0; }
+.recent-list li, .machine-list li { display: flex; justify-content: space-between; padding: 15px 5px; border-bottom: 1px solid #f0f2f5; align-items: center; }
+.recent-list li:last-child, .machine-list li:last-child { border-bottom: none; }
+.recent-list span, .machine-list span { font-weight: 500; }
 
-.stats-grid {
-    display: flex;
-    justify-content: space-around;
-    text-align: center;
-    margin-top: 20px;
-}
+.machine-list { gap: 15px; }
+.machine-list li { background-color: var(--cor-fundo); border-radius: var(--borda-radius); padding: 15px; }
+.machine-list .machine-name { font-weight: 600; font-size: 1.1rem; }
 
-.stat-number {
-    display: block;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--cor-primaria);
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    color: var(--cor-texto-secundario);
-}
-
-.recent-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.recent-list li {
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 5px;
-    border-bottom: 1px solid #f0f2f5;
-}
-.recent-list li:last-child {
-    border-bottom: none;
-}
-.recent-list span {
-    font-weight: 500;
-}
-.recent-list [class^="status-"] {
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    color: white;
-}
-/* ---------------------------------- */
-/* 6. NOVO: Estilos da Atividade      */
-/* por Máquina e Status            */
-/* ---------------------------------- */
-
-.machine-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Espaço entre as máquinas */
-}
-
-.machine-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border-radius: var(--borda-radius);
-    background-color: var(--cor-fundo);
-}
-
-.machine-list .machine-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-/* Reutilizando e adicionando novos status */
-.recent-list [class^="status-"],
-.machine-list [class^="status-"] {
+.recent-list [class^="status-"], .machine-list [class^="status-"] {
     font-weight: 600;
     padding: 5px 12px;
     border-radius: 15px;
@@ -300,29 +212,61 @@ form .button { width: 100%; background-color: var(--cor-sucesso); color: white; 
 .status-concluido { background-color: var(--cor-sucesso); }
 .status-aguardando { background-color: var(--cor-perigo); }
 .status-ociosa { background-color: var(--cor-secundaria); }
-.status-producao { background-color: var(--cor-alerta); color: var(--cor-texto); }
-.status-concluido { background-color: var(--cor-sucesso); }
-.status-aguardando { background-color: var(--cor-perigo); }
+
 /* ---------------------------------- */
-/* 7. NOVO: Estilos para Formulários  */
-/* com Grupos                      */
+/* 6. Estilos de Grupos de Formulário */
 /* ---------------------------------- */
 
-.form-group-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Duas colunas de tamanho igual */
-    gap: 20px; /* Espaço entre as colunas */
-}
+.form-group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-/* Estilos para o card de resultado da OS */
-#os-result-card ul {
-    list-style: none;
-    padding: 0;
+#os-result-card ul { list-style: none; padding: 0; }
+#os-result-card ul li { font-size: 1.1rem; padding: 10px 0; }
+#os-result-card ul li strong { color: var(--cor-primaria); }
+
+/* ---------------------------------- */
+/* 7. Estilos de Upload e Preview     */
+/* ---------------------------------- */
+
+fieldset { border: 1px solid #dee2e6; border-radius: var(--borda-radius); padding: 20px; margin-bottom: 30px; }
+legend { padding: 0 10px; font-weight: 600; color: var(--cor-primaria); }
+
+#drop-zone {
+    border: 2px dashed #ced4da;
+    border-radius: var(--borda-radius);
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
 }
-#os-result-card ul li {
-    font-size: 1.1rem;
-    padding: 10px 0;
+#drop-zone p { margin: 0; color: var(--cor-texto-secundario); }
+#drop-zone.drag-over { background-color: rgba(13, 110, 253, 0.05); border-color: var(--cor-primaria); }
+
+.preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+.preview-item {
+    position: relative;
+    border: 1px solid #dee2e6;
+    border-radius: var(--borda-radius);
+    padding: 5px;
+    background-color: var(--cor-fundo);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-#os-result-card ul li strong {
-    color: var(--cor-primaria);
+.preview-item canvas { width: 100%; height: auto; display: block; border-radius: 5px; }
+.preview-item .preview-info { font-size: 0.8rem; text-align: center; padding: 5px 0; color: var(--cor-texto-secundario); font-weight: 500; }
+.delete-preview-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: var(--cor-perigo);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 24px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    padding: 0; /* Reset padding */
 }
