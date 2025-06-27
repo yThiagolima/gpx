@@ -1,174 +1,97 @@
 /* ---------------------------------- */
-/* 1. VARIÁVEIS E GERAL          */
+/* 5. NOVO: Estilos do Dashboard */
 /* ---------------------------------- */
 
-:root {
-    --cor-primaria: #0d6efd;
-    --cor-primaria-hover: #0b5ed7;
-    --cor-sucesso: #198754;
-    --cor-alerta: #ffc107;
-    --cor-perigo: #dc3545;
-    --cor-secundaria: #6c757d;
-    --cor-fundo: #f8f9fa;
-    --cor-card: #ffffff;
-    --cor-texto: #212529;
-    --cor-texto-secundario: #6c757d;
-    --sombra: 0 4px 20px rgba(0, 0, 0, 0.08);
-    --borda-radius: 8px;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--cor-fundo);
-    color: var(--cor-texto);
-    line-height: 1.6;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 20px;
-}
-
-.main-title {
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-/* ---------------------------------- */
-/* 2. LAYOUT E NAVEGAÇÃO         */
-/* ---------------------------------- */
-
-.navbar {
-    background-color: var(--cor-card);
-    padding: 15px 30px;
-    box-shadow: var(--sombra);
+.dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
-.navbar h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
+.current-date {
+    font-size: 1rem;
+    color: var(--cor-texto-secundario);
+    font-weight: 500;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Começa com uma coluna em telas pequenas */
+    gap: 30px;
+}
+
+/* Em telas maiores, o grid terá 2 colunas */
+@media (min-width: 992px) {
+    .dashboard-grid {
+        /* A coluna da direita (info) será 1.5x maior que a da esquerda (ações) */
+        grid-template-columns: 1fr 1.5fr;
+    }
+}
+
+.main-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+/* Em telas médias, os botões ficam lado a lado */
+@media (min-width: 576px) {
+    .main-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (min-width: 992px) {
+    .main-actions {
+        /* Na tela grande, voltam a ser um por linha na coluna da esquerda */
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.stats-grid {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
     color: var(--cor-primaria);
 }
 
-/* ---------------------------------- */
-/* 3. COMPONENTES REUTILIZÁVEIS  */
-/* ---------------------------------- */
-
-.button {
-    display: inline-block;
-    padding: 10px 20px;
-    border: none;
-    border-radius: var(--borda-radius);
-    font-weight: 500;
-    font-size: 1rem;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
 }
 
-.button-primary { background-color: var(--cor-primaria); color: white; }
-.button-primary:hover { background-color: var(--cor-primaria-hover); transform: translateY(-2px); }
-.button-danger { background-color: var(--cor-perigo); color: white; }
-.button-secondary { background-color: var(--cor-secundaria); color: white; }
-
-.card {
-    background-color: var(--cor-card);
-    padding: 30px;
-    border-radius: var(--borda-radius);
-    box-shadow: var(--sombra);
-    margin-top: 30px;
+.recent-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
-.card h2 {
-    margin-bottom: 25px;
-    font-weight: 600;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
-}
-
-form label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--cor-texto-secundario); }
-form input, form textarea, form select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #ced4da;
-    border-radius: var(--borda-radius);
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-}
-form input:focus, form textarea:focus, form select:focus {
-    outline: none;
-    border-color: var(--cor-primaria);
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
-}
-form .button { width: 100%; background-color: var(--cor-sucesso); color: white; font-size: 1.1rem; }
-
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th, .data-table td { border-bottom: 1px solid #dee2e6; padding: 16px; text-align: left; vertical-align: middle; }
-.data-table thead th { font-weight: 600; color: var(--cor-texto-secundario); text-transform: uppercase; font-size: 0.85rem; }
-.data-table tbody tr:hover { background-color: rgba(13, 110, 253, 0.05); }
-.action-button {
-    background-color: var(--cor-alerta);
-    color: var(--cor-texto);
-    border: none;
-    padding: 5px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-/* ---------------------------------- */
-/* 4. ESTILOS ESPECÍFICOS        */
-/* ---------------------------------- */
-
-.main-menu {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-}
-.menu-link {
-    display: block;
-    background-color: var(--cor-card);
-    border-radius: var(--borda-radius);
-    padding: 25px;
-    text-decoration: none;
-    color: var(--cor-texto);
-    box-shadow: var(--sombra);
-    transition: all 0.2s ease-in-out;
-    border-left: 5px solid transparent;
-}
-.menu-link:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-left-color: var(--cor-primaria);
-}
-.menu-link h3 { margin: 0 0 10px 0; color: var(--cor-primaria); font-weight: 600; }
-.menu-link p { margin: 0; font-size: 0.9em; color: var(--cor-texto-secundario); }
-
-.table-header {
+.recent-list li {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 15px;
+    padding: 15px 5px;
+    border-bottom: 1px solid #f0f2f5;
 }
-.table-header h2 {
-    margin: 0;
-    padding: 0;
-    border: none;
+.recent-list li:last-child {
+    border-bottom: none;
 }
+.recent-list span {
+    font-weight: 500;
+}
+.recent-list .status-producao { color: #ffc107; }
+.recent-list .status-concluido { color: #198754; }
+.recent-list .status-aguardando { color: #dc3545; }
