@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;</script>
     
     <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -19,55 +21,79 @@
 
     <main class="container">
         <div class="card">
-            <h2>Detalhes do Serviço</h2>
+            <div class="step-indicator">
+                <div class="step-item active" data-step="1">
+                    <span>1</span>
+                    <p>Serviço</p>
+                </div>
+                <div class="step-item" data-step="2">
+                    <span>2</span>
+                    <p>Arquivos</p>
+                </div>
+                <div class="step-item" data-step="3">
+                    <span>3</span>
+                    <p>Finalização</p>
+                </div>
+            </div>
+
             <form id="form-nova-os">
-                <label for="cliente">Cliente</label>
-                <select id="cliente" required>
-                    <option value="" disabled selected>Selecione um cliente...</option>
-                    <option value="cliente1">Gráfica Veloz Ltda</option>
-                    <option value="cliente2">Agência de Publicidade Criativa</option>
-                    <option value="cliente3">João da Silva (Fotógrafo)</option>
-                </select>
-                
-                <div class="form-group-grid">
-                    <div>
-                        <label for="material">Material de Impressão</label>
-                        <select id="material" required>
-                            <option value="adesivo">Adesivo</option>
-                            <option value="lona">Lona</option>
+                <div class="form-step active" data-step="1">
+                    <fieldset>
+                        <legend>Dados Gerais</legend>
+                        <label for="cliente">Cliente</label>
+                        <select id="cliente" required>
+                            <option value="" disabled selected>Selecione um cliente...</option>
+                            <option value="cliente1">Gráfica Veloz Ltda</option>
+                            <option value="cliente2">Agência Criativa</option>
                         </select>
-                    </div>
-                    <div>
-                        <label for="maquina">Máquina</label>
-                        <select id="maquina" required>
-                            <option value="epson">Epson S40</option>
-                            <option value="mimaki">Mimaki 320</option>
-                            <option value="bunnercut">BunnerCUT (Apenas Recorte)</option>
-                        </select>
-                    </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Detalhes de Produção</legend>
+                        <div class="form-group-grid">
+                            <div><label for="material">Material</label><select id="material" required><option value="adesivo">Adesivo</option><option value="lona">Lona</option></select></div>
+                            <div><label for="maquina">Máquina</label><select id="maquina" required><option value="epson">Epson S40</option><option value="mimaki">Mimaki 320</option><option value="bunnercut">BunnerCUT</option></select></div>
+                        </div>
+                        <div class="form-group-grid">
+                            <div><label for="largura">Largura (cm)</label><input type="number" id="largura" step="0.1" required></div>
+                            <div><label for="altura">Altura (cm)</label><input type="number" id="altura" step="0.1" required></div>
+                        </div>
+                    </fieldset>
                 </div>
-                
-                <div class="form-group-grid">
-                    <div>
-                        <label for="largura">Largura (cm)</label>
-                        <input type="number" id="largura" step="0.1" required placeholder="Ex: 120.5">
-                    </div>
-                    <div>
-                        <label for="altura">Altura (cm)</label>
-                        <input type="number" id="altura" step="0.1" required placeholder="Ex: 80">
+
+                <div class="form-step" data-step="2">
+                    <fieldset>
+                        <legend>Arquivos da Arte</legend>
+                        <p class="step-instruction">Anexe aqui todos os arquivos PDF para esta Ordem de Serviço.</p>
+                        <div id="drop-zone"><p>Arraste e solte os arquivos PDF aqui ou clique para selecionar</p></div>
+                        <input type="file" id="file-input" accept=".pdf" multiple style="display: none;">
+                        <div id="preview-container" class="preview-grid"></div>
+                    </fieldset>
+                </div>
+
+                <div class="form-step" data-step="3">
+                    <fieldset>
+                        <legend>Financeiro (Caixa)</legend>
+                        <div class="form-group-grid">
+                            <div><label for="custo-m2">Custo por m² (R$)</label><input type="number" id="custo-m2" step="0.01" value="35.00"></div>
+                            <div><label for="valor-total">Valor Total (R$)</label><input type="text" id="valor-total" disabled></div>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Observações</legend>
+                        <textarea id="observacoes" rows="4"></textarea>
+                    </fieldset>
+                    <div id="os-result-card" style="display: none;">
+                        <h2>Análise da Ordem de Serviço</h2>
+                        <div id="os-result-content"></div>
                     </div>
                 </div>
 
-                <label for="observacoes">Observações</label>
-                <textarea id="observacoes" rows="4" placeholder="Detalhes importantes, como acabamento, sangria, etc..."></textarea>
-
-                <button type="submit" class="button">Analisar e Gerar OS</button>
+                <div class="step-navigation">
+                    <button type="button" id="prev-btn" class="button button-secondary" style="display: none;">Anterior</p>
+                    <button type="button" id="next-btn" class="button button-primary">Próximo</p>
+                    <button type="submit" id="submit-btn" class="button" style="display: none;">Gerar OS</p>
+                </div>
             </form>
-        </div>
-
-        <div id="os-result-card" class="card" style="display: none;">
-            <h2>Análise da Ordem de Serviço</h2>
-            <div id="os-result-content"></div>
         </div>
     </main>
 
