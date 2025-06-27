@@ -1,59 +1,63 @@
-// Aguarda o HTML carregar completamente
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- Seleção de Elementos do HTML ---
+    // --- Mapeamento das máquinas e suas capacidades ---
+    const maquinasInfo = {
+        epson: { nome: 'Epson S40', boca: 160 },
+        mimaki: { nome: 'Mimaki 320', boca: 320 },
+        bunnercut: { nome: 'BunnerCUT (Recorte)', boca: 120 } // Exemplo de boca para a cutter
+    };
+
+    // --- Elementos do HTML ---
     const form = document.getElementById('form-nova-os');
-    const tipoServicoSelect = document.getElementById('tipo-servico');
-    const camposImpressaoDiv = document.getElementById('campos-impressao');
     const resultCard = document.getElementById('os-result-card');
     const resultContent = document.getElementById('os-result-content');
 
-    // --- Lógica para Mostrar/Esconder Campos ---
-    // Quando o "Tipo de Serviço" muda, decidimos quais campos mostrar.
-    tipoServicoSelect.addEventListener('change', function() {
-        if (this.value === 'impressao') {
-            camposImpressaoDiv.style.display = 'block';
-        } else {
-            // Se for 'recorte', esconde os campos de impressão
-            camposImpressaoDiv.style.display = 'none';
-        }
-    });
-
     // --- Lógica Principal ao Enviar o Formulário ---
     form.addEventListener('submit', function(event) {
-        // Impede que a página recarregue
-        event.preventDefault(); 
+        event.preventDefault();
 
-        const tipoServico = tipoServicoSelect.value;
-        let resultadoHTML = ''; // Variável para guardar o resultado
+        // Esconde o resultado anterior para uma nova análise
+        resultCard.style.display = 'none';
+        resultContent.innerHTML = '';
 
-        // --- SE O SERVIÇO FOR IMPRESSÃO DIGITAL ---
-        if (tipoServico === 'impressao') {
-            const largura = parseFloat(document.getElementById('largura').value);
-            const material = document.getElementById('material').value;
+        // --- Pega os valores do formulário ---
+        const material = document.getElementById('material').value;
+        const maquinaKey = document.getElementById('maquina').value;
+        const largura = parseFloat(document.getElementById('largura').value);
+        const maquinaSelecionada = maquinasInfo[maquinaKey];
 
-            // Validação: verifica se a largura foi preenchida
-            if (isNaN(largura) || largura <= 0) {
-                alert('Por favor, insira uma largura válida para o serviço de impressão.');
-                return;
-            }
+        // Validação básica
+        if (isNaN(largura) || largura <= 0) {
+            alert('Por favor, insira uma largura válida.');
+            return;
+        }
 
-            // 1. Lógica de Seleção da Máquina de IMPRESSÃO
-            let maquina = '';
-            if (largura <= 160) {
-                maquina = 'Epson S40';
-            } else if (largura <= 320) {
-                maquina = 'Mimaki 320';
+        // --- LÓGICA DE VALIDAÇÃO E CONFIRMAÇÃO ---
+
+        // CASO 1: Lona maior que a maior máquina (320cm), precisa de EMENDA.
+        if (material === 'lona' && largura > 320) {
+            const ok = confirm("AVISO: A lona excede 320cm e precisará de EMENDA para atingir a largura desejada. Deseja continuar e gerar a OS mesmo assim?");
+            if (!ok) return; // Se o usuário clicar em "Cancelar", para a execução.
+        }
+
+        // CASO 2: A arte é maior que a boca da máquina selecionada.
+        else if (largura > maquinaSelecionada.boca) {
+            // CASO 2.1: Se for adesivo, podemos dividir em "folhas".
+            if (material === 'adesivo') {
+                const ok = confirm(`AVISO: A arte (${largura}cm) é maior que a boca da ${maquinaSelecionada.nome} (${maquinaSelecionada.boca}cm).\n\nO adesivo será dividido em folhas. Deseja continuar?`);
+                if (!ok) return;
             } else {
-                // Se a largura for muito grande, mostra um erro e para
-                resultadoHTML = '<p style="color: red; font-weight: bold;">ERRO: A arte precisa ser dividida. A largura excede 320 cm.</p>';
-                resultContent.innerHTML = resultadoHTML;
-                resultCard.style.display = 'block'; // Mostra o card de resultado
+            // CASO 2.2: Se for qualquer outra coisa (lona), é um erro.
+                alert(`ERRO: A lona (${largura}cm) não cabe na ${maquinaSelecionada.nome} (${maquinaSelecionada.boca}cm) e não pode ser dividida.\n\nPor favor, escolha uma máquina maior ou ajuste a arte.`);
                 return;
             }
+        }
+        
+        // Se todas as validações e confirmações passaram, continuamos...
 
-            // 2. Lógica de Sugestão de Bobina
-            let bobinaSugerida = 'Não encontrada';
+        // --- Lógica de Sugestão de Bobina ---
+        let bobinaSugerida = 'N/A';
+        if (maquinaKey !== 'bunnercut') { // Bobinas não se aplicam à cutter
             const bobinasAdesivo = [106, 122, 127, 152];
             const bobinasLona = [90, 100, 140, 250, 320];
             const bobinasDisponiveis = (material === 'adesivo') ? bobinasAdesivo : bobinasLona;
@@ -61,31 +65,27 @@ document.addEventListener('DOMContentLoaded', function() {
             for (const bobina of bobinasDisponiveis) {
                 if (largura <= bobina) {
                     bobinaSugerida = `${bobina} cm`;
-                    break; // Para o loop na primeira bobina que couber
+                    break;
                 }
             }
-            
-            // Monta o HTML com o resultado da análise de IMPRESSÃO
-            resultadoHTML = `
-                <ul>
-                    <li><strong>Máquina Designada:</strong> ${maquina}</li>
-                    <li><strong>Bobina Sugerida:</strong> ${bobinaSugerida}</li>
-                </ul>
-            `;
+        }
         
-        // --- SE O SERVIÇO FOR RECORTE ELETRÔNICO ---
-        } else if (tipoServico === 'recorte') {
-            // Monta o HTML com o resultado da análise de RECORTE
-            resultadoHTML = `
-                <ul>
-                    <li><strong>Máquina Designada:</strong> BunnerCUT (Recorte)</li>
-                    <li><strong>Observação:</strong> Verifique as especificações do material a ser recortado.</li>
-                </ul>
-            `;
+        // --- Monta e Exibe o Resultado ---
+        let resultadoHTML = `
+            <ul>
+                <li><strong>Máquina Selecionada:</strong> ${maquinaSelecionada.nome}</li>
+                <li><strong>Bobina Sugerida:</strong> ${bobinaSugerida}</li>
+            </ul>
+        `;
+
+        // Adiciona um aviso no resultado se houver emenda ou divisão
+        if (material === 'lona' && largura > 320) {
+            resultadoHTML += '<p style="color: red; font-weight: bold;">LEMBRETE: Esta OS requer EMENDA na lona.</p>';
+        } else if (material === 'adesivo' && largura > maquinaSelecionada.boca) {
+            resultadoHTML += '<p style="color: red; font-weight: bold;">LEMBRETE: Esta OS requer DIVISÃO do adesivo em folhas.</p>';
         }
 
-        // --- Exibe o resultado final ---
-        resultContent.innerHTML = resultadoHTML; // Coloca o resultado no card
-        resultCard.style.display = 'block'; // Mostra o card de resultado
+        resultContent.innerHTML = resultadoHTML;
+        resultCard.style.display = 'block';
     });
 });
