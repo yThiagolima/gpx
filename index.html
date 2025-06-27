@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle - Sistema de OS</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -18,24 +16,60 @@
     </header>
 
     <main class="container">
-        <h2 class="main-title">Painel de Controle</h2>
-        <div class="main-menu">
-            <a href="clientes/novo.html" class="menu-link">
-                <h3>Cadastrar Cliente</h3>
-                <p>Adicionar um novo cliente à base de dados.</p>
-            </a>
-            <a href="clientes/index.html" class="menu-link">
-                <h3>Ver Clientes</h3>
-                <p>Listar e gerenciar todos os clientes cadastrados.</p>
-            </a>
-            <a href="ordens/nova.html" class="menu-link">
-                <h3>Gerar Nova OS</h3>
-                <p>Criar uma nova Ordem de Serviço para um cliente.</p>
-            </a>
-            <a href="ordens/index.html" class="menu-link">
-                <h3>Ver Ordens de Serviço</h3>
-                <p>Visualizar o histórico de todas as OS geradas.</p>
-            </a>
+        <div class="dashboard-header">
+            <h2 class="main-title">Painel de Controle</h2>
+            <p class="current-date">Sexta-feira, 27 de Junho de 2025</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="main-actions">
+                <a href="clientes/novo.html" class="menu-link">
+                    <h3>Cadastrar Cliente</h3>
+                    <p>Adicionar um novo cliente à base de dados.</p>
+                </a>
+                <a href="ordens/nova.html" class="menu-link">
+                    <h3>Gerar Nova OS</h3>
+                    <p>Criar uma nova Ordem de Serviço para um cliente.</p>
+                </a>
+                <a href="clientes/index.html" class="menu-link">
+                    <h3>Ver Clientes</h3>
+                    <p>Listar e gerenciar todos os clientes.</p>
+                </a>
+                <a href="ordens/index.html" class="menu-link">
+                    <h3>Ver Ordens de Serviço</h3>
+                    <p>Visualizar o histórico de todas as OS.</p>
+                </a>
+            </div>
+
+            <div class="info-panel">
+                <div class="card">
+                    <h3>Resumo do Dia</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-number">8</span>
+                            <span class="stat-label">OS Criadas</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">OS Pendentes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">R$ 1.250</span>
+                            <span class="stat-label">Faturado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Ordens de Serviço Recentes</h3>
+                    <ul class="recent-list">
+                        <li><span>OS008 - Gráfica Veloz</span><span class="status-producao">Em Produção</span></li>
+                        <li><span>OS007 - Ag. Criativa</span><span class="status-concluido">Concluído</span></li>
+                        <li><span>OS006 - João da Silva</span><span class="status-concluido">Concluído</span></li>
+                        <li><span>OS005 - Gráfica Veloz</span><span class="status-aguardando">Aguardando Arte</span></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </main>
 </body>
