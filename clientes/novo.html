@@ -4,32 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastrar Novo Cliente</title>
-    <link rel="stylesheet" href="../css/style.css"> </head>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/style.css">
+</head>
 <body>
     <header class="navbar">
-        <h1>Cadastrar Novo Cliente</h1>
-        <a href="../index.html" class="back-button">Voltar ao Painel</a>
+        <h1>Novo Cliente</h1>
+        <a href="../index.html" class="button button-secondary">Voltar ao Painel</a>
     </header>
 
     <main class="container">
-        <div class="form-card">
+        <div class="card">
+            <h2>Informações do Cliente</h2>
             <form id="form-novo-cliente">
                 <label for="nome">Nome Completo / Razão Social</label>
-                <input type="text" id="nome" required>
+                <input type="text" id="nome" required placeholder="Ex: Gráfica Veloz Ltda">
 
                 <label for="cnpj">CNPJ (opcional)</label>
-                <input type="text" id="cnpj">
+                <input type="text" id="cnpj" placeholder="Ex: 00.000.000/0001-00">
 
                 <label for="telefone">Telefone / WhatsApp</label>
-                <input type="text" id="telefone" required>
+                <input type="text" id="telefone" required placeholder="Ex: (62) 99999-8888">
 
                 <label for="email">E-mail (opcional)</label>
-                <input type="email" id="email">
+                <input type="email" id="email" placeholder="Ex: contato@empresa.com.br">
 
                 <label for="observacoes">Observações</label>
-                <textarea id="observacoes" rows="4"></textarea>
+                <textarea id="observacoes" rows="4" placeholder="Alguma informação importante sobre o cliente..."></textarea>
 
-                <button type="submit">Salvar Cliente</button>
+                <button type="submit" class="button">Salvar Cliente</button>
             </form>
         </div>
     </main>
