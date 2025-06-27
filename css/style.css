@@ -116,7 +116,7 @@ form input:focus, form textarea:focus, form select:focus {
     border-color: var(--cor-primaria);
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
 }
-form .button { width: 100%; background-color: var(--cor-sucesso); color: white; font-size: 1.1rem; }
+form #submit-btn { width: 100%; background-color: var(--cor-sucesso); color: white; font-size: 1.1rem; }
 input[disabled] { background-color: #e9ecef; font-weight: bold; cursor: not-allowed; }
 
 .data-table { width: 100%; border-collapse: collapse; }
@@ -134,7 +134,7 @@ input[disabled] { background-color: #e9ecef; font-weight: bold; cursor: not-allo
 }
 
 /* ---------------------------------- */
-/* 4. ESTILOS DE PÁGINAS         */
+/* 4. ESTILOS DE PÁGINAS ESPECÍFICAS */
 /* ---------------------------------- */
 
 .menu-link {
@@ -160,7 +160,7 @@ input[disabled] { background-color: #e9ecef; font-weight: bold; cursor: not-allo
 .table-header h2 { margin: 0; padding: 0; border: none; }
 
 /* ---------------------------------- */
-/* 5. Estilos do Dashboard          */
+/* 5. ESTILOS DO DASHBOARD          */
 /* ---------------------------------- */
 
 .dashboard-header {
@@ -170,177 +170,61 @@ input[disabled] { background-color: #e9ecef; font-weight: bold; cursor: not-allo
     flex-wrap: wrap;
     margin-bottom: 20px;
 }
-
-.current-date {
-    font-size: 1rem;
-    color: var(--cor-texto-secundario);
-    font-weight: 500;
-}
-
+.current-date { font-size: 1rem; color: var(--cor-texto-secundario); font-weight: 500; }
 .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
 @media (min-width: 992px) { .dashboard-grid { grid-template-columns: 1fr 1.5fr; } }
-
 .main-actions { display: grid; grid-template-columns: 1fr; gap: 20px; }
 @media (min-width: 576px) { .main-actions { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 992px) { .main-actions { grid-template-columns: 1fr; } }
-
 .info-panel { display: flex; flex-direction: column; gap: 30px; }
 .info-panel .card { margin-top: 0; }
-
 .stats-grid { display: flex; justify-content: space-around; text-align: center; margin-top: 20px; }
 .stat-number { display: block; font-size: 2rem; font-weight: 700; color: var(--cor-primaria); }
 .stat-label { font-size: 0.9rem; color: var(--cor-texto-secundario); }
-
 .recent-list, .machine-list { list-style: none; padding: 0; margin: 0; }
 .recent-list li, .machine-list li { display: flex; justify-content: space-between; padding: 15px 5px; border-bottom: 1px solid #f0f2f5; align-items: center; }
 .recent-list li:last-child, .machine-list li:last-child { border-bottom: none; }
 .recent-list span, .machine-list span { font-weight: 500; }
-
 .machine-list { gap: 15px; }
 .machine-list li { background-color: var(--cor-fundo); border-radius: var(--borda-radius); padding: 15px; }
 .machine-list .machine-name { font-weight: 600; font-size: 1.1rem; }
-
-.recent-list [class^="status-"], .machine-list [class^="status-"] {
-    font-weight: 600;
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    color: white;
-}
-
+.recent-list [class^="status-"], .machine-list [class^="status-"] { font-weight: 600; padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; color: white; }
 .status-producao { background-color: var(--cor-alerta); color: var(--cor-texto); }
 .status-concluido { background-color: var(--cor-sucesso); }
 .status-aguardando { background-color: var(--cor-perigo); }
 .status-ociosa { background-color: var(--cor-secundaria); }
 
 /* ---------------------------------- */
-/* 6. Estilos de Grupos de Formulário */
+/* 6. ESTILOS DE GRUPOS DE FORMULÁRIO */
 /* ---------------------------------- */
-
 .form-group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-#os-result-card ul { list-style: none; padding: 0; }
-#os-result-card ul li { font-size: 1.1rem; padding: 10px 0; }
-#os-result-card ul li strong { color: var(--cor-primaria); }
-
 /* ---------------------------------- */
-/* 7. Estilos de Upload e Preview     */
+/* 7. ESTILOS DE UPLOAD E PREVIEW     */
 /* ---------------------------------- */
-
 fieldset { border: 1px solid #dee2e6; border-radius: var(--borda-radius); padding: 20px; margin-bottom: 30px; }
 legend { padding: 0 10px; font-weight: 600; color: var(--cor-primaria); }
-
-#drop-zone {
-    border: 2px dashed #ced4da;
-    border-radius: var(--borda-radius);
-    padding: 40px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
-}
+#drop-zone { border: 2px dashed #ced4da; border-radius: var(--borda-radius); padding: 40px 20px; text-align: center; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
 #drop-zone p { margin: 0; color: var(--cor-texto-secundario); }
 #drop-zone.drag-over { background-color: rgba(13, 110, 253, 0.05); border-color: var(--cor-primaria); }
-
 .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
-.preview-item {
-    position: relative;
-    border: 1px solid #dee2e6;
-    border-radius: var(--borda-radius);
-    padding: 5px;
-    background-color: var(--cor-fundo);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.preview-item canvas { width: 100%; height: auto; display: block; border-radius: 5px; }
-.preview-item .preview-info { font-size: 0.8rem; text-align: center; padding: 5px 0; color: var(--cor-texto-secundario); font-weight: 500; }
-.delete-preview-btn {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    background-color: var(--cor-perigo);
-    color: white;
-    border: 2px solid white;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 24px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    padding: 0; /* Reset padding */
-}
+.preview-item { position: relative; border: 1px solid #dee2e6; background-color: var(--cor-card); border-radius: var(--borda-radius); padding: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.preview-item img { width: 100%; height: auto; display: block; border-radius: 5px; border: 1px solid #eee; }
+.preview-item .preview-info { font-size: 0.8rem; text-align: center; padding: 8px 0 0 0; color: var(--cor-texto-secundario); font-weight: 500; }
+.delete-preview-btn { position: absolute; top: -10px; right: -10px; background-color: var(--cor-perigo); color: white; border: 2px solid white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold; font-size: 16px; line-height: 24px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); padding: 0; }
+.loading-previews { width: 100%; text-align: center; padding: 20px; font-weight: 500; color: var(--cor-texto-secundario); }
+
 /* ---------------------------------- */
-/* 10. NOVO: Estilos para o Wizard    */
-/* de Passo a Passo                   */
+/* 8. ESTILOS DO WIZARD (Passo a Passo) */
 /* ---------------------------------- */
-
-.step-indicator {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 40px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
-}
-.step-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: var(--cor-texto-secundario);
-    font-weight: 500;
-    width: 100px;
-}
-.step-item span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #ccc;
-    font-weight: 700;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-}
-.step-item.active {
-    color: var(--cor-primaria);
-}
-.step-item.active span {
-    background-color: var(--cor-primaria);
-    color: white;
-    border-color: var(--cor-primaria);
-}
-.step-item p {
-    margin: 0;
-}
-
-.form-step {
-    display: none; /* Esconde todos os passos por padrão */
-    animation: fadeIn 0.5s;
-}
-.form-step.active {
-    display: block; /* Mostra apenas o passo ativo */
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.step-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-}
-
-.step-instruction {
-    font-size: 1.1rem;
-    color: var(--cor-texto-secundario);
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: var(--cor-fundo);
-    border-radius: var(--borda-radius);
-}
+.step-indicator { display: flex; justify-content: space-around; margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+.step-item { display: flex; flex-direction: column; align-items: center; color: var(--cor-texto-secundario); font-weight: 500; width: 150px; text-align: center; }
+.step-item span { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ccc; font-weight: 700; margin-bottom: 8px; transition: all 0.3s ease; }
+.step-item.active { color: var(--cor-primaria); }
+.step-item.active span { background-color: var(--cor-primaria); color: white; border-color: var(--cor-primaria); }
+.step-item p { margin: 0; }
+.form-step { display: none; animation: fadeIn 0.5s; }
+.form-step.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.step-navigation { display: flex; justify-content: space-between; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+.step-instruction { font-size: 1.1rem; color: var(--cor-texto-secundario); text-align: center; margin-bottom: 20px; padding: 15px; background-color: var(--cor-fundo); border-radius: var(--borda-radius); }
