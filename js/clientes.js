@@ -1,22 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    const formNovoCliente = document.getElementById('form-novo-cliente');
-    
-    // Verifica se o formulário de novo cliente existe na página atual
-    if (formNovoCliente) {
-        
-        // Adiciona o listener para o envio do formulário, agora com 'async' para esperar a resposta da API
-        formNovoCliente.addEventListener('submit', async function(event) {
-            
-            // Impede o recarregamento padrão da página
-            event.preventDefault(); 
+    const apiUrl = 'https://gpx-api-xwv1.onrender.com/api/customers';
 
-            // Pega o botão de submit para desabilitá-lo durante o envio
+    // --- LÓGICA PARA A PÁGINA DE CADASTRO (novo.html) ---
+    const formNovoCliente = document.getElementById('form-novo-cliente');
+    if (formNovoCliente) {
+        formNovoCliente.addEventListener('submit', async function(event) {
+            event.preventDefault();
             const submitButton = formNovoCliente.querySelector('button[type="submit"]');
             submitButton.disabled = true;
             submitButton.textContent = 'Salvando...';
 
-            // 1. Pega os dados digitados nos campos do formulário
             const customerData = {
                 name: document.getElementById('nome').value,
                 cnpj: document.getElementById('cnpj').value,
@@ -25,43 +19,68 @@ document.addEventListener('DOMContentLoaded', function() {
                 observations: document.getElementById('observacoes').value
             };
 
-            // 2. Define a URL da sua API no Render
-            const apiUrl = 'https://gpx-api-xwv1.onrender.com/api/customers';
-
             try {
-                // 3. Faz a requisição para a API usando fetch
                 const response = await fetch(apiUrl, {
-                    method: 'POST', // Método para criar um novo recurso
-                    headers: {
-                        'Content-Type': 'application/json', // Informa que estamos enviando dados em formato JSON
-                    },
-                    body: JSON.stringify(customerData), // Converte o objeto JavaScript em texto JSON
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(customerData),
                 });
-
-                // Pega a resposta da API
                 const result = await response.json();
-
-                // 4. Verifica se a API respondeu com sucesso
                 if (!response.ok) {
-                    // Se a API retornou um erro, lança uma exceção com a mensagem de erro
                     throw new Error(result.message || 'Falha ao cadastrar cliente.');
                 }
-
-                // 5. Se deu tudo certo
                 alert('Cliente cadastrado com sucesso!');
-                formNovoCliente.reset(); // Limpa o formulário
-                window.location.href = 'index.html'; // Redireciona para a lista de clientes
-
+                window.location.href = 'index.html'; // Redireciona para a lista
             } catch (error) {
-                // 6. Se ocorreu qualquer erro na comunicação ou na API
                 console.error('Erro no cadastro:', error);
                 alert(`Erro ao cadastrar cliente: ${error.message}`);
-            
             } finally {
-                // 7. Reabilita o botão, independentemente do resultado
                 submitButton.disabled = false;
                 submitButton.textContent = 'Salvar Cliente';
             }
         });
+    }
+
+    // --- LÓGICA PARA A PÁGINA DE LISTAGEM (index.html) ---
+    const customerListBody = document.getElementById('customer-list-body');
+    if (customerListBody) {
+        
+        async function loadCustomers() {
+            customerListBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Carregando clientes...</td></tr>';
+            
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('Não foi possível buscar os clientes da API.');
+                }
+                const result = await response.json();
+                const customers = result.data.customers;
+
+                customerListBody.innerHTML = '';
+
+                if (customers.length === 0) {
+                    customerListBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum cliente cadastrado ainda.</td></tr>';
+                } else {
+                    customers.forEach(customer => {
+                        const row = `
+                            <tr>
+                                <td>${customer.name}</td>
+                                <td>${customer.phone}</td>
+                                <td>${customer.email || 'N/A'}</td>
+                                <td>
+                                    <button class="action-button" data-id="${customer._id}">Editar</button>
+                                </td>
+                            </tr>
+                        `;
+                        customerListBody.innerHTML += row;
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+                customerListBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: red;">${error.message}</td></tr>`;
+            }
+        }
+        
+        loadCustomers();
     }
 });
