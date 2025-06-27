@@ -3,104 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerar Nova Ordem de Serviço</title>
+    <title>Cadastrar Novo Cliente</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;</script>
 
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
     <header class="navbar">
-        <h1>Nova Ordem de Serviço</h1>
-        <a href="../index.html" class="button button-secondary">Voltar ao Painel</a>
+        <h1>Cadastrar Novo Cliente</h1>
+        <a href="index.html" class="button button-secondary">Voltar para Lista</a>
     </header>
 
     <main class="container">
         <div class="card">
-            <form id="form-nova-os">
+            <h2>Informações do Cliente</h2>
+            <form id="form-novo-cliente">
                 <fieldset>
-                    <legend>Dados Gerais</legend>
-                    <label for="cliente">Cliente</label>
-                    <select id="cliente" required>
-                        <option value="" disabled selected>Selecione um cliente...</option>
-                        <option value="cliente1">Gráfica Veloz Ltda</option>
-                        <option value="cliente2">Agência Criativa</option>
-                    </select>
+                    <legend>Dados Principais</legend>
+                    <label for="nome">Nome Completo / Razão Social</label>
+                    <input type="text" id="nome" placeholder="Ex: Gráfica Veloz Ltda" required>
+
+                    <label for="telefone">Telefone / WhatsApp</label>
+                    <input type="tel" id="telefone" placeholder="Ex: (62) 99999-8888" required>
                 </fieldset>
 
                 <fieldset>
-                    <legend>Detalhes de Produção</legend>
-                    <div class="form-group-grid">
-                        <div>
-                            <label for="material">Material</label>
-                            <select id="material" required>
-                                <option value="adesivo">Adesivo</option>
-                                <option value="lona">Lona</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="maquina">Máquina</label>
-                            <select id="maquina" required>
-                                <option value="epson">Epson S40</option>
-                                <option value="mimaki">Mimaki 320</option>
-                                <option value="bunnercut">BunnerCUT (Recorte)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group-grid">
-                        <div>
-                            <label for="largura">Largura (cm)</label>
-                            <input type="number" id="largura" step="0.1" required>
-                        </div>
-                        <div>
-                            <label for="altura">Altura (cm)</label>
-                            <input type="number" id="altura" step="0.1" required>
-                        </div>
-                    </div>
+                    <legend>Dados Adicionais (Opcional)</legend>
+                    <label for="cnpj">CNPJ / CPF</label>
+                    <input type="text" id="cnpj" placeholder="Ex: 00.000.000/0001-00">
+
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" placeholder="Ex: contato@empresa.com.br">
                 </fieldset>
 
                 <fieldset>
-                    <legend>Financeiro</legend>
-                    <div class="form-group-grid">
-                        <div>
-                            <label for="custo-m2">Custo por m² (R$)</label>
-                            <input type="number" id="custo-m2" step="0.01" value="35.00">
-                        </div>
-                        <div>
-                            <label for="valor-total">Valor Total (R$)</label>
-                            <input type="text" id="valor-total" disabled>
-                        </div>
-                    </div>
+                    <legend>Observações</legend>
+                    <textarea id="observacoes" rows="4" placeholder="Alguma informação importante sobre o cliente..."></textarea>
                 </fieldset>
 
-                <fieldset>
-                    <legend>Arquivos da Arte</legend>
-                    <div id="drop-zone">
-                        <p>Arraste e solte os arquivos PDF aqui ou clique para selecionar</p>
-                    </div>
-                    <input type="file" id="file-input" accept=".pdf" multiple style="display: none;">
-                    <div id="preview-container" class="preview-grid">
-                        </div>
-                </fieldset>
-
-                <label for="observacoes">Observações Finais</label>
-                <textarea id="observacoes" rows="4"></textarea>
-
-                <button type="submit" class="button">Analisar e Gerar OS</button>
+                <button type="submit" class="button">Salvar Cliente</button>
             </form>
-        </div>
-        
-        <div id="os-result-card" class="card" style="display: none;">
-            <h2>Análise da Ordem de Serviço</h2>
-            <div id="os-result-content"></div>
         </div>
     </main>
 
-    <script src="../js/ordens.js" defer></script>
+    <script src="../js/clientes.js" defer></script>
 </body>
 </html>
