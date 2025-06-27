@@ -258,6 +258,48 @@ form .button { width: 100%; background-color: var(--cor-sucesso); color: white; 
     font-size: 0.8rem;
     color: white;
 }
+/* ---------------------------------- */
+/* 6. NOVO: Estilos da Atividade      */
+/* por Máquina e Status            */
+/* ---------------------------------- */
+
+.machine-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre as máquinas */
+}
+
+.machine-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-radius: var(--borda-radius);
+    background-color: var(--cor-fundo);
+}
+
+.machine-list .machine-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Reutilizando e adicionando novos status */
+.recent-list [class^="status-"],
+.machine-list [class^="status-"] {
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    color: white;
+}
+
+.status-producao { background-color: var(--cor-alerta); color: var(--cor-texto); }
+.status-concluido { background-color: var(--cor-sucesso); }
+.status-aguardando { background-color: var(--cor-perigo); }
+.status-ociosa { background-color: var(--cor-secundaria); }
 .status-producao { background-color: var(--cor-alerta); color: var(--cor-texto); }
 .status-concluido { background-color: var(--cor-sucesso); }
 .status-aguardando { background-color: var(--cor-perigo); }
