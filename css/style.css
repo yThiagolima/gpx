@@ -270,3 +270,77 @@ legend { padding: 0 10px; font-weight: 600; color: var(--cor-primaria); }
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     padding: 0; /* Reset padding */
 }
+/* ---------------------------------- */
+/* 10. NOVO: Estilos para o Wizard    */
+/* de Passo a Passo                   */
+/* ---------------------------------- */
+
+.step-indicator {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--cor-texto-secundario);
+    font-weight: 500;
+    width: 100px;
+}
+.step-item span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    font-weight: 700;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+.step-item.active {
+    color: var(--cor-primaria);
+}
+.step-item.active span {
+    background-color: var(--cor-primaria);
+    color: white;
+    border-color: var(--cor-primaria);
+}
+.step-item p {
+    margin: 0;
+}
+
+.form-step {
+    display: none; /* Esconde todos os passos por padrão */
+    animation: fadeIn 0.5s;
+}
+.form-step.active {
+    display: block; /* Mostra apenas o passo ativo */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.step-instruction {
+    font-size: 1.1rem;
+    color: var(--cor-texto-secundario);
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-radius);
+}
