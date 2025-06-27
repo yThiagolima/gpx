@@ -31,34 +31,31 @@
                 
                 <div class="form-group-grid">
                     <div>
-                        <label for="tipo-servico">Tipo de Serviço</label>
-                        <select id="tipo-servico" required>
-                            <option value="impressao">Impressão Digital</option>
-                            <option value="recorte">Recorte Eletrônico (BunnerCUT)</option>
+                        <label for="material">Material de Impressão</label>
+                        <select id="material" required>
+                            <option value="adesivo">Adesivo</option>
+                            <option value="lona">Lona</option>
                         </select>
                     </div>
                     <div>
-                        <label for="quantidade">Quantidade</label>
-                        <input type="number" id="quantidade" value="1" min="1" required>
+                        <label for="maquina">Máquina</label>
+                        <select id="maquina" required>
+                            <option value="epson">Epson S40</option>
+                            <option value="mimaki">Mimaki 320</option>
+                            <option value="bunnercut">BunnerCUT (Apenas Recorte)</option>
+                        </select>
                     </div>
                 </div>
-
-                <div id="campos-impressao">
-                    <div class="form-group-grid">
-                        <div>
-                            <label for="largura">Largura (cm)</label>
-                            <input type="number" id="largura" step="0.1" placeholder="Ex: 120.5">
-                        </div>
-                        <div>
-                            <label for="altura">Altura (cm)</label>
-                            <input type="number" id="altura" step="0.1" placeholder="Ex: 80">
-                        </div>
+                
+                <div class="form-group-grid">
+                    <div>
+                        <label for="largura">Largura (cm)</label>
+                        <input type="number" id="largura" step="0.1" required placeholder="Ex: 120.5">
                     </div>
-                    <label for="material">Material de Impressão</label>
-                    <select id="material">
-                        <option value="adesivo">Adesivo</option>
-                        <option value="lona">Lona</option>
-                    </select>
+                    <div>
+                        <label for="altura">Altura (cm)</label>
+                        <input type="number" id="altura" step="0.1" required placeholder="Ex: 80">
+                    </div>
                 </div>
 
                 <label for="observacoes">Observações</label>
@@ -70,8 +67,7 @@
 
         <div id="os-result-card" class="card" style="display: none;">
             <h2>Análise da Ordem de Serviço</h2>
-            <div id="os-result-content">
-                </div>
+            <div id="os-result-content"></div>
         </div>
     </main>
 
