@@ -7,8 +7,9 @@
 
 .lona-layout {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 360px minmax(0, 1fr);
   gap: 22px;
+  min-width: 0;
 }
 
 .lona-preview-shell {
@@ -16,16 +17,34 @@
   border: 1px solid var(--line);
   border-radius: 30px;
   padding: 18px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .lona-preview-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 680px;
   background: linear-gradient(135deg, #f8fafc, #e2e8f0);
   border-radius: 24px;
-  display: grid;
-  place-items: center;
   padding: 28px;
   overflow: auto;
+  position: relative;
+  display: grid;
+  place-items: center;
+  cursor: default;
+  overscroll-behavior: contain;
+}
+
+.lona-preview-wrap.is-zoomed {
+  display: block;
+  cursor: grab;
+}
+
+.lona-preview-wrap.is-dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .lona-preview-page {
@@ -35,6 +54,13 @@
   box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
   overflow: hidden;
   border-radius: 6px;
+  flex: 0 0 auto;
+  max-width: none;
+  max-height: none;
+}
+
+.lona-preview-wrap.is-zoomed .lona-preview-page {
+  margin: 18px auto;
 }
 
 .lona-art-canvas {
@@ -72,7 +98,7 @@
   position: absolute;
   background: white;
   border: 1px solid #111827;
-  z-index: 5;
+  z-index: 8;
 }
 
 .lona-corner-tl {
@@ -146,40 +172,42 @@
 
 .lona-tech-text {
   position: absolute;
-  z-index: 8;
+  z-index: 20;
   font-weight: 900;
   color: #111827;
-  font-size: var(--lona-text-size, 5px);
+  font-size: var(--lona-text-size, 4px);
   line-height: 1;
   white-space: nowrap;
   pointer-events: none;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: var(--lona-text-max, 180px);
+}
+
+.lona-text-tl,
+.lona-text-tr,
+.lona-text-bl,
+.lona-text-br {
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  max-width: none;
+  transform-origin: left top;
 }
 
 .lona-text-tl {
-  left: var(--lona-text-tl-x, 20px);
-  top: var(--lona-text-tl-y, 4px);
+  text-align: left;
 }
 
 .lona-text-tr {
-  right: var(--lona-text-tr-x, 4px);
-  top: var(--lona-text-tr-y, 20px);
-  transform: rotate(90deg);
-  transform-origin: right top;
+  text-align: left;
 }
 
 .lona-text-bl {
-  left: var(--lona-text-bl-x, 4px);
-  bottom: var(--lona-text-bl-y, 20px);
-  transform: rotate(-90deg);
-  transform-origin: left bottom;
+  text-align: left;
 }
 
 .lona-text-br {
-  right: var(--lona-text-br-x, 20px);
-  bottom: var(--lona-text-br-y, 4px);
   text-align: right;
 }
 
@@ -187,7 +215,7 @@
 .lona-bottom-text,
 .lona-left-text,
 .lona-right-text {
-  display: none;
+  display: none !important;
 }
 
 .lona-preview-modal {
@@ -209,6 +237,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  flex: 0 0 auto;
 }
 
 .lona-preview-modal-head strong {
@@ -227,21 +256,38 @@
 
 .lona-preview-modal-body {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   padding: 24px;
-  display: grid;
-  place-items: center;
+  min-width: 0;
+  min-height: 0;
 }
 
 .lona-preview-modal-mount {
   width: 100%;
+  height: 100%;
   min-height: calc(100vh - 120px);
   background: linear-gradient(135deg, #e2e8f0, #f8fafc);
   border-radius: 28px;
   padding: 32px;
+  overflow: auto;
   display: grid;
   place-items: center;
-  overflow: auto;
+  cursor: default;
+  overscroll-behavior: contain;
+}
+
+.lona-preview-modal-mount.is-zoomed {
+  display: block;
+  cursor: grab;
+}
+
+.lona-preview-modal-mount.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.lona-preview-modal-mount.is-zoomed .lona-preview-page {
+  margin: 18px auto;
 }
 
 .lona-preview-modal .lona-preview-page {
@@ -261,6 +307,11 @@
 @media (max-width: 560px) {
   .lona-tool {
     padding: 16px;
+  }
+
+  .lona-preview-wrap {
+    padding: 16px;
+    border-radius: 20px;
   }
 
   .lona-preview-modal-head {
