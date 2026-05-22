@@ -1,0 +1,198 @@
+.lona-tool {
+  display: none;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px;
+}
+
+.lona-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 22px;
+}
+
+.lona-preview-shell {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  padding: 18px;
+}
+
+.lona-preview-wrap {
+  min-height: 680px;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  overflow: auto;
+}
+
+.lona-preview-page {
+  position: relative;
+  background: white;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.lona-art-canvas {
+  position: absolute;
+  display: block;
+  background: white;
+  z-index: 1;
+}
+
+.lona-no-preview {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #020617, #0f172a);
+  color: white;
+  text-align: center;
+  z-index: 10;
+}
+
+.lona-no-preview strong {
+  display: block;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.lona-no-preview span {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.lona-corner {
+  position: absolute;
+  background: white;
+  border: 1px solid #111827;
+  z-index: 4;
+}
+
+.lona-corner-tl {
+  left: 0;
+  top: 0;
+}
+
+.lona-corner-tr {
+  right: 0;
+  top: 0;
+}
+
+.lona-corner-bl {
+  left: 0;
+  bottom: 0;
+}
+
+.lona-corner-br {
+  right: 0;
+  bottom: 0;
+}
+
+.lona-logo-strip {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.lona-logo-unit {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  font-weight: 950;
+  color: #020617;
+}
+
+.lona-logo-unit img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lona-top-strip,
+.lona-bottom-strip {
+  left: 0;
+  width: 100%;
+}
+
+.lona-top-strip {
+  top: 0;
+}
+
+.lona-bottom-strip {
+  bottom: 0;
+}
+
+.lona-left-strip,
+.lona-right-strip {
+  top: 0;
+  height: 100%;
+}
+
+.lona-left-strip {
+  left: 0;
+}
+
+.lona-right-strip {
+  right: 0;
+}
+
+.lona-tech-text {
+  position: absolute;
+  z-index: 5;
+  font-weight: 800;
+  color: #111827;
+  font-size: var(--lona-text-size, 11px);
+  white-space: nowrap;
+  pointer-events: none;
+  text-align: center;
+}
+
+.lona-top-text {
+  top: var(--lona-text-offset, 10px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.lona-bottom-text {
+  bottom: var(--lona-text-offset, 10px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.lona-left-text {
+  left: var(--lona-text-offset, 10px);
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center;
+}
+
+.lona-right-text {
+  right: var(--lona-text-offset, 10px);
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center;
+}
+
+@media (max-width: 950px) {
+  .lona-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lona-preview-wrap {
+    min-height: 560px;
+  }
+}
+
+@media (max-width: 560px) {
+  .lona-tool {
+    padding: 16px;
+  }
+}
