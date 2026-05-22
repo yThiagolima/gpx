@@ -31,6 +31,8 @@ let ratio = sourcePdfWidthCm / sourcePdfHeightCm;
 
 let adjustMode = "proportional";
 
+let previewIsLarge = false;
+
 let selectedLogoId = "default";
 let logos = [];
 
@@ -276,6 +278,51 @@ el("clearLogsBtn").onclick = () => {
 el("dropPdf").onclick = () => el("pdfInput").click();
 el("changePdfBtn").onclick = () => el("pdfInput").click();
 el("newLogoBtn").onclick = () => el("logoInput").click();
+el("openPreviewModalBtn").onclick = openPreviewModal;
+el("closePreviewModalBtn").onclick = closePreviewModal;
+
+function openPreviewModal() {
+  const modal = el("previewModal");
+  const mount = el("previewModalMount");
+  const page = el("previewPage");
+
+  if (!modal || !mount || !page) return;
+
+  previewIsLarge = true;
+
+  mount.appendChild(page);
+  modal.classList.remove("hidden");
+
+  el("previewModalSubtitle").textContent =
+    pages.length
+      ? `Página ${selectedPageIndex + 1} de ${pages.length} • visualização ampliada`
+      : "Visualização ampliada";
+
+  addLog("abriu_preview_maior", "Usuário abriu o preview ampliado");
+
+  setTimeout(renderAll, 80);
+}
+
+function closePreviewModal() {
+  const modal = el("previewModal");
+  const page = el("previewPage");
+  const normalWrap = document.querySelector(".preview-wrap");
+
+  if (!modal || !page || !normalWrap) return;
+
+  previewIsLarge = false;
+
+  normalWrap.appendChild(page);
+  modal.classList.add("hidden");
+
+  addLog("fechou_preview_maior", "Usuário fechou o preview ampliado");
+
+  setTimeout(renderAll, 80);
+}
+
+function currentPreviewContainer() {
+  return previewIsLarge ? el("previewModalMount") : document.querySelector(".preview-wrap");
+}
 
 el("modeProportionalBtn").onclick = () => {
   adjustMode = "proportional";
@@ -552,12 +599,14 @@ function renderAll() {
   updateTag("top", logo, info);
   updateTag("bottom", logo, info);
 
-  const wrap = document.querySelector(".preview-wrap");
+  const wrap = currentPreviewContainer();
 
   if (!wrap || wrap.clientWidth === 0) return;
 
-  const maxW = Math.max(220, wrap.clientWidth - 56);
-  const maxH = Math.max(420, wrap.clientHeight - 56);
+  const padding = previewIsLarge ? 80 : 56;
+
+  const maxW = Math.max(220, wrap.clientWidth - padding);
+  const maxH = Math.max(420, wrap.clientHeight - padding);
 
   const totalCmW = safeW;
   const totalCmH = safeH + 20;
@@ -862,17 +911,6 @@ el("generateBtn").addEventListener("click", async () => {
         color: rgb(0.45, 0.45, 0.45),
         dashArray: [8, 6]
       });
-
-      if (adjustMode === "cover") {
-        page.drawRectangle({
-          x: 0,
-          y: bannerStartY,
-          width: bannerW,
-          height: bannerH,
-          borderColor: rgb(1, 0, 0),
-          borderWidth: 2
-        });
-      }
 
       const topRectY = pageH - rectH;
       const bottomRectY = 0;
