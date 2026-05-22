@@ -3,255 +3,172 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fechamento Pro</title>
-
-  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <title>Thiago - Sistema de Fechamento Pro</title>
 
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
-  <section id="login" class="login-screen">
-    <div class="login-background"></div>
-
+  <section id="login" class="login">
     <div class="login-card">
-      <div class="app-logo app-logo-lg">FP</div>
-      <h1>Fechamento Pro</h1>
-      <p>Sistema interno de fechamento de arquivos para gráfica.</p>
+      <div class="login-logo">T</div>
+      <h1>Thiago</h1>
+      <p>Sistema de Fechamento Pro</p>
 
       <label>E-mail</label>
-      <input value="arte@grafica.com" />
+      <input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="username" />
 
       <label>Senha</label>
-      <input type="password" value="123456" />
+      <input id="loginPassword" type="password" placeholder="Digite sua senha" autocomplete="current-password" />
 
-      <button class="btn btn-dark btn-full" id="loginBtn">Entrar no sistema</button>
+      <div id="loginError" class="login-error hidden"></div>
+
+      <button class="btn-dark" id="loginBtn">Entrar no sistema</button>
     </div>
   </section>
 
-  <section id="app" class="app hidden">
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <div class="app-logo">FP</div>
+  <section id="app" class="app">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">T</div>
+          <div>
+            <div class="brand-title">Thiago - Sistema de Fechamento Pro</div>
+            <div class="brand-sub" id="pageSub">Painel principal</div>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <div class="user-pill">
+            <div class="avatar" id="userAvatar">U</div>
+            <span id="currentUserLabel">Usuário</span>
+          </div>
+          <button class="btn-light" id="goDashboardBtn">Dashboard</button>
+          <button class="btn-light" id="logoutBtn">Sair</button>
+        </div>
+      </div>
+    </div>
+
+    <section id="dashboard" class="dashboard">
+      <div class="hero">
         <div>
-          <strong>Fechamento Pro</strong>
-          <span>Pré-impressão</span>
+          <div class="hero-tag">⚡ Central de pré-impressão</div>
+          <h1>Feche arquivos com padrão, velocidade e segurança.</h1>
+          <p>Automatize etapas repetitivas do fechamento de arquivos, reduza erro manual e padronize a produção da gráfica.</p>
+          <div class="hero-actions">
+            <button class="btn-dark" id="openBannerHeroBtn">Abrir criador de banner</button>
+            <button class="btn-light" id="showFutureBtn">Ver módulos futuros</button>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="mini-stat"><strong>Banner</strong><span>Fechamento com sangria, logo e OS</span></div>
+          <div class="mini-stat"><strong>Logos por usuário</strong><span>Cada login tem sua própria biblioteca</span></div>
+          <div class="mini-stat"><strong>Logs ao vivo</strong><span>Visível apenas para administrador</span></div>
         </div>
       </div>
 
-      <nav class="sidebar-nav">
-        <button class="nav-item active" id="navDashboardBtn">
-          <span>🏠</span> Dashboard
-        </button>
-        <button class="nav-item" id="navBannerBtn">
-          <span>🖼️</span> Banner
-        </button>
-        <button class="nav-item disabled">
-          <span>✂️</span> Adesivo
-        </button>
-        <button class="nav-item disabled">
-          <span>📄</span> Panfleto / Cartão
-        </button>
-        <button class="nav-item disabled">
-          <span>📦</span> Montagem em folha
-        </button>
-        <button class="nav-item disabled">
-          <span>✅</span> Checklist técnico
-        </button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="user-card">
-          <div class="avatar">A</div>
-          <div>
-            <strong>Arte Finalista</strong>
-            <span>Usuário local</span>
-          </div>
+      <div class="modules-header">
+        <div>
+          <h2>Módulos de fechamento</h2>
+          <p>Escolha uma ferramenta para preparar o arquivo.</p>
         </div>
       </div>
-    </aside>
 
-    <main class="content">
-      <header class="topbar">
-        <div>
-          <span class="eyebrow" id="pageEyebrow">Painel principal</span>
-          <h2 id="pageTitle">Dashboard</h2>
-        </div>
-
-        <div class="topbar-actions">
-          <button class="btn btn-light" id="quickDashboardBtn">Dashboard</button>
-          <button class="btn btn-dark hidden" id="generateBtn">Gerar PDF</button>
-        </div>
-      </header>
-
-      <section id="dashboardScreen" class="screen">
-        <div class="hero-card">
-          <div class="hero-content">
-            <div class="hero-pill">⚡ Central de fechamento de arquivos</div>
-            <h1>Automatize fechamentos repetitivos da gráfica.</h1>
-            <p>
-              Comece pelo módulo de banner: detecte PDF, mantenha proporção, aplique sangria,
-              insira identificação técnica e gere o arquivo final pronto para produção.
-            </p>
-            <div class="hero-actions">
-              <button class="btn btn-white" id="openBannerHeroBtn">Abrir criador de banner</button>
-              <button class="btn btn-ghost">Ver funções futuras</button>
-            </div>
-          </div>
-
-          <div class="hero-stats">
-            <div class="hero-stat">
-              <strong>Banner</strong>
-              <span>Disponível agora</span>
-            </div>
-            <div class="hero-stat">
-              <strong>PDF real</strong>
-              <span>Preview da primeira página</span>
-            </div>
-            <div class="hero-stat">
-              <strong>+20 cm</strong>
-              <span>Sangria superior e inferior</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-head">
+      <div class="module-grid">
+        <div class="module-card">
           <div>
-            <h3>Módulos</h3>
-            <p>Ferramentas planejadas para a rotina de arte final.</p>
-          </div>
-        </div>
-
-        <div class="module-grid">
-          <article class="module-card available">
             <div class="module-icon blue">🖼️</div>
-            <h4>Fechamento de banner</h4>
-            <p>Adiciona sangria, retângulos técnicos, logo, cliente, tamanho e OS.</p>
-            <span class="badge green">Disponível</span>
-            <button class="btn btn-dark btn-full" id="openBannerCardBtn">Abrir ferramenta</button>
-          </article>
-
-          <article class="module-card">
-            <div class="module-icon green">✂️</div>
-            <h4>Adesivo com recorte</h4>
-            <p>Futuro fechamento com sangria, linha de corte e espaçamento.</p>
-            <span class="badge gray">Em breve</span>
-            <button class="btn btn-disabled btn-full">Indisponível</button>
-          </article>
-
-          <article class="module-card">
-            <div class="module-icon purple">📄</div>
-            <h4>Panfleto e cartão</h4>
-            <p>Futuro fechamento com margem segura, sangria e PDF final.</p>
-            <span class="badge gray">Em breve</span>
-            <button class="btn btn-disabled btn-full">Indisponível</button>
-          </article>
-
-          <article class="module-card">
-            <div class="module-icon orange">📦</div>
-            <h4>Montagem em folha</h4>
-            <p>Futuro aproveitamento automático de mídia para várias peças.</p>
-            <span class="badge gray">Em breve</span>
-            <button class="btn btn-disabled btn-full">Indisponível</button>
-          </article>
+            <h3>Fechamento de banner</h3>
+            <p>Detecta o PDF, mantém proporção, adiciona sangria superior/inferior, cria retângulos técnicos e gera o arquivo final.</p>
+            <div class="status available">Disponível</div>
+          </div>
+          <button class="module-btn" id="openBannerCardBtn">Abrir ferramenta</button>
         </div>
-      </section>
 
-      <section id="bannerScreen" class="screen hidden">
-        <div class="tool-layout">
-          <div class="tool-panel">
-            <div class="card">
-              <div class="card-title">Arquivo</div>
-              <input id="pdfInput" type="file" accept="application/pdf" class="hidden" />
-              <div id="dropPdf" class="drop-zone">
-                <div class="drop-icon">⬆️</div>
-                <strong>Enviar PDF</strong>
-                <span>O preview real aparecerá ao lado.</span>
-              </div>
-              <div id="pdfOk" class="file-ok hidden"></div>
-              <div id="error" class="error"></div>
-            </div>
+        <div class="module-card disabled"><div><div class="module-icon green">✂️</div><h3>Adesivo com recorte</h3><p>Futuro módulo para sangria, linha de corte, espaçamento e montagem em folha.</p><div class="status soon">Em breve</div></div><button class="module-btn disabled">Indisponível</button></div>
+        <div class="module-card disabled"><div><div class="module-icon purple">📄</div><h3>Panfleto e cartão</h3><p>Futuro módulo para conferir tamanho, sangria, margem segura e fechamento em PDF.</p><div class="status soon">Em breve</div></div><button class="module-btn disabled">Indisponível</button></div>
+        <div class="module-card disabled"><div><div class="module-icon orange">🧾</div><h3>Ficha técnica</h3><p>Futuro gerador de ficha técnica para produção com cliente, material e acabamento.</p><div class="status soon">Em breve</div></div><button class="module-btn disabled">Indisponível</button></div>
+        <div class="module-card disabled"><div><div class="module-icon blue">📦</div><h3>Montagem em folha</h3><p>Futuro aproveitamento automático para encaixar várias peças em uma mídia.</p><div class="status soon">Em breve</div></div><button class="module-btn disabled">Indisponível</button></div>
+        <div class="module-card disabled"><div><div class="module-icon green">✅</div><h3>Checklist técnico</h3><p>Futuro checklist inteligente por tipo de material e máquina de produção.</p><div class="status soon">Em breve</div></div><button class="module-btn disabled">Indisponível</button></div>
+      </div>
 
-            <div class="card">
-              <div class="card-title">Tamanho final</div>
-              <div class="grid-2">
-                <label>
-                  Largura
-                  <input id="wInput" type="number" step="0.01" value="80" />
-                </label>
-                <label>
-                  Altura
-                  <input id="hInput" type="number" step="0.01" value="120" />
-                </label>
-              </div>
-              <div class="output-box">
-                <span>Arquivo fechado</span>
-                <strong id="closedSize">80 x 140 cm</strong>
-                <small>+10 cm em cima e +10 cm embaixo</small>
-              </div>
-            </div>
+      <div id="adminLogsPanel" class="admin-panel hidden">
+        <div class="admin-head">
+          <div>
+            <h2>Logs ao vivo</h2>
+            <p>Área visível somente para admin@admin.com.</p>
+          </div>
+          <div class="admin-actions">
+            <button id="refreshLogsBtn" class="btn-light">Atualizar</button>
+            <button id="clearLogsBtn" class="btn-light danger">Limpar logs</button>
+          </div>
+        </div>
+        <div id="logsList" class="logs-list"></div>
+      </div>
+    </section>
 
-            <div class="card">
-              <div class="card-title">Identificação</div>
-              <label>
-                Cliente
-                <input id="clientInput" value="Mercado Lima" />
-              </label>
-              <label>
-                OS
-                <input id="osInput" value="1548" />
-              </label>
+    <section id="bannerTool" class="tool">
+      <div class="tool-head">
+        <div class="tool-title">
+          <h1>Fechamento de banner</h1>
+          <p>Envie um PDF, ajuste o tamanho e gere o arquivo fechado.</p>
+        </div>
 
-              <label>Logo</label>
-              <div id="logoList" class="logo-list"></div>
-              <input id="logoInput" type="file" accept="image/png,image/jpeg" class="hidden" />
-              <button id="newLogoBtn" class="btn btn-light btn-full">+ Nova logo</button>
-              <p class="help-text">A logo enviada fica salva no navegador.</p>
-            </div>
+        <div class="tool-actions">
+          <button class="btn-light" id="backDashboardBtn">Voltar</button>
+          <button id="generateBtn" class="btn-dark">Gerar PDF</button>
+        </div>
+      </div>
+
+      <div class="tool-layout">
+        <div class="left">
+          <div class="card">
+            <div class="section-title">Arquivo</div>
+            <input id="pdfInput" type="file" accept="application/pdf" class="hidden" />
+            <div id="dropPdf" class="drop"><div class="drop-icon">⬆️</div><div class="drop-title">Enviar PDF</div><div class="small">O preview real aparecerá ao lado.</div></div>
+            <div id="pdfOk" class="file-ok hidden"></div>
+            <div id="error" class="error"></div>
           </div>
 
-          <div class="preview-panel">
-            <div class="preview-head">
-              <div>
-                <strong>Preview do fechamento</strong>
-                <span>Retângulos técnicos superior e inferior</span>
-              </div>
-              <b id="bannerSizeText">80 x 120 cm</b>
+          <div class="card">
+            <div class="section-title">Tamanho final</div>
+            <div class="grid2">
+              <label>Largura<input id="wInput" type="number" step="0.01" value="80" /></label>
+              <label>Altura<input id="hInput" type="number" step="0.01" value="120" /></label>
             </div>
+            <div class="result"><small>Arquivo fechado</small><strong id="closedSize">80 x 140 cm</strong><div class="small" style="color:#94a3b8">+10 cm em cima e +10 cm embaixo</div></div>
+          </div>
 
-            <div class="preview-wrap">
-              <div id="previewPage" class="preview-page">
-                <div id="topBleed" class="bleed top">
-                  <div class="tag">
-                    <div id="topTagLogoText" class="tag-logo-text">GF</div>
-                    <img id="topTagLogoImg" class="hidden" />
-                    <div id="topTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 1548</div>
-                  </div>
-                </div>
+          <div class="card">
+            <div class="section-title">Identificação</div>
+            <label>Cliente<input id="clientInput" value="Mercado Lima" /></label>
+            <label>OS<input id="osInput" value="1548" /></label>
+            <label>Logo</label>
+            <div id="logoList" class="logos"></div>
+            <input id="logoInput" type="file" accept="image/png,image/jpeg" class="hidden" />
+            <button id="newLogoBtn" class="btn-soft" style="width:100%;margin-top:10px">+ Nova logo</button>
+            <p class="small">A logo enviada fica salva somente para o usuário logado.</p>
+          </div>
+        </div>
 
-                <div id="bannerArea" class="banner-area">
-                  <canvas id="pdfCanvas" class="banner-canvas"></canvas>
-                  <div id="noPreview" class="no-preview">
-                    <div>
-                      <strong>ÁREA DO BANNER</strong>
-                      <span id="bannerSize">80 x 120 cm</span>
-                    </div>
-                  </div>
-                </div>
+        <div class="preview-shell">
+          <div class="preview-top">
+            <div><strong>Preview do fechamento</strong><br><span>Retângulos técnicos superior e inferior</span></div>
+            <span id="bannerSizeText">80 x 120 cm</span>
+          </div>
 
-                <div id="bottomBleed" class="bleed bottom">
-                  <div class="tag">
-                    <div id="bottomTagLogoText" class="tag-logo-text">GF</div>
-                    <img id="bottomTagLogoImg" class="hidden" />
-                    <div id="bottomTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 1548</div>
-                  </div>
-                </div>
-              </div>
+          <div class="preview-wrap">
+            <div id="previewPage" class="preview-page">
+              <div id="topBleed" class="bleed top"><div class="tag"><div id="topTagLogoText" class="tag-logo-text">GF</div><img id="topTagLogoImg" class="hidden" /><div id="topTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 1548</div></div></div>
+              <div id="bannerArea" class="banner-area"><canvas id="pdfCanvas" class="banner-canvas"></canvas><div id="noPreview" class="no-preview"><div><strong>ÁREA DO BANNER</strong><span id="bannerSize">80 x 120 cm</span></div></div></div>
+              <div id="bottomBleed" class="bleed bottom"><div class="tag"><div id="bottomTagLogoText" class="tag-logo-text">GF</div><img id="bottomTagLogoImg" class="hidden" /><div id="bottomTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 1548</div></div></div>
             </div>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
   </section>
 
   <script src="assets/js/app.js"></script>
