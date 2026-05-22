@@ -124,7 +124,22 @@ function lonaUpdateFinalText() {
 }
 
 function lonaTechnicalText() {
-  return `O.S. ${lonaGetOs()} - ${lonaGetClient()} - ${lonaGetFinish()} - ${lonaGetNumbers().artW}x${lonaGetNumbers().artH}cm`;
+  const n = lonaGetNumbers();
+  return `O.S. ${lonaGetOs()} - ${lonaGetClient()} - ${lonaGetFinish()} - ${n.artW}x${n.artH}cm`;
+}
+
+function lonaTextFontPx(n, scale) {
+  const borderPx = n.border * scale;
+  const cornerPx = n.corner * scale;
+
+  return Math.max(
+    4,
+    Math.min(
+      11,
+      borderPx * 0.22,
+      cornerPx * 0.20
+    )
+  );
 }
 
 function lonaRenderLogoRepeats(strip, orientation, n, scale) {
@@ -132,28 +147,29 @@ function lonaRenderLogoRepeats(strip, orientation, n, scale) {
   strip.innerHTML = "";
 
   const borderPx = n.border * scale;
-  const logoPx = Math.max(8, n.logoSize * scale);
-  const gapPx = Math.max(16, n.logoGap * scale);
+  const logoPx = Math.max(5, Math.min(n.logoSize * scale, borderPx * 0.55));
+  const gapPx = Math.max(10, n.logoGap * scale);
+  const cornerPx = n.corner * scale;
 
   if (orientation === "horizontal") {
     strip.style.height = `${borderPx}px`;
 
-    const available = n.finalW * scale;
-    const count = Math.max(2, Math.floor(available / gapPx));
+    const startX = cornerPx + gapPx * 0.35;
+    const endX = n.finalW * scale - cornerPx - logoPx - gapPx * 0.35;
 
-    for (let i = 0; i < count; i++) {
+    for (let x = startX; x <= endX; x += gapPx) {
       const unit = document.createElement("div");
       unit.className = "lona-logo-unit";
       unit.style.width = `${logoPx}px`;
       unit.style.height = `${logoPx}px`;
-      unit.style.left = `${i * gapPx + gapPx / 2}px`;
+      unit.style.left = `${x}px`;
       unit.style.top = `${Math.max(2, (borderPx - logoPx) / 2)}px`;
 
       if (logo.dataUrl) {
         unit.innerHTML = `<img src="${logo.dataUrl}" alt="">`;
       } else {
         unit.textContent = logo.initials || "GF";
-        unit.style.fontSize = `${Math.max(6, logoPx * 0.45)}px`;
+        unit.style.fontSize = `${Math.max(4, logoPx * 0.45)}px`;
       }
 
       strip.appendChild(unit);
@@ -163,27 +179,54 @@ function lonaRenderLogoRepeats(strip, orientation, n, scale) {
   if (orientation === "vertical") {
     strip.style.width = `${borderPx}px`;
 
-    const available = n.finalH * scale;
-    const count = Math.max(2, Math.floor(available / gapPx));
+    const startY = cornerPx + gapPx * 0.35;
+    const endY = n.finalH * scale - cornerPx - logoPx - gapPx * 0.35;
 
-    for (let i = 0; i < count; i++) {
+    for (let y = startY; y <= endY; y += gapPx) {
       const unit = document.createElement("div");
       unit.className = "lona-logo-unit";
       unit.style.width = `${logoPx}px`;
       unit.style.height = `${logoPx}px`;
-      unit.style.top = `${i * gapPx + gapPx / 2}px`;
+      unit.style.top = `${y}px`;
       unit.style.left = `${Math.max(2, (borderPx - logoPx) / 2)}px`;
 
       if (logo.dataUrl) {
         unit.innerHTML = `<img src="${logo.dataUrl}" alt="">`;
       } else {
         unit.textContent = logo.initials || "GF";
-        unit.style.fontSize = `${Math.max(6, logoPx * 0.45)}px`;
+        unit.style.fontSize = `${Math.max(4, logoPx * 0.45)}px`;
       }
 
       strip.appendChild(unit);
     }
   }
+}
+
+function lonaSetTextPositions(n, scale) {
+  const preview = lonaEl("lonaPreviewPage");
+
+  const borderPx = n.border * scale;
+  const cornerPx = n.corner * scale;
+  const finalW = n.finalW * scale;
+  const finalH = n.finalH * scale;
+
+  const fontSize = lonaTextFontPx(n, scale);
+  const innerPad = Math.max(2, borderPx * 0.18);
+  const startX = cornerPx + innerPad;
+  const startY = cornerPx + innerPad;
+
+  const horizontalMax = Math.max(20, finalW - cornerPx * 2 - innerPad * 2);
+  const verticalMax = Math.max(20, finalH - cornerPx * 2 - innerPad * 2);
+
+  preview.style.setProperty("--lona-text-size", `${fontSize}px`);
+  preview.style.setProperty("--lona-text-start-x", `${startX}px`);
+  preview.style.setProperty("--lona-text-start-y", `${startY}px`);
+  preview.style.setProperty("--lona-text-top-y", `${Math.max(2, (borderPx - fontSize) / 2)}px`);
+  preview.style.setProperty("--lona-text-bottom-y", `${Math.max(2, (borderPx - fontSize) / 2)}px`);
+  preview.style.setProperty("--lona-left-text-x", `${Math.max(2, (borderPx - fontSize) / 2)}px`);
+  preview.style.setProperty("--lona-right-text-x", `${Math.max(2, (borderPx - fontSize) / 2)}px`);
+  preview.style.setProperty("--lona-horizontal-text-max", `${horizontalMax}px`);
+  preview.style.setProperty("--lona-vertical-text-max", `${verticalMax}px`);
 }
 
 function lonaRenderAll() {
@@ -211,8 +254,8 @@ function lonaRenderAll() {
 
   preview.style.width = `${finalPxW}px`;
   preview.style.height = `${finalPxH}px`;
-  preview.style.setProperty("--lona-text-size", `${Math.max(7, Math.min(14, borderPx * 0.22))}px`);
-  preview.style.setProperty("--lona-text-offset", `${Math.max(4, borderPx * 0.28)}px`);
+
+  lonaSetTextPositions(n, scale);
 
   const canvas = lonaEl("lonaCanvas");
   canvas.style.left = `${borderPx}px`;
@@ -264,7 +307,6 @@ function lonaRenderAll() {
 async function lonaRenderPdfPreview() {
   if (!lonaPdfJsPage) return;
 
-  const n = lonaGetNumbers();
   const canvas = lonaEl("lonaCanvas");
   const ctx = canvas.getContext("2d");
 
@@ -324,12 +366,18 @@ async function lonaEmbedLogo(pdfDoc, logo) {
   return await pdfDoc.embedJpg(bytes);
 }
 
-function lonaDrawTextFit(page, text, font, maxWidth, x, y, size = 16, rotate = null) {
-  let fontSize = size;
+function lonaFitFontSize(font, text, maxWidth, startSize, minSize) {
+  let size = startSize;
 
-  while (fontSize > 6 && font.widthOfTextAtSize(text, fontSize) > maxWidth) {
-    fontSize -= 0.5;
+  while (size > minSize && font.widthOfTextAtSize(text, size) > maxWidth) {
+    size -= 0.5;
   }
+
+  return size;
+}
+
+function lonaDrawTextAt(page, text, font, x, y, maxWidth, startSize, rotate = null) {
+  const fontSize = lonaFitFontSize(font, text, maxWidth, startSize, 4);
 
   const options = {
     x,
@@ -344,47 +392,40 @@ function lonaDrawTextFit(page, text, font, maxWidth, x, y, size = 16, rotate = n
   page.drawText(text, options);
 }
 
-function lonaDrawRepeatedLogos(page, pdfDoc, logoObj, logo, n, font) {
+function lonaDrawRepeatedLogos(page, logoObj, logo, n, font) {
   const pageW = lonaCmToPt(n.finalW);
   const pageH = lonaCmToPt(n.finalH);
   const border = lonaCmToPt(n.border);
-  const logoSize = lonaCmToPt(n.logoSize);
+  const corner = lonaCmToPt(n.corner);
+  const logoSize = Math.min(lonaCmToPt(n.logoSize), border * 0.55);
   const gap = lonaCmToPt(n.logoGap);
 
-  function drawOne(x, y, rotate = null) {
+  function drawOne(x, y) {
     if (logoObj) {
-      const options = {
+      page.drawImage(logoObj, {
         x,
         y,
         width: logoSize,
         height: logoSize
-      };
-
-      if (rotate) options.rotate = rotate;
-
-      page.drawImage(logoObj, options);
+      });
     } else {
       const text = logo.initials || "GF";
-      const options = {
+      page.drawText(text, {
         x,
         y,
-        size: Math.max(8, logoSize * 0.35),
+        size: Math.max(4, logoSize * 0.35),
         font,
         color: PDFLib.rgb(0, 0, 0)
-      };
-
-      if (rotate) options.rotate = rotate;
-
-      page.drawText(text, options);
+      });
     }
   }
 
-  for (let x = gap / 2; x < pageW - logoSize; x += gap) {
+  for (let x = corner + gap * 0.35; x < pageW - corner - logoSize; x += gap) {
     drawOne(x, border / 2 - logoSize / 2);
     drawOne(x, pageH - border / 2 - logoSize / 2);
   }
 
-  for (let y = gap / 2; y < pageH - logoSize; y += gap) {
+  for (let y = corner + gap * 0.35; y < pageH - corner - logoSize; y += gap) {
     drawOne(border / 2 - logoSize / 2, y);
     drawOne(pageW - border / 2 - logoSize / 2, y);
   }
@@ -419,12 +460,59 @@ function lonaDrawTechTexts(page, n, font, text) {
   const pageW = lonaCmToPt(n.finalW);
   const pageH = lonaCmToPt(n.finalH);
   const border = lonaCmToPt(n.border);
-  const margin = border * 0.32;
+  const corner = lonaCmToPt(n.corner);
 
-  lonaDrawTextFit(page, text, font, pageW - border * 3, pageW * 0.28, pageH - margin - 8, 16);
-  lonaDrawTextFit(page, text, font, pageW - border * 3, pageW * 0.28, margin, 16);
-  lonaDrawTextFit(page, text, font, pageH - border * 3, margin, pageH * 0.72, 16, PDFLib.degrees(-90));
-  lonaDrawTextFit(page, text, font, pageH - border * 3, pageW - margin, pageH * 0.28, 16, PDFLib.degrees(90));
+  const margin = border * 0.18;
+  const fontStart = Math.min(16, border * 0.28, corner * 0.24);
+
+  const xAfterLeftCorner = corner + margin;
+  const yTop = pageH - border / 2 - fontStart / 2;
+  const yBottom = border / 2 - fontStart / 2;
+
+  const horizontalMax = Math.max(20, pageW - corner * 2 - margin * 2);
+  const verticalMax = Math.max(20, pageH - corner * 2 - margin * 2);
+
+  lonaDrawTextAt(
+    page,
+    text,
+    font,
+    xAfterLeftCorner,
+    yTop,
+    horizontalMax,
+    fontStart
+  );
+
+  lonaDrawTextAt(
+    page,
+    text,
+    font,
+    xAfterLeftCorner,
+    yBottom,
+    horizontalMax,
+    fontStart
+  );
+
+  lonaDrawTextAt(
+    page,
+    text,
+    font,
+    border / 2 - fontStart / 2,
+    pageH - corner - margin,
+    verticalMax,
+    fontStart,
+    PDFLib.degrees(-90)
+  );
+
+  lonaDrawTextAt(
+    page,
+    text,
+    font,
+    pageW - border / 2 + fontStart / 2,
+    corner + margin,
+    verticalMax,
+    fontStart,
+    PDFLib.degrees(90)
+  );
 }
 
 async function lonaGeneratePdf() {
@@ -485,7 +573,7 @@ async function lonaGeneratePdf() {
         borderWidth: 0.6
       });
 
-      lonaDrawRepeatedLogos(page, outPdf, logoObj, logo, n, font);
+      lonaDrawRepeatedLogos(page, logoObj, logo, n, font);
       lonaDrawCorners(page, n);
       lonaDrawTechTexts(page, n, regular, lonaTechnicalText());
     }
