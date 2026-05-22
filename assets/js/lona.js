@@ -21,7 +21,8 @@ let lonaPanState = {
   startX: 0,
   startY: 0,
   scrollLeft: 0,
-  scrollTop: 0
+  scrollTop: 0,
+  pointerId: null
 };
 
 function lonaLog(action, details = "") {
@@ -94,6 +95,7 @@ function lonaOpenTool() {
 
   lonaEnsurePreviewButton();
   lonaEnsureCornerTextElements();
+  lonaSetupPanContainers();
 
   lonaLog("abriu_lona_ilhos", "Usuário abriu a ferramenta de lona com ilhós");
 
@@ -184,7 +186,7 @@ function lonaEnsurePreviewButton() {
       <div class="lona-preview-modal-head">
         <div>
           <strong>Preview ampliado</strong>
-          <span>Clique e arraste para navegar quando estiver com zoom.</span>
+          <span>Clique e arraste para navegar pela lona quando houver zoom.</span>
         </div>
         <button id="lonaClosePreviewModalBtn" class="btn-light">Fechar</button>
       </div>
@@ -196,6 +198,8 @@ function lonaEnsurePreviewButton() {
     document.body.appendChild(modal);
     lonaEl("lonaClosePreviewModalBtn").onclick = lonaClosePreviewModal;
   }
+
+  lonaSetupPanContainers();
 }
 
 function lonaOpenPreviewModal() {
@@ -211,9 +215,14 @@ function lonaOpenPreviewModal() {
   mount.appendChild(page);
   modal.classList.remove("hidden");
 
+  lonaSetupPanContainers();
+
   lonaLog("abriu_preview_lona_maior", "Usuário abriu o preview maior da lona");
 
-  setTimeout(lonaRenderAll, 80);
+  setTimeout(() => {
+    lonaRenderAll();
+    lonaCenterCurrentPreview();
+  }, 80);
 }
 
 function lonaClosePreviewModal() {
@@ -229,7 +238,10 @@ function lonaClosePreviewModal() {
 
   lonaLog("fechou_preview_lona_maior", "Usuário fechou o preview maior da lona");
 
-  setTimeout(lonaRenderAll, 80);
+  setTimeout(() => {
+    lonaRenderAll();
+    lonaCenterCurrentPreview();
+  }, 80);
 }
 
 function lonaCurrentPreviewContainer() {
@@ -240,6 +252,15 @@ function lonaCurrentPreviewContainer() {
   return document.querySelector(".lona-preview-wrap");
 }
 
+function lonaIsScrollable(container) {
+  if (!container) return false;
+
+  return (
+    container.scrollWidth > container.clientWidth + 4 ||
+    container.scrollHeight > container.clientHeight + 4
+  );
+}
+
 function lonaUpdateZoomContainers() {
   const normal = document.querySelector(".lona-preview-wrap");
   const modal = lonaEl("lonaPreviewModalMount");
@@ -247,11 +268,21 @@ function lonaUpdateZoomContainers() {
   [normal, modal].forEach((container) => {
     if (!container) return;
 
-    const zoomed = lonaZoom > 1.01;
+    const pannable = lonaZoom > 1.01 || lonaIsScrollable(container);
 
-    container.classList.toggle("is-zoomed", zoomed);
+    container.classList.toggle("is-pannable", pannable);
     container.classList.remove("is-dragging");
   });
+}
+
+function lonaCenterCurrentPreview() {
+  const container = lonaCurrentPreviewContainer();
+  if (!container) return;
+
+  if (lonaIsScrollable(container)) {
+    container.scrollLeft = Math.max(0, (container.scrollWidth - container.clientWidth) / 2);
+    container.scrollTop = Math.max(0, (container.scrollHeight - container.clientHeight) / 2);
+  }
 }
 
 function lonaTextFontPx(n, scale) {
@@ -259,11 +290,11 @@ function lonaTextFontPx(n, scale) {
   const cornerPx = n.corner * scale;
 
   return Math.max(
-    2.8,
+    2.6,
     Math.min(
-      4.8,
-      borderPx * 0.11,
-      cornerPx * 0.11
+      4.6,
+      borderPx * 0.105,
+      cornerPx * 0.105
     )
   );
 }
@@ -337,7 +368,7 @@ function lonaSetTextPositions(n, scale) {
   const finalH = n.finalH * scale;
 
   const fontSize = lonaTextFontPx(n, scale);
-  const pad = Math.max(1, borderPx * 0.05);
+  const pad = Math.max(0.8, borderPx * 0.035);
 
   const horizontalMax = Math.max(10, finalW - cornerPx * 2 - pad * 2);
   const verticalMax = Math.max(10, finalH - cornerPx * 2 - pad * 2);
@@ -365,6 +396,7 @@ function lonaSetTextPositions(n, scale) {
     tr.style.width = `${verticalMax}px`;
     tr.style.maxWidth = `${verticalMax}px`;
     tr.style.transform = "rotate(90deg)";
+    tr.style.transformOrigin = "left top";
     tr.style.textAlign = "left";
   }
 
@@ -374,6 +406,7 @@ function lonaSetTextPositions(n, scale) {
     bl.style.width = `${verticalMax}px`;
     bl.style.maxWidth = `${verticalMax}px`;
     bl.style.transform = "rotate(-90deg)";
+    bl.style.transformOrigin = "left top";
     bl.style.textAlign = "left";
   }
 
@@ -390,12 +423,14 @@ function lonaSetTextPositions(n, scale) {
 function lonaRenderAll() {
   lonaEnsurePreviewButton();
   lonaEnsureCornerTextElements();
-  lonaUpdateZoomContainers();
 
   const preview = lonaEl("lonaPreviewPage");
   const wrap = lonaCurrentPreviewContainer();
 
   if (!preview || !wrap) return;
+
+  const previousScrollLeft = wrap.scrollLeft;
+  const previousScrollTop = wrap.scrollTop;
 
   const n = lonaGetNumbers();
   lonaUpdateFinalText();
@@ -467,6 +502,15 @@ function lonaRenderAll() {
   if (lonaEl("lonaBottomText")) lonaEl("lonaBottomText").textContent = "";
   if (lonaEl("lonaLeftText")) lonaEl("lonaLeftText").textContent = "";
   if (lonaEl("lonaRightText")) lonaEl("lonaRightText").textContent = "";
+
+  lonaUpdateZoomContainers();
+
+  requestAnimationFrame(() => {
+    if (lonaIsScrollable(wrap)) {
+      wrap.scrollLeft = previousScrollLeft;
+      wrap.scrollTop = previousScrollTop;
+    }
+  });
 
   lonaRenderPdfPreview();
 }
@@ -544,7 +588,7 @@ function lonaFitFontSize(font, text, maxWidth, startSize, minSize) {
 }
 
 function lonaDrawTextAt(page, text, font, x, y, maxWidth, startSize, rotate = null, rightAlign = false) {
-  const fontSize = lonaFitFontSize(font, text, maxWidth, startSize, 3.5);
+  const fontSize = lonaFitFontSize(font, text, maxWidth, startSize, 3.2);
   const textW = font.widthOfTextAtSize(text, fontSize);
 
   const options = {
@@ -630,8 +674,8 @@ function lonaDrawTechTexts(page, n, font, text) {
   const border = lonaCmToPt(n.border);
   const corner = lonaCmToPt(n.corner);
 
-  const pad = border * 0.05;
-  const fontStart = Math.min(4.8, border * 0.11, corner * 0.11);
+  const pad = border * 0.035;
+  const fontStart = Math.min(4.6, border * 0.105, corner * 0.105);
 
   const horizontalMax = Math.max(10, pageW - corner * 2 - pad * 2);
   const verticalMax = Math.max(10, pageH - corner * 2 - pad * 2);
@@ -776,22 +820,46 @@ async function lonaGeneratePdf() {
   }
 }
 
+function lonaSetupPanContainers() {
+  const containers = [
+    document.querySelector(".lona-preview-wrap"),
+    lonaEl("lonaPreviewModalMount")
+  ];
+
+  containers.forEach((container) => {
+    if (!container || container.dataset.panReady === "true") return;
+
+    container.dataset.panReady = "true";
+
+    container.addEventListener("pointerdown", lonaStartPan);
+    container.addEventListener("pointermove", lonaMovePan);
+    container.addEventListener("pointerup", lonaEndPan);
+    container.addEventListener("pointercancel", lonaEndPan);
+    container.addEventListener("pointerleave", lonaEndPan);
+  });
+}
+
 function lonaStartPan(event) {
-  const container = event.target.closest(".lona-preview-wrap, .lona-preview-modal-mount");
+  const container = event.currentTarget;
 
   if (!container) return;
-  if (!container.classList.contains("is-zoomed")) return;
+  if (!container.classList.contains("is-pannable")) return;
   if (event.button !== 0) return;
   if (event.target.closest("button, input, label, select, textarea")) return;
 
   lonaPanState.active = true;
   lonaPanState.container = container;
+  lonaPanState.pointerId = event.pointerId;
   lonaPanState.startX = event.clientX;
   lonaPanState.startY = event.clientY;
   lonaPanState.scrollLeft = container.scrollLeft;
   lonaPanState.scrollTop = container.scrollTop;
 
   container.classList.add("is-dragging");
+
+  try {
+    container.setPointerCapture(event.pointerId);
+  } catch (e) {}
 
   event.preventDefault();
 }
@@ -808,13 +876,20 @@ function lonaMovePan(event) {
   event.preventDefault();
 }
 
-function lonaEndPan() {
+function lonaEndPan(event) {
   if (lonaPanState.container) {
     lonaPanState.container.classList.remove("is-dragging");
+
+    try {
+      if (lonaPanState.pointerId !== null) {
+        lonaPanState.container.releasePointerCapture(lonaPanState.pointerId);
+      }
+    } catch (e) {}
   }
 
   lonaPanState.active = false;
   lonaPanState.container = null;
+  lonaPanState.pointerId = null;
 }
 
 lonaEl("openLonaCardBtn").onclick = lonaOpenTool;
@@ -832,9 +907,22 @@ lonaEl("lonaChangePdfBtn").onclick = () => lonaEl("lonaPdfInput").click();
 lonaEl("generateLonaBtn").onclick = lonaGeneratePdf;
 
 lonaEl("lonaZoomInBtn").onclick = () => {
-  lonaZoom = Math.min(2.5, Number((lonaZoom + 0.15).toFixed(2)));
+  const container = lonaCurrentPreviewContainer();
+  const oldScrollLeft = container ? container.scrollLeft : 0;
+  const oldScrollTop = container ? container.scrollTop : 0;
+
+  lonaZoom = Math.min(3, Number((lonaZoom + 0.15).toFixed(2)));
   lonaEl("lonaZoomResetBtn").textContent = `${Math.round(lonaZoom * 100)}%`;
+
   lonaRenderAll();
+
+  requestAnimationFrame(() => {
+    const c = lonaCurrentPreviewContainer();
+    if (c) {
+      c.scrollLeft = oldScrollLeft + 60;
+      c.scrollTop = oldScrollTop + 40;
+    }
+  });
 };
 
 lonaEl("lonaZoomOutBtn").onclick = () => {
@@ -847,6 +935,10 @@ lonaEl("lonaZoomResetBtn").onclick = () => {
   lonaZoom = 1;
   lonaEl("lonaZoomResetBtn").textContent = "100%";
   lonaRenderAll();
+
+  requestAnimationFrame(() => {
+    lonaCenterCurrentPreview();
+  });
 };
 
 lonaEl("lonaPdfInput").addEventListener("change", async (event) => {
@@ -895,6 +987,10 @@ lonaEl("lonaPdfInput").addEventListener("change", async (event) => {
     lonaLog("upload_lona_pdf", `Arquivo: ${file.name} | ${lonaSourceWidthCm}x${lonaSourceHeightCm}cm`);
 
     lonaRenderAll();
+
+    requestAnimationFrame(() => {
+      lonaCenterCurrentPreview();
+    });
   } catch (err) {
     console.error(err);
     lonaShowError("Não consegui ler esse PDF. Teste com um PDF simples, sem senha.");
@@ -919,13 +1015,9 @@ lonaEl("lonaPdfInput").addEventListener("change", async (event) => {
   lonaEl(id).addEventListener("input", lonaRenderAll);
 });
 
-document.addEventListener("mousedown", lonaStartPan);
-document.addEventListener("mousemove", lonaMovePan);
-document.addEventListener("mouseup", lonaEndPan);
-document.addEventListener("mouseleave", lonaEndPan);
-
 window.addEventListener("resize", lonaRenderAll);
 
 lonaEnsurePreviewButton();
 lonaEnsureCornerTextElements();
+lonaSetupPanContainers();
 lonaUpdateZoomContainers();
