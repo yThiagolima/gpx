@@ -169,6 +169,16 @@ function clearError() {
   el("error").textContent = "";
 }
 
+function showLoading(title, text) {
+  el("loadingTitle").textContent = title;
+  el("loadingText").textContent = text;
+  el("loadingOverlay").classList.remove("hidden");
+}
+
+function hideLoading() {
+  el("loadingOverlay").classList.add("hidden");
+}
+
 function currentLogo() {
   return logos.find((logo) => logo.id === selectedLogoId) || logos[0];
 }
@@ -205,8 +215,10 @@ el("loginBtn").onclick = () => {
 
   el("login").style.display = "none";
   el("app").style.display = "block";
+
   el("loginEmail").value = "";
   el("loginPassword").value = "";
+
   el("currentUserLabel").textContent = `${currentUser.name} (${currentUser.role})`;
   el("userAvatar").textContent = currentUser.name.slice(0, 1).toUpperCase();
 
@@ -214,6 +226,14 @@ el("loginBtn").onclick = () => {
   showScreen("dashboard");
   renderLogoList();
 };
+
+el("loginEmail").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") el("loginPassword").focus();
+});
+
+el("loginPassword").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") el("loginBtn").click();
+});
 
 el("logoutBtn").onclick = () => {
   addLog("logout", "Usuário saiu do sistema");
@@ -254,6 +274,7 @@ el("clearLogsBtn").onclick = () => {
 };
 
 el("dropPdf").onclick = () => el("pdfInput").click();
+el("changePdfBtn").onclick = () => el("pdfInput").click();
 el("newLogoBtn").onclick = () => el("logoInput").click();
 
 el("modeProportionalBtn").onclick = () => {
@@ -261,6 +282,7 @@ el("modeProportionalBtn").onclick = () => {
   el("modeProportionalBtn").classList.add("active");
   el("modeCoverBtn").classList.remove("active");
   el("cutGuide").classList.add("hidden");
+
   addLog("modo_proporcional", "Usuário selecionou ajuste proporcional");
   renderAll();
 };
@@ -270,6 +292,7 @@ el("modeCoverBtn").onclick = () => {
   el("modeCoverBtn").classList.add("active");
   el("modeProportionalBtn").classList.remove("active");
   el("cutGuide").classList.remove("hidden");
+
   addLog("modo_preencher_cortar", "Usuário selecionou preencher e cortar");
   renderAll();
 };
@@ -282,8 +305,9 @@ el("pdfInput").addEventListener("change", async (e) => {
   if (!file) return;
 
   try {
-    pdfBytes = await file.arrayBuffer();
+    showLoading("Lendo PDF...", "Detectando páginas, tamanhos e preparando o preview.");
 
+    pdfBytes = await file.arrayBuffer();
     pdfLibDocLoaded = await PDFDocument.load(pdfBytes);
 
     const loadingTask = pdfjsLib.getDocument({
@@ -311,6 +335,7 @@ el("pdfInput").addEventListener("change", async (e) => {
     await selectPage(0, true);
 
     el("dropPdf").classList.add("hidden");
+    el("changePdfBtn").classList.remove("hidden");
     el("pdfOk").classList.remove("hidden");
 
     el("pdfOk").innerHTML = `
@@ -329,6 +354,8 @@ el("pdfInput").addEventListener("change", async (e) => {
   } catch (err) {
     console.error(err);
     showError("Não consegui ler esse PDF. Teste com um PDF simples, sem senha.");
+  } finally {
+    hideLoading();
   }
 });
 
@@ -348,7 +375,8 @@ async function selectPage(index, applySize = false) {
 
   pdfJsPage = await pdfJsDocLoaded.getPage(index + 1);
 
-  el("previewSubtitle").textContent = `Página ${index + 1} de ${pages.length} • original ${sourcePdfWidthCm} x ${sourcePdfHeightCm} cm`;
+  el("previewSubtitle").textContent =
+    `Página ${index + 1} de ${pages.length} • original ${sourcePdfWidthCm} x ${sourcePdfHeightCm} cm`;
 
   renderPagesList();
   renderAll();
@@ -401,10 +429,23 @@ el("logoInput").addEventListener("change", async (e) => {
   reader.readAsDataURL(file);
 });
 
+function validateSize() {
+  const w = Number(el("wInput").value || 0);
+  const h = Number(el("hInput").value || 0);
+
+  if (w <= 0 || h <= 0) {
+    showError("Largura e altura precisam ser maiores que zero.");
+    return false;
+  }
+
+  clearError();
+  return true;
+}
+
 el("wInput").addEventListener("input", () => {
   const w = Number(el("wInput").value || 0);
 
-  if (adjustMode === "proportional" && ratio > 0) {
+  if (adjustMode === "proportional" && ratio > 0 && w > 0) {
     el("hInput").value = (w / ratio).toFixed(2);
   }
 
@@ -415,7 +456,7 @@ el("wInput").addEventListener("input", () => {
 el("hInput").addEventListener("input", () => {
   const h = Number(el("hInput").value || 0);
 
-  if (adjustMode === "proportional" && ratio > 0) {
+  if (adjustMode === "proportional" && ratio > 0 && h > 0) {
     el("wInput").value = (h * ratio).toFixed(2);
   }
 
@@ -473,6 +514,20 @@ function updateTag(prefix, logo, info) {
   }
 }
 
+function setPreviewTagScale(tagH) {
+  const page = el("previewPage");
+
+  const logoH = Math.max(7, Math.min(30, tagH * 0.38));
+  const infoSize = Math.max(5.5, Math.min(11, tagH * 0.16));
+  const logoTextSize = Math.max(8, Math.min(18, tagH * 0.25));
+  const gap = Math.max(1, Math.min(4, tagH * 0.05));
+
+  page.style.setProperty("--tag-logo-h", `${logoH}px`);
+  page.style.setProperty("--tag-info-size", `${infoSize}px`);
+  page.style.setProperty("--tag-logo-text-size", `${logoTextSize}px`);
+  page.style.setProperty("--tag-gap", `${gap}px`);
+}
+
 function renderAll() {
   if (!el("previewPage")) return;
 
@@ -483,13 +538,16 @@ function renderAll() {
   const os = el("osInput").value || "0000";
   const logo = currentLogo();
 
-  const closedH = h + 20;
-  const pageNumber = pages.length ? `P${selectedPageIndex + 1}/${pages.length}` : "P1";
-  const info = `${client} • ${w}x${h}cm • OS ${os} • ${pageNumber}`;
+  const safeW = Math.max(w, 1);
+  const safeH = Math.max(h, 1);
 
-  el("closedSize").textContent = `${w} x ${closedH.toFixed(2)} cm`;
-  el("bannerSize").textContent = `${w} x ${h} cm`;
-  el("bannerSizeText").textContent = `${w} x ${h} cm`;
+  const closedH = safeH + 20;
+  const pageNumber = pages.length ? `P${selectedPageIndex + 1}/${pages.length}` : "P1";
+  const info = `${client} • ${safeW}x${safeH}cm • OS ${os} • ${pageNumber}`;
+
+  el("closedSize").textContent = `${safeW} x ${closedH.toFixed(2)} cm`;
+  el("bannerSize").textContent = `${safeW} x ${safeH} cm`;
+  el("bannerSizeText").textContent = `${safeW} x ${safeH} cm`;
 
   updateTag("top", logo, info);
   updateTag("bottom", logo, info);
@@ -501,8 +559,8 @@ function renderAll() {
   const maxW = Math.max(220, wrap.clientWidth - 56);
   const maxH = Math.max(420, wrap.clientHeight - 56);
 
-  const totalCmW = Math.max(w, 1);
-  const totalCmH = Math.max(h + 20, 1);
+  const totalCmW = safeW;
+  const totalCmH = safeH + 20;
 
   const scale = Math.min(maxW / totalCmW, maxH / totalCmH);
 
@@ -510,7 +568,7 @@ function renderAll() {
   const previewH = totalCmH * scale;
 
   const bleedH = 10 * scale;
-  const bannerH = h * scale;
+  const bannerH = safeH * scale;
   const tagH = 6 * scale;
 
   el("previewPage").style.width = `${previewW}px`;
@@ -523,6 +581,8 @@ function renderAll() {
   document.querySelectorAll(".tag").forEach((tag) => {
     tag.style.height = `${tagH}px`;
   });
+
+  setPreviewTagScale(tagH);
 
   if (adjustMode === "cover") {
     el("cutGuide").classList.remove("hidden");
@@ -558,13 +618,9 @@ async function renderPdfPreview() {
 
   const viewport = pdfJsPage.getViewport({ scale: 1 });
 
-  let scale;
-
-  if (adjustMode === "cover") {
-    scale = Math.max(cssW / viewport.width, cssH / viewport.height);
-  } else {
-    scale = Math.min(cssW / viewport.width, cssH / viewport.height);
-  }
+  const scale = adjustMode === "cover"
+    ? Math.max(cssW / viewport.width, cssH / viewport.height)
+    : Math.min(cssW / viewport.width, cssH / viewport.height);
 
   const scaledViewport = pdfJsPage.getViewport({ scale });
 
@@ -608,6 +664,28 @@ async function embedLogo(pdfDoc, logo) {
   return await pdfDoc.embedJpg(bytes);
 }
 
+function fitFontSize(font, text, maxWidth, startSize, minSize) {
+  let size = startSize;
+
+  while (size > minSize && font.widthOfTextAtSize(text, size) > maxWidth) {
+    size -= 0.5;
+  }
+
+  return size;
+}
+
+function drawCenteredText(page, text, font, size, centerX, y, color) {
+  const width = font.widthOfTextAtSize(text, size);
+
+  page.drawText(text, {
+    x: centerX - width / 2,
+    y,
+    size,
+    font,
+    color
+  });
+}
+
 function drawTechnicalBox({ page, pageW, rectY, rectH, rectW, rectX, logoObj, logo, font, regular, info }) {
   page.drawRectangle({
     x: rectX,
@@ -619,45 +697,54 @@ function drawTechnicalBox({ page, pageW, rectY, rectH, rectW, rectX, logoObj, lo
   });
 
   const centerX = pageW / 2;
+  const paddingX = cmToPt(1);
+  const maxTextW = rectW - paddingX * 2;
+
+  const fontSize = fitFontSize(regular, info, maxTextW, 18, 8);
+  const textY = rectY + rectH * 0.23;
 
   if (logoObj) {
-    const maxLogoW = Math.min(rectW * 0.5, cmToPt(26));
-    const maxLogoH = cmToPt(3.2);
+    const maxLogoW = Math.min(rectW * 0.42, cmToPt(26));
+    const maxLogoH = rectH * 0.36;
 
-    const scale = Math.min(
+    const logoScale = Math.min(
       maxLogoW / logoObj.width,
       maxLogoH / logoObj.height
     );
 
-    const logoW = logoObj.width * scale;
-    const logoH = logoObj.height * scale;
+    const logoW = logoObj.width * logoScale;
+    const logoH = logoObj.height * logoScale;
 
     page.drawImage(logoObj, {
       x: centerX - logoW / 2,
-      y: rectY + rectH * 0.52,
+      y: rectY + rectH * 0.54,
       width: logoW,
       height: logoH
     });
   } else {
-    page.drawText(logo.initials || "GF", {
-      x: centerX - 22,
-      y: rectY + rectH * 0.6,
-      size: 30,
+    const initials = logo.initials || "GF";
+    const initialsSize = fitFontSize(font, initials, maxTextW, 30, 12);
+
+    drawCenteredText(
+      page,
+      initials,
       font,
-      color: rgb(0, 0, 0)
-    });
+      initialsSize,
+      centerX,
+      rectY + rectH * 0.58,
+      rgb(0, 0, 0)
+    );
   }
 
-  const fontSize = 18;
-  const textW = regular.widthOfTextAtSize(info, fontSize);
-
-  page.drawText(info, {
-    x: Math.max(rectX + 10, centerX - textW / 2),
-    y: rectY + rectH * 0.22,
-    size: fontSize,
-    font: regular,
-    color: rgb(0, 0, 0)
-  });
+  drawCenteredText(
+    page,
+    info,
+    regular,
+    fontSize,
+    centerX,
+    textY,
+    rgb(0, 0, 0)
+  );
 }
 
 function getCoverPlacement(srcW, srcH, targetW, targetH) {
@@ -694,7 +781,11 @@ el("generateBtn").addEventListener("click", async () => {
     return;
   }
 
+  if (!validateSize()) return;
+
   try {
+    showLoading("Gerando PDF...", "Fechando todas as páginas com sangria e identificação.");
+
     const wCm = Number(el("wInput").value || 0);
     const hCm = Number(el("hInput").value || 0);
 
@@ -779,7 +870,7 @@ el("generateBtn").addEventListener("click", async () => {
           width: bannerW,
           height: bannerH,
           borderColor: rgb(1, 0, 0),
-          borderWidth: 3
+          borderWidth: 2
         });
       }
 
@@ -835,9 +926,14 @@ el("generateBtn").addEventListener("click", async () => {
 
     URL.revokeObjectURL(url);
 
-    addLog("gerou_pdf", `Cliente: ${client} | OS: ${os} | páginas: ${pages.length} | modo: ${adjustMode} | final: ${wCm}x${hCm}cm`);
+    addLog(
+      "gerou_pdf",
+      `Cliente: ${client} | OS: ${os} | páginas: ${pages.length} | modo: ${adjustMode} | final: ${wCm}x${hCm}cm`
+    );
   } catch (err) {
     console.error(err);
     showError("Erro ao gerar o PDF. Teste com um PDF simples, sem senha.");
+  } finally {
+    hideLoading();
   }
 });
