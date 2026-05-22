@@ -32,8 +32,10 @@ let ratio = sourcePdfWidthCm / sourcePdfHeightCm;
 
 let adjustMode = "proportional";
 let previewIsLarge = false;
+let previewZoom = 1;
 
 let selectedLogoId = "default";
+let defaultLogoId = "default";
 let logos = [];
 
 function safeKey(email) {
@@ -42,6 +44,10 @@ function safeKey(email) {
 
 function logosKey() {
   return `fp_logos_${safeKey(currentUser?.email)}`;
+}
+
+function defaultLogoKey() {
+  return `fp_default_logo_${safeKey(currentUser?.email)}`;
 }
 
 function logsKey() {
@@ -62,11 +68,18 @@ function loadLogos() {
     ];
   }
 
-  selectedLogoId = logos[0].id;
+  defaultLogoId = localStorage.getItem(defaultLogoKey()) || logos[0].id;
+
+  if (!logos.some((logo) => logo.id === defaultLogoId)) {
+    defaultLogoId = logos[0].id;
+  }
+
+  selectedLogoId = defaultLogoId;
 }
 
 function saveLogos() {
   localStorage.setItem(logosKey(), JSON.stringify(logos));
+  localStorage.setItem(defaultLogoKey(), defaultLogoId);
 }
 
 function getLogs() {
@@ -333,8 +346,95 @@ el("clearLogsBtn").onclick = () => {
 el("dropPdf").onclick = () => el("pdfInput").click();
 el("changePdfBtn").onclick = () => el("pdfInput").click();
 el("newLogoBtn").onclick = () => el("logoInput").click();
+
 el("openPreviewModalBtn").onclick = openPreviewModal;
 el("closePreviewModalBtn").onclick = closePreviewModal;
+
+el("previewZoomInBtn").onclick = () => {
+  previewZoom = Math.min(2.5, Number((previewZoom + 0.15).toFixed(2)));
+  updateZoomLabel();
+  renderAll();
+};
+
+el("previewZoomOutBtn").onclick = () => {
+  previewZoom = Math.max(0.55, Number((previewZoom - 0.15).toFixed(2)));
+  updateZoomLabel();
+  renderAll();
+};
+
+el("previewZoomResetBtn").onclick = () => {
+  previewZoom = 1;
+  updateZoomLabel();
+  renderAll();
+};
+
+el("copyPrevPageBtn").onclick = () => {
+  if (!pages.length || selectedPageIndex <= 0) {
+    showError("Não existe página anterior para copiar.");
+    return;
+  }
+
+  const prev = pageSettings[selectedPageIndex - 1];
+
+  pageSettings[selectedPageIndex] = {
+    widthCm: prev.widthCm,
+    heightCm: prev.heightCm,
+    mode: prev.mode
+  };
+
+  applyCurrentPageSettingsToInputs();
+  clearError();
+  addLog("copiou_config_pagina_anterior", `Configuração copiada para página ${selectedPageIndex + 1}`);
+  renderPagesList();
+  renderAll();
+};
+
+el("applyAllPagesBtn").onclick = () => {
+  if (!pages.length) {
+    showError("Envie um PDF primeiro.");
+    return;
+  }
+
+  saveCurrentPageSettingsFromInputs();
+
+  const current = currentPageSetting();
+
+  pageSettings = pageSettings.map(() => ({
+    widthCm: current.widthCm,
+    heightCm: current.heightCm,
+    mode: current.mode
+  }));
+
+  clearError();
+  addLog("aplicou_config_todas_paginas", `Final ${current.widthCm}x${current.heightCm}cm | modo ${modeLabel(current.mode)}`);
+  renderPagesList();
+  renderAll();
+};
+
+el("resetCurrentPageBtn").onclick = () => {
+  if (!pages.length) {
+    showError("Envie um PDF primeiro.");
+    return;
+  }
+
+  const page = pages[selectedPageIndex];
+
+  pageSettings[selectedPageIndex] = {
+    widthCm: page.widthCm,
+    heightCm: page.heightCm,
+    mode: "proportional"
+  };
+
+  applyCurrentPageSettingsToInputs();
+  clearError();
+  addLog("resetou_config_pagina", `Página ${selectedPageIndex + 1} voltou para o tamanho original`);
+  renderPagesList();
+  renderAll();
+};
+
+function updateZoomLabel() {
+  el("previewZoomResetBtn").textContent = `${Math.round(previewZoom * 100)}%`;
+}
 
 function openPreviewModal() {
   const modal = el("previewModal");
@@ -512,9 +612,14 @@ function renderPagesList() {
       mode: "proportional"
     };
 
+    const changed =
+      Number(setting.widthCm) !== Number(page.widthCm) ||
+      Number(setting.heightCm) !== Number(page.heightCm) ||
+      setting.mode !== "proportional";
+
     return `
       <button class="page-btn ${page.index === selectedPageIndex ? "active" : ""}" data-page="${page.index}">
-        <strong>Página ${page.index + 1}</strong><br>
+        <strong>Página ${page.index + 1} ${changed ? "• alterada" : ""}</strong><br>
         Original: ${page.widthCm} x ${page.heightCm} cm<br>
         Final: ${setting.widthCm} x ${setting.heightCm} cm<br>
         Modo: ${modeLabel(setting.mode)}
@@ -549,6 +654,7 @@ el("logoInput").addEventListener("change", async (e) => {
     });
 
     selectedLogoId = id;
+    defaultLogoId = id;
     saveLogos();
 
     addLog("upload_logo", `Logo enviada: ${file.name}`);
@@ -640,18 +746,81 @@ function renderLogoList() {
   list.innerHTML = "";
 
   logos.forEach((logo) => {
-    const btn = document.createElement("button");
+    const card = document.createElement("div");
+    card.className = "logo-card" + (logo.id === selectedLogoId ? " active" : "");
 
-    btn.className = "logo-choice" + (logo.id === selectedLogoId ? " active" : "");
-    btn.textContent = logo.name.length > 18 ? logo.name.slice(0, 18) + "…" : logo.name;
+    const preview = logo.dataUrl
+      ? `<img src="${logo.dataUrl}" alt="">`
+      : `<span>${escapeHtml(logo.initials || "LG")}</span>`;
 
-    btn.onclick = () => {
+    card.innerHTML = `
+      <div class="logo-card-head">
+        <div class="logo-card-title">
+          <strong>${escapeHtml(logo.name)}</strong>
+          <span>${logo.id === defaultLogoId ? "Logo padrão" : "Logo salva"}</span>
+        </div>
+        <div class="logo-preview">${preview}</div>
+      </div>
+
+      <div class="logo-actions">
+        <button data-action="select">Usar</button>
+        <button data-action="default">Padrão</button>
+        <button data-action="rename">Renomear</button>
+        <button data-action="delete" class="danger">Excluir</button>
+      </div>
+    `;
+
+    card.querySelector('[data-action="select"]').onclick = () => {
       selectedLogoId = logo.id;
       addLog("selecionou_logo", `Logo selecionada: ${logo.name}`);
       renderAll();
     };
 
-    list.appendChild(btn);
+    card.querySelector('[data-action="default"]').onclick = () => {
+      defaultLogoId = logo.id;
+      selectedLogoId = logo.id;
+      saveLogos();
+      addLog("definiu_logo_padrao", `Logo padrão: ${logo.name}`);
+      renderAll();
+    };
+
+    card.querySelector('[data-action="rename"]').onclick = () => {
+      const newName = prompt("Novo nome da logo:", logo.name);
+
+      if (!newName || !newName.trim()) return;
+
+      logo.name = newName.trim();
+      saveLogos();
+      addLog("renomeou_logo", `Logo renomeada para: ${logo.name}`);
+      renderAll();
+    };
+
+    card.querySelector('[data-action="delete"]').onclick = () => {
+      if (logos.length <= 1) {
+        alert("Você precisa manter pelo menos uma logo.");
+        return;
+      }
+
+      const confirmDelete = confirm(`Excluir a logo "${logo.name}"?`);
+
+      if (!confirmDelete) return;
+
+      logos = logos.filter((item) => item.id !== logo.id);
+
+      if (selectedLogoId === logo.id) {
+        selectedLogoId = logos[0].id;
+      }
+
+      if (defaultLogoId === logo.id) {
+        defaultLogoId = logos[0].id;
+      }
+
+      saveLogos();
+      addLog("excluiu_logo", `Logo excluída: ${logo.name}`);
+      renderAll();
+    };
+
+    list.appendChild(card);
   });
 }
 
@@ -731,7 +900,8 @@ function renderAll() {
   const totalCmW = safeW;
   const totalCmH = safeH + 20;
 
-  const scale = Math.min(maxW / totalCmW, maxH / totalCmH);
+  const baseScale = Math.min(maxW / totalCmW, maxH / totalCmH);
+  const scale = baseScale * previewZoom;
 
   const previewW = totalCmW * scale;
   const previewH = totalCmH * scale;
