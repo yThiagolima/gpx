@@ -54,6 +54,11 @@ function logsKey() {
   return "fp_live_logs";
 }
 
+function getOsValue() {
+  const value = String(el("osInput").value || "").trim();
+  return value || "0000";
+}
+
 function loadLogos() {
   logos = JSON.parse(localStorage.getItem(logosKey()) || "[]");
 
@@ -326,10 +331,6 @@ el("goDashboardBtn").onclick = () => showScreen("dashboard");
 el("backDashboardBtn").onclick = () => showScreen("dashboard");
 el("openBannerHeroBtn").onclick = () => showScreen("banner");
 el("openBannerCardBtn").onclick = () => showScreen("banner");
-
-el("showFutureBtn").onclick = () => {
-  addLog("clicou_modulos_futuros", "Usuário clicou para ver módulos futuros");
-};
 
 el("refreshLogsBtn").onclick = () => {
   addLog("atualizou_logs", "Admin atualizou a lista de logs");
@@ -731,7 +732,7 @@ el("hInput").addEventListener("input", () => {
 
 ["clientInput", "osInput"].forEach((id) => {
   el(id).addEventListener("input", () => {
-    addLog("alterou_identificacao", `Cliente: ${el("clientInput").value || "-"} | OS: ${el("osInput").value || "-"}`);
+    addLog("alterou_identificacao", `Cliente: ${el("clientInput").value || "-"} | OS: ${getOsValue()}`);
     renderAll();
   });
 });
@@ -807,13 +808,8 @@ function renderLogoList() {
 
       logos = logos.filter((item) => item.id !== logo.id);
 
-      if (selectedLogoId === logo.id) {
-        selectedLogoId = logos[0].id;
-      }
-
-      if (defaultLogoId === logo.id) {
-        defaultLogoId = logos[0].id;
-      }
+      if (selectedLogoId === logo.id) selectedLogoId = logos[0].id;
+      if (defaultLogoId === logo.id) defaultLogoId = logos[0].id;
 
       saveLogos();
       addLog("excluiu_logo", `Logo excluída: ${logo.name}`);
@@ -871,7 +867,7 @@ function renderAll() {
   const h = Number(setting.heightCm || 0);
 
   const client = el("clientInput").value || "Cliente";
-  const os = el("osInput").value || "0000";
+  const os = getOsValue();
   const logo = currentLogo();
 
   const safeW = Math.max(w, 1);
@@ -986,9 +982,7 @@ async function renderPdfPreview() {
   try {
     await renderTask.promise;
   } catch (err) {
-    if (err?.name !== "RenderingCancelledException") {
-      console.error(err);
-    }
+    if (err?.name !== "RenderingCancelledException") console.error(err);
   } finally {
     ctx.restore();
   }
@@ -1067,51 +1061,31 @@ function drawTechnicalBox({ page, pageW, rectY, rectH, rectW, rectX, logoObj, lo
     const initials = logo.initials || "GF";
     const initialsSize = fitFontSize(font, initials, maxTextW, 30, 12);
 
-    drawCenteredText(
-      page,
-      initials,
-      font,
-      initialsSize,
-      centerX,
-      rectY + rectH * 0.58,
-      rgb(0, 0, 0)
-    );
+    drawCenteredText(page, initials, font, initialsSize, centerX, rectY + rectH * 0.58, rgb(0, 0, 0));
   }
 
-  drawCenteredText(
-    page,
-    info,
-    regular,
-    fontSize,
-    centerX,
-    textY,
-    rgb(0, 0, 0)
-  );
+  drawCenteredText(page, info, regular, fontSize, centerX, textY, rgb(0, 0, 0));
 }
 
 function getCoverPlacement(srcW, srcH, targetW, targetH) {
   const scale = Math.max(targetW / srcW, targetH / srcH);
-  const width = srcW * scale;
-  const height = srcH * scale;
 
   return {
-    x: (targetW - width) / 2,
-    y: (targetH - height) / 2,
-    width,
-    height
+    x: (targetW - srcW * scale) / 2,
+    y: (targetH - srcH * scale) / 2,
+    width: srcW * scale,
+    height: srcH * scale
   };
 }
 
 function getContainPlacement(srcW, srcH, targetW, targetH) {
   const scale = Math.min(targetW / srcW, targetH / srcH);
-  const width = srcW * scale;
-  const height = srcH * scale;
 
   return {
-    x: (targetW - width) / 2,
-    y: (targetH - height) / 2,
-    width,
-    height
+    x: (targetW - srcW * scale) / 2,
+    y: (targetH - srcH * scale) / 2,
+    width: srcW * scale,
+    height: srcH * scale
   };
 }
 
@@ -1131,7 +1105,7 @@ el("generateBtn").addEventListener("click", async () => {
     showLoading("Gerando PDF...", "Fechando todas as páginas com suas configurações individuais.");
 
     const client = el("clientInput").value || "Cliente";
-    const os = el("osInput").value || "0000";
+    const os = getOsValue();
     const logo = currentLogo();
 
     const outPdf = await PDFDocument.create();
@@ -1261,10 +1235,7 @@ el("generateBtn").addEventListener("click", async () => {
 
     URL.revokeObjectURL(url);
 
-    addLog(
-      "gerou_pdf",
-      `Cliente: ${client} | OS: ${os} | páginas: ${pages.length} | configurações individuais por página`
-    );
+    addLog("gerou_pdf", `Cliente: ${client} | OS: ${os} | páginas: ${pages.length}`);
   } catch (err) {
     console.error(err);
     showError("Erro ao gerar o PDF. Teste com um PDF simples, sem senha.");
