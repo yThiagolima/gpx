@@ -23,6 +23,7 @@ let pdfJsPage = null;
 let renderTask = null;
 
 let pages = [];
+let pageSettings = [];
 let selectedPageIndex = 0;
 
 let sourcePdfWidthCm = 80;
@@ -30,7 +31,6 @@ let sourcePdfHeightCm = 120;
 let ratio = sourcePdfWidthCm / sourcePdfHeightCm;
 
 let adjustMode = "proportional";
-
 let previewIsLarge = false;
 
 let selectedLogoId = "default";
@@ -196,6 +196,60 @@ function debounce(fn, delay = 150) {
 
 const debouncedPdfPreview = debounce(renderPdfPreview, 180);
 
+function createPageSettings() {
+  pageSettings = pages.map((page) => ({
+    widthCm: page.widthCm,
+    heightCm: page.heightCm,
+    mode: "proportional"
+  }));
+}
+
+function currentPageSetting() {
+  if (!pageSettings[selectedPageIndex]) {
+    pageSettings[selectedPageIndex] = {
+      widthCm: pages[selectedPageIndex]?.widthCm || 80,
+      heightCm: pages[selectedPageIndex]?.heightCm || 120,
+      mode: "proportional"
+    };
+  }
+
+  return pageSettings[selectedPageIndex];
+}
+
+function saveCurrentPageSettingsFromInputs() {
+  if (!pages.length || !pageSettings[selectedPageIndex]) return;
+
+  const w = Number(el("wInput").value || 0);
+  const h = Number(el("hInput").value || 0);
+
+  pageSettings[selectedPageIndex].widthCm = w > 0 ? Number(w.toFixed(2)) : 1;
+  pageSettings[selectedPageIndex].heightCm = h > 0 ? Number(h.toFixed(2)) : 1;
+  pageSettings[selectedPageIndex].mode = adjustMode;
+}
+
+function applyCurrentPageSettingsToInputs() {
+  const setting = currentPageSetting();
+
+  adjustMode = setting.mode || "proportional";
+
+  el("wInput").value = setting.widthCm;
+  el("hInput").value = setting.heightCm;
+
+  if (adjustMode === "cover") {
+    el("modeCoverBtn").classList.add("active");
+    el("modeProportionalBtn").classList.remove("active");
+    el("cutGuide").classList.remove("hidden");
+  } else {
+    el("modeProportionalBtn").classList.add("active");
+    el("modeCoverBtn").classList.remove("active");
+    el("cutGuide").classList.add("hidden");
+  }
+}
+
+function modeLabel(mode) {
+  return mode === "cover" ? "Preencher e cortar" : "Proporcional";
+}
+
 el("loginBtn").onclick = () => {
   clearLoginError();
 
@@ -246,6 +300,7 @@ el("logoutBtn").onclick = () => {
   pdfJsDocLoaded = null;
   pdfLibDocLoaded = null;
   pages = [];
+  pageSettings = [];
   selectedPageIndex = 0;
 
   el("app").style.display = "none";
@@ -330,7 +385,10 @@ el("modeProportionalBtn").onclick = () => {
   el("modeCoverBtn").classList.remove("active");
   el("cutGuide").classList.add("hidden");
 
-  addLog("modo_proporcional", "Usuário selecionou ajuste proporcional");
+  saveCurrentPageSettingsFromInputs();
+
+  addLog("modo_proporcional", `Página ${selectedPageIndex + 1}: modo proporcional`);
+  renderPagesList();
   renderAll();
 };
 
@@ -340,7 +398,10 @@ el("modeCoverBtn").onclick = () => {
   el("modeProportionalBtn").classList.remove("active");
   el("cutGuide").classList.remove("hidden");
 
-  addLog("modo_preencher_cortar", "Usuário selecionou preencher e cortar");
+  saveCurrentPageSettingsFromInputs();
+
+  addLog("modo_preencher_cortar", `Página ${selectedPageIndex + 1}: preencher e cortar`);
+  renderPagesList();
   renderAll();
 };
 
@@ -378,8 +439,10 @@ el("pdfInput").addEventListener("change", async (e) => {
       });
     }
 
+    createPageSettings();
+
     selectedPageIndex = 0;
-    await selectPage(0, true);
+    await selectPage(0, false);
 
     el("dropPdf").classList.add("hidden");
     el("changePdfBtn").classList.remove("hidden");
@@ -406,7 +469,11 @@ el("pdfInput").addEventListener("change", async (e) => {
   }
 });
 
-async function selectPage(index, applySize = false) {
+async function selectPage(index, shouldSaveCurrent = true) {
+  if (shouldSaveCurrent) {
+    saveCurrentPageSettingsFromInputs();
+  }
+
   selectedPageIndex = index;
 
   const pageData = pages[index];
@@ -415,15 +482,19 @@ async function selectPage(index, applySize = false) {
   sourcePdfHeightCm = pageData.heightCm;
   ratio = sourcePdfWidthCm / sourcePdfHeightCm;
 
-  if (applySize) {
-    el("wInput").value = sourcePdfWidthCm;
-    el("hInput").value = sourcePdfHeightCm;
-  }
+  applyCurrentPageSettingsToInputs();
 
   pdfJsPage = await pdfJsDocLoaded.getPage(index + 1);
 
+  const setting = currentPageSetting();
+
   el("previewSubtitle").textContent =
-    `Página ${index + 1} de ${pages.length} • original ${sourcePdfWidthCm} x ${sourcePdfHeightCm} cm`;
+    `Página ${index + 1} de ${pages.length} • original ${sourcePdfWidthCm} x ${sourcePdfHeightCm} cm • final ${setting.widthCm} x ${setting.heightCm} cm`;
+
+  if (previewIsLarge) {
+    el("previewModalSubtitle").textContent =
+      `Página ${index + 1} de ${pages.length} • visualização ampliada`;
+  }
 
   renderPagesList();
   renderAll();
@@ -434,16 +505,27 @@ function renderPagesList() {
 
   if (!list) return;
 
-  list.innerHTML = pages.map((page) => `
-    <button class="page-btn ${page.index === selectedPageIndex ? "active" : ""}" data-page="${page.index}">
-      Página ${page.index + 1} • ${page.widthCm} x ${page.heightCm} cm
-    </button>
-  `).join("");
+  list.innerHTML = pages.map((page) => {
+    const setting = pageSettings[page.index] || {
+      widthCm: page.widthCm,
+      heightCm: page.heightCm,
+      mode: "proportional"
+    };
+
+    return `
+      <button class="page-btn ${page.index === selectedPageIndex ? "active" : ""}" data-page="${page.index}">
+        <strong>Página ${page.index + 1}</strong><br>
+        Original: ${page.widthCm} x ${page.heightCm} cm<br>
+        Final: ${setting.widthCm} x ${setting.heightCm} cm<br>
+        Modo: ${modeLabel(setting.mode)}
+      </button>
+    `;
+  }).join("");
 
   document.querySelectorAll(".page-btn").forEach((btn) => {
     btn.onclick = async () => {
       const index = Number(btn.dataset.page);
-      await selectPage(index, false);
+      await selectPage(index, true);
       addLog("selecionou_pagina", `Página ${index + 1} selecionada`);
     };
   });
@@ -489,6 +571,20 @@ function validateSize() {
   return true;
 }
 
+function validateAllPageSettings() {
+  for (let i = 0; i < pageSettings.length; i++) {
+    const setting = pageSettings[i];
+
+    if (!setting || Number(setting.widthCm) <= 0 || Number(setting.heightCm) <= 0) {
+      showError(`A página ${i + 1} está com largura ou altura inválida.`);
+      return false;
+    }
+  }
+
+  clearError();
+  return true;
+}
+
 el("wInput").addEventListener("input", () => {
   const w = Number(el("wInput").value || 0);
 
@@ -496,7 +592,15 @@ el("wInput").addEventListener("input", () => {
     el("hInput").value = (w / ratio).toFixed(2);
   }
 
-  addLog("alterou_largura", `Largura: ${el("wInput").value}cm | altura: ${el("hInput").value}cm`);
+  saveCurrentPageSettingsFromInputs();
+
+  const setting = currentPageSetting();
+
+  el("previewSubtitle").textContent =
+    `Página ${selectedPageIndex + 1} de ${pages.length || 1} • original ${sourcePdfWidthCm} x ${sourcePdfHeightCm} cm • final ${setting.widthCm} x ${setting.heightCm} cm`;
+
+  addLog("alterou_largura", `Página ${selectedPageIndex + 1}: largura ${setting.widthCm}cm | altura ${setting.heightCm}cm`);
+  renderPagesList();
   renderAll();
 });
 
@@ -507,7 +611,15 @@ el("hInput").addEventListener("input", () => {
     el("wInput").value = (h * ratio).toFixed(2);
   }
 
-  addLog("alterou_altura", `Altura: ${el("hInput").value}cm | largura: ${el("wInput").value}cm`);
+  saveCurrentPageSettingsFromInputs();
+
+  const setting = currentPageSetting();
+
+  el("previewSubtitle").textContent =
+    `Página ${selectedPageIndex + 1} de ${pages.length || 1} • original ${sourcePdfWidthCm} x ${sourcePdfHeightCm} cm • final ${setting.widthCm} x ${setting.heightCm} cm`;
+
+  addLog("alterou_altura", `Página ${selectedPageIndex + 1}: altura ${setting.heightCm}cm | largura ${setting.widthCm}cm`);
+  renderPagesList();
   renderAll();
 });
 
@@ -578,8 +690,16 @@ function setPreviewTagScale(tagH) {
 function renderAll() {
   if (!el("previewPage")) return;
 
-  const w = Number(el("wInput").value || 0);
-  const h = Number(el("hInput").value || 0);
+  if (pages.length) {
+    saveCurrentPageSettingsFromInputs();
+  }
+
+  const setting = pages.length
+    ? currentPageSetting()
+    : { widthCm: Number(el("wInput").value || 80), heightCm: Number(el("hInput").value || 120), mode: adjustMode };
+
+  const w = Number(setting.widthCm || 0);
+  const h = Number(setting.heightCm || 0);
 
   const client = el("clientInput").value || "Cliente";
   const os = el("osInput").value || "0000";
@@ -633,7 +753,7 @@ function renderAll() {
 
   setPreviewTagScale(tagH);
 
-  if (adjustMode === "cover") {
+  if (setting.mode === "cover") {
     el("cutGuide").classList.remove("hidden");
   } else {
     el("cutGuide").classList.add("hidden");
@@ -645,6 +765,9 @@ function renderAll() {
 
 async function renderPdfPreview() {
   if (!pdfJsPage) return;
+
+  const setting = currentPageSetting();
+  const mode = setting.mode || "proportional";
 
   const bannerArea = el("bannerArea");
   const canvas = el("pdfCanvas");
@@ -667,7 +790,7 @@ async function renderPdfPreview() {
 
   const viewport = pdfJsPage.getViewport({ scale: 1 });
 
-  const scale = adjustMode === "cover"
+  const scale = mode === "cover"
     ? Math.max(cssW / viewport.width, cssH / viewport.height)
     : Math.min(cssW / viewport.width, cssH / viewport.height);
 
@@ -824,6 +947,7 @@ function getContainPlacement(srcW, srcH, targetW, targetH) {
 
 el("generateBtn").addEventListener("click", async () => {
   clearError();
+  saveCurrentPageSettingsFromInputs();
 
   if (!pdfBytes || !pdfLibDocLoaded || !pages.length) {
     showError("Envie um PDF primeiro.");
@@ -831,12 +955,10 @@ el("generateBtn").addEventListener("click", async () => {
   }
 
   if (!validateSize()) return;
+  if (!validateAllPageSettings()) return;
 
   try {
-    showLoading("Gerando PDF...", "Fechando todas as páginas com sangria e identificação.");
-
-    const wCm = Number(el("wInput").value || 0);
-    const hCm = Number(el("hInput").value || 0);
+    showLoading("Gerando PDF...", "Fechando todas as páginas com suas configurações individuais.");
 
     const client = el("clientInput").value || "Cliente";
     const os = el("osInput").value || "0000";
@@ -849,16 +971,6 @@ el("generateBtn").addEventListener("click", async () => {
 
     const logoObj = await embedLogo(outPdf, logo);
 
-    const pageW = cmToPt(wCm);
-    const pageH = cmToPt(hCm + 20);
-    const bleed = cmToPt(10);
-    const bannerW = cmToPt(wCm);
-    const bannerH = cmToPt(hCm);
-
-    const rectH = cmToPt(6);
-    const rectW = pageW;
-    const rectX = 0;
-
     const embeddedPages = await outPdf.embedPdf(
       pdfBytes,
       pages.map((page) => page.index)
@@ -867,6 +979,21 @@ el("generateBtn").addEventListener("click", async () => {
     for (let i = 0; i < embeddedPages.length; i++) {
       const embeddedPage = embeddedPages[i];
       const source = pages[i];
+      const setting = pageSettings[i];
+
+      const wCm = Number(setting.widthCm);
+      const hCm = Number(setting.heightCm);
+      const mode = setting.mode || "proportional";
+
+      const pageW = cmToPt(wCm);
+      const pageH = cmToPt(hCm + 20);
+      const bleed = cmToPt(10);
+      const bannerW = cmToPt(wCm);
+      const bannerH = cmToPt(hCm);
+
+      const rectH = cmToPt(6);
+      const rectW = pageW;
+      const rectX = 0;
 
       const page = outPdf.addPage([pageW, pageH]);
 
@@ -876,7 +1003,7 @@ el("generateBtn").addEventListener("click", async () => {
       const srcW = cmToPt(source.widthCm);
       const srcH = cmToPt(source.heightCm);
 
-      const placement = adjustMode === "cover"
+      const placement = mode === "cover"
         ? getCoverPlacement(srcW, srcH, bannerW, bannerH)
         : getContainPlacement(srcW, srcH, bannerW, bannerH);
 
@@ -966,7 +1093,7 @@ el("generateBtn").addEventListener("click", async () => {
 
     addLog(
       "gerou_pdf",
-      `Cliente: ${client} | OS: ${os} | páginas: ${pages.length} | modo: ${adjustMode} | final: ${wCm}x${hCm}cm`
+      `Cliente: ${client} | OS: ${os} | páginas: ${pages.length} | configurações individuais por página`
     );
   } catch (err) {
     console.error(err);
