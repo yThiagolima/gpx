@@ -146,39 +146,52 @@
 
 .lona-tech-text {
   position: absolute;
-  z-index: 5;
-  font-weight: 800;
+  z-index: 6;
+  font-weight: 900;
   color: #111827;
-  font-size: var(--lona-text-size, 11px);
+  font-size: var(--lona-text-size, 8px);
+  line-height: 1;
   white-space: nowrap;
   pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lona-top-text,
+.lona-bottom-text {
+  text-align: left;
+}
+
+.lona-left-text,
+.lona-right-text {
   text-align: center;
+  transform-origin: left top;
 }
 
 .lona-top-text {
-  top: var(--lona-text-offset, 10px);
-  left: 50%;
-  transform: translateX(-50%);
+  left: var(--lona-text-start-x, 20px);
+  top: var(--lona-text-top-y, 6px);
+  max-width: var(--lona-horizontal-text-max, 260px);
 }
 
 .lona-bottom-text {
-  bottom: var(--lona-text-offset, 10px);
-  left: 50%;
-  transform: translateX(-50%);
+  left: var(--lona-text-start-x, 20px);
+  bottom: var(--lona-text-bottom-y, 6px);
+  max-width: var(--lona-horizontal-text-max, 260px);
 }
 
 .lona-left-text {
-  left: var(--lona-text-offset, 10px);
-  top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
-  transform-origin: center;
+  left: var(--lona-left-text-x, 6px);
+  top: var(--lona-text-start-y, 20px);
+  max-width: var(--lona-vertical-text-max, 260px);
+  transform: rotate(-90deg) translateX(-100%);
 }
 
 .lona-right-text {
-  right: var(--lona-text-offset, 10px);
-  top: 50%;
-  transform: translateY(-50%) rotate(90deg);
-  transform-origin: center;
+  right: var(--lona-right-text-x, 6px);
+  top: var(--lona-text-start-y, 20px);
+  max-width: var(--lona-vertical-text-max, 260px);
+  transform: rotate(90deg);
 }
 
 @media (max-width: 950px) {
