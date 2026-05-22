@@ -179,6 +179,10 @@ el("loginBtn").onclick = () => {
 
   el("login").style.display = "none";
   el("app").style.display = "block";
+
+  el("loginEmail").value = "";
+  el("loginPassword").value = "";
+
   el("currentUserLabel").textContent = `${currentUser.name} (${currentUser.role})`;
   el("userAvatar").textContent = currentUser.name.slice(0, 1).toUpperCase();
 
@@ -192,8 +196,11 @@ el("logoutBtn").onclick = () => {
   currentUser = null;
   pdfBytes = null;
   pdfJsPage = null;
+
   el("app").style.display = "none";
   el("login").style.display = "grid";
+
+  el("loginEmail").value = "";
   el("loginPassword").value = "";
 };
 
@@ -202,7 +209,12 @@ el("backDashboardBtn").onclick = () => showScreen("dashboard");
 el("openBannerHeroBtn").onclick = () => showScreen("banner");
 el("openBannerCardBtn").onclick = () => showScreen("banner");
 el("showFutureBtn").onclick = () => addLog("clicou_modulos_futuros", "Usuário clicou para ver módulos futuros");
-el("refreshLogsBtn").onclick = () => { addLog("atualizou_logs", "Admin atualizou a lista de logs"); renderLogs(); };
+
+el("refreshLogsBtn").onclick = () => {
+  addLog("atualizou_logs", "Admin atualizou a lista de logs");
+  renderLogs();
+};
+
 el("clearLogsBtn").onclick = () => {
   if (currentUser?.email !== "admin@admin.com") return;
   localStorage.setItem(logsKey(), JSON.stringify([]));
@@ -292,15 +304,18 @@ function renderLogoList() {
   if (!list) return;
 
   list.innerHTML = "";
+
   logos.forEach((logo) => {
     const btn = document.createElement("button");
     btn.className = "logo-choice" + (logo.id === selectedLogoId ? " active" : "");
     btn.textContent = logo.name.length > 18 ? logo.name.slice(0, 18) + "…" : logo.name;
+
     btn.onclick = () => {
       selectedLogoId = logo.id;
       addLog("selecionou_logo", `Logo selecionada: ${logo.name}`);
       renderAll();
     };
+
     list.appendChild(btn);
   });
 }
@@ -363,7 +378,9 @@ function renderAll() {
   el("bannerArea").style.top = `${bleedH}px`;
   el("bannerArea").style.height = `${bannerH}px`;
 
-  document.querySelectorAll(".tag").forEach((tag) => { tag.style.height = `${tagH}px`; });
+  document.querySelectorAll(".tag").forEach((tag) => {
+    tag.style.height = `${tagH}px`;
+  });
 
   renderLogoList();
   debouncedPdfPreview();
@@ -413,29 +430,66 @@ async function renderPdfPreview() {
 
 async function embedLogo(pdfDoc, logo) {
   if (!logo || !logo.dataUrl) return null;
+
   const bytes = await fetch(logo.dataUrl).then((r) => r.arrayBuffer());
-  if (logo.dataUrl.startsWith("data:image/png")) return await pdfDoc.embedPng(bytes);
+
+  if (logo.dataUrl.startsWith("data:image/png")) {
+    return await pdfDoc.embedPng(bytes);
+  }
+
   return await pdfDoc.embedJpg(bytes);
 }
 
 function drawTechnicalBox({ page, pageW, rectY, rectH, rectW, rectX, logoObj, logo, font, regular, info }) {
-  page.drawRectangle({ x: rectX, y: rectY, width: rectW, height: rectH, borderColor: rgb(0, 0, 0), borderWidth: 1 });
+  page.drawRectangle({
+    x: rectX,
+    y: rectY,
+    width: rectW,
+    height: rectH,
+    borderColor: rgb(0, 0, 0),
+    borderWidth: 1
+  });
+
   const centerX = pageW / 2;
 
   if (logoObj) {
     const maxLogoW = Math.min(rectW * 0.45, cmToPt(18));
     const maxLogoH = cmToPt(2.4);
-    const scale = Math.min(maxLogoW / logoObj.width, maxLogoH / logoObj.height);
+
+    const scale = Math.min(
+      maxLogoW / logoObj.width,
+      maxLogoH / logoObj.height
+    );
+
     const logoW = logoObj.width * scale;
     const logoH = logoObj.height * scale;
-    page.drawImage(logoObj, { x: centerX - logoW / 2, y: rectY + rectH * 0.55, width: logoW, height: logoH });
+
+    page.drawImage(logoObj, {
+      x: centerX - logoW / 2,
+      y: rectY + rectH * 0.55,
+      width: logoW,
+      height: logoH
+    });
   } else {
-    page.drawText(logo.initials || "GF", { x: centerX - 16, y: rectY + rectH * 0.62, size: 22, font, color: rgb(0, 0, 0) });
+    page.drawText(logo.initials || "GF", {
+      x: centerX - 16,
+      y: rectY + rectH * 0.62,
+      size: 22,
+      font,
+      color: rgb(0, 0, 0)
+    });
   }
 
   const fontSize = 12;
   const textW = regular.widthOfTextAtSize(info, fontSize);
-  page.drawText(info, { x: Math.max(rectX + 8, centerX - textW / 2), y: rectY + rectH * 0.28, size: fontSize, font: regular, color: rgb(0, 0, 0) });
+
+  page.drawText(info, {
+    x: Math.max(rectX + 8, centerX - textW / 2),
+    y: rectY + rectH * 0.28,
+    size: fontSize,
+    font: regular,
+    color: rgb(0, 0, 0)
+  });
 }
 
 el("generateBtn").addEventListener("click", async () => {
@@ -467,9 +521,28 @@ el("generateBtn").addEventListener("click", async () => {
     const topBleedStartY = bleed + bannerH;
     const page = outPdf.addPage([pageW, pageH]);
 
-    page.drawPage(embeddedPage, { x: 0, y: bannerStartY, width: cmToPt(wCm), height: bannerH });
-    page.drawLine({ start: { x: 0, y: bannerStartY }, end: { x: pageW, y: bannerStartY }, thickness: 1, color: rgb(0.45, 0.45, 0.45), dashArray: [8, 6] });
-    page.drawLine({ start: { x: 0, y: topBleedStartY }, end: { x: pageW, y: topBleedStartY }, thickness: 1, color: rgb(0.45, 0.45, 0.45), dashArray: [8, 6] });
+    page.drawPage(embeddedPage, {
+      x: 0,
+      y: bannerStartY,
+      width: cmToPt(wCm),
+      height: bannerH
+    });
+
+    page.drawLine({
+      start: { x: 0, y: bannerStartY },
+      end: { x: pageW, y: bannerStartY },
+      thickness: 1,
+      color: rgb(0.45, 0.45, 0.45),
+      dashArray: [8, 6]
+    });
+
+    page.drawLine({
+      start: { x: 0, y: topBleedStartY },
+      end: { x: pageW, y: topBleedStartY },
+      thickness: 1,
+      color: rgb(0.45, 0.45, 0.45),
+      dashArray: [8, 6]
+    });
 
     const rectH = cmToPt(6);
     const rectW = pageW;
@@ -483,14 +556,22 @@ el("generateBtn").addEventListener("click", async () => {
     drawTechnicalBox({ page, pageW, rectY: bottomRectY, rectH, rectW, rectX, logoObj, logo, font, regular, info });
 
     const finalBytes = await outPdf.save();
-    const blob = new Blob([finalBytes], { type: "application/pdf" });
+
+    const blob = new Blob([finalBytes], {
+      type: "application/pdf"
+    });
+
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
     a.download = `banner_fechado_OS_${os}.pdf`;
+
     document.body.appendChild(a);
+
     a.click();
     a.remove();
+
     URL.revokeObjectURL(url);
 
     addLog("gerou_pdf", `Cliente: ${client} | OS: ${os} | final: ${wCm}x${hCm}cm | fechado: ${wCm}x${hCm + 20}cm`);
@@ -499,6 +580,3 @@ el("generateBtn").addEventListener("click", async () => {
     showError("Erro ao gerar o PDF. Teste com um PDF simples, de uma página, sem senha.");
   }
 });
-
-el("loginEmail").value = "gedson@thiago.com";
-el("loginPassword").value = "fofo123";
