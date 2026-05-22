@@ -301,7 +301,10 @@
               <span id="previewSubtitle">Nenhum PDF enviado</span>
             </div>
 
-            <span id="bannerSizeText">80 x 120 cm</span>
+            <div class="preview-actions">
+              <span id="bannerSizeText">80 x 120 cm</span>
+              <button id="openPreviewModalBtn" class="btn-soft preview-big-btn">Ver maior</button>
+            </div>
           </div>
 
           <div class="preview-wrap">
@@ -342,7 +345,7 @@
           <div class="preview-help">
             <strong>Importante:</strong>
             no modo “Preencher e cortar”, a linha vermelha mostra a área final do banner.
-            O excesso da arte é cortado fora dessa área.
+            O excesso da arte é cortado fora dessa área. A linha vermelha não sai no PDF final.
           </div>
         </div>
       </div>
@@ -353,6 +356,21 @@
         <div class="loader"></div>
         <strong id="loadingTitle">Processando...</strong>
         <span id="loadingText">Aguarde um momento.</span>
+      </div>
+    </div>
+
+    <div id="previewModal" class="preview-modal hidden">
+      <div class="preview-modal-head">
+        <div>
+          <strong>Preview ampliado</strong>
+          <span id="previewModalSubtitle">Visualização maior do fechamento</span>
+        </div>
+
+        <button id="closePreviewModalBtn" class="btn-light">Fechar</button>
+      </div>
+
+      <div class="preview-modal-body">
+        <div id="previewModalMount" class="preview-modal-mount"></div>
       </div>
     </div>
   </section>
