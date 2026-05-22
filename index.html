@@ -18,14 +18,27 @@
       <p>Sistema de Fechamento Pro</p>
 
       <label>E-mail</label>
-      <input id="loginEmail" type="email" placeholder="Digite seu e-mail" autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <input
+        id="loginEmail"
+        type="email"
+        placeholder="Digite seu e-mail"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
 
       <label>Senha</label>
-      <input id="loginPassword" type="password" placeholder="Digite sua senha" autocomplete="new-password" spellcheck="false" />
+      <input
+        id="loginPassword"
+        type="password"
+        placeholder="Digite sua senha"
+        autocomplete="new-password"
+        spellcheck="false"
+      />
 
       <div id="loginError" class="login-error hidden"></div>
 
-      <button class="btn-dark" id="loginBtn">Entrar no sistema</button>
+      <button class="btn-dark login-button" id="loginBtn">Entrar no sistema</button>
     </div>
   </section>
 
@@ -45,6 +58,7 @@
             <div class="avatar" id="userAvatar">U</div>
             <span id="currentUserLabel">Usuário</span>
           </div>
+
           <button class="btn-light" id="goDashboardBtn">Dashboard</button>
           <button class="btn-light" id="logoutBtn">Sair</button>
         </div>
@@ -56,7 +70,10 @@
         <div>
           <div class="hero-tag">⚡ Central de pré-impressão</div>
           <h1>Feche arquivos com padrão, velocidade e segurança.</h1>
-          <p>Automatize etapas repetitivas do fechamento de arquivos, reduza erro manual e padronize a produção da gráfica.</p>
+          <p>
+            Automatize etapas repetitivas do fechamento de arquivos, reduza erro manual
+            e padronize a produção da gráfica.
+          </p>
 
           <div class="hero-actions">
             <button class="btn-dark" id="openBannerHeroBtn">Abrir criador de banner</button>
@@ -65,9 +82,20 @@
         </div>
 
         <div class="hero-panel">
-          <div class="mini-stat"><strong>Banner</strong><span>Fechamento com sangria, logo e OS</span></div>
-          <div class="mini-stat"><strong>Multi páginas</strong><span>Detecta páginas e medidas individuais</span></div>
-          <div class="mini-stat"><strong>Corte</strong><span>Modo preencher e cortar com linha vermelha</span></div>
+          <div class="mini-stat">
+            <strong>Banner</strong>
+            <span>Fechamento com sangria, logo e OS</span>
+          </div>
+
+          <div class="mini-stat">
+            <strong>Multi páginas</strong>
+            <span>Detecta páginas e medidas individuais</span>
+          </div>
+
+          <div class="mini-stat">
+            <strong>Preencher e cortar</strong>
+            <span>Amplia proporcionalmente e corta o excesso</span>
+          </div>
         </div>
       </div>
 
@@ -83,14 +111,70 @@
           <div>
             <div class="module-icon blue">🖼️</div>
             <h3>Fechamento de banner</h3>
-            <p>Detecta PDF, páginas, medidas, adiciona sangria, retângulos técnicos e gera o arquivo final.</p>
+            <p>
+              Detecta PDF, páginas, medidas, adiciona sangria, retângulos técnicos
+              e gera o arquivo final.
+            </p>
             <div class="status available">Disponível</div>
           </div>
+
           <button class="module-btn" id="openBannerCardBtn">Abrir ferramenta</button>
         </div>
 
-        <div class="module-card disabled"><div><div class="module-icon green">✂️</div><h3>Adesivo com recorte</h3><p>Futuro módulo para sangria, linha de corte, espaçamento e montagem em folha.</p><div class="status soon">Em breve</div></div><button class="module-btn disabled">Indisponível</button></div>
-        <div class="module-card disabled"><div><div class="module-icon purple">📄</div><h3>Panfleto e cartão</h3><p>Futuro módulo para conferir tamanho, sangria, margem segura e fechamento em PDF.</p><div class="status soon">Em breve</div></div><button class="module-btn disabled">Indisponível</button></div>
+        <div class="module-card disabled">
+          <div>
+            <div class="module-icon green">✂️</div>
+            <h3>Adesivo com recorte</h3>
+            <p>Futuro módulo para sangria, linha de corte, espaçamento e montagem em folha.</p>
+            <div class="status soon">Em breve</div>
+          </div>
+
+          <button class="module-btn disabled">Indisponível</button>
+        </div>
+
+        <div class="module-card disabled">
+          <div>
+            <div class="module-icon purple">📄</div>
+            <h3>Panfleto e cartão</h3>
+            <p>Futuro módulo para conferir tamanho, sangria, margem segura e fechamento em PDF.</p>
+            <div class="status soon">Em breve</div>
+          </div>
+
+          <button class="module-btn disabled">Indisponível</button>
+        </div>
+
+        <div class="module-card disabled">
+          <div>
+            <div class="module-icon orange">🧾</div>
+            <h3>Ficha técnica</h3>
+            <p>Futuro gerador de ficha técnica com cliente, material, tamanho e acabamento.</p>
+            <div class="status soon">Em breve</div>
+          </div>
+
+          <button class="module-btn disabled">Indisponível</button>
+        </div>
+
+        <div class="module-card disabled">
+          <div>
+            <div class="module-icon blue">📦</div>
+            <h3>Montagem em folha</h3>
+            <p>Futuro aproveitamento automático para encaixar várias peças em uma mídia.</p>
+            <div class="status soon">Em breve</div>
+          </div>
+
+          <button class="module-btn disabled">Indisponível</button>
+        </div>
+
+        <div class="module-card disabled">
+          <div>
+            <div class="module-icon green">✅</div>
+            <h3>Checklist técnico</h3>
+            <p>Futuro checklist inteligente por tipo de material e máquina de produção.</p>
+            <div class="status soon">Em breve</div>
+          </div>
+
+          <button class="module-btn disabled">Indisponível</button>
+        </div>
       </div>
 
       <div id="adminLogsPanel" class="admin-panel hidden">
@@ -99,11 +183,13 @@
             <h2>Logs ao vivo</h2>
             <p>Área visível somente para admin@admin.com.</p>
           </div>
+
           <div class="admin-actions">
             <button id="refreshLogsBtn" class="btn-light">Atualizar</button>
             <button id="clearLogsBtn" class="btn-light danger">Limpar logs</button>
           </div>
         </div>
+
         <div id="logsList" class="logs-list"></div>
       </div>
     </section>
@@ -135,6 +221,11 @@
             </div>
 
             <div id="pdfOk" class="file-ok hidden"></div>
+
+            <div class="file-actions">
+              <button id="changePdfBtn" class="btn-soft hidden">Trocar PDF</button>
+            </div>
+
             <div id="pagesList" class="pages-list hidden"></div>
             <div id="error" class="error"></div>
           </div>
@@ -161,12 +252,12 @@
             <div class="grid2">
               <label>
                 Largura
-                <input id="wInput" type="number" step="0.01" value="80" />
+                <input id="wInput" type="number" step="0.01" min="1" value="80" />
               </label>
 
               <label>
                 Altura
-                <input id="hInput" type="number" step="0.01" value="120" />
+                <input id="hInput" type="number" step="0.01" min="1" value="120" />
               </label>
             </div>
 
@@ -195,7 +286,10 @@
 
             <input id="logoInput" type="file" accept="image/png,image/jpeg" class="hidden" />
 
-            <button id="newLogoBtn" class="btn-soft" style="width:100%;margin-top:10px">+ Nova logo</button>
+            <button id="newLogoBtn" class="btn-soft" style="width:100%;margin-top:10px">
+              + Nova logo
+            </button>
+
             <p class="small">A logo enviada fica salva somente para o usuário logado.</p>
           </div>
         </div>
@@ -204,8 +298,9 @@
           <div class="preview-top">
             <div>
               <strong>Preview do fechamento</strong><br>
-              <span id="previewSubtitle">Página 1</span>
+              <span id="previewSubtitle">Nenhum PDF enviado</span>
             </div>
+
             <span id="bannerSizeText">80 x 120 cm</span>
           </div>
 
@@ -243,9 +338,23 @@
               </div>
             </div>
           </div>
+
+          <div class="preview-help">
+            <strong>Importante:</strong>
+            no modo “Preencher e cortar”, a linha vermelha mostra a área final do banner.
+            O excesso da arte é cortado fora dessa área.
+          </div>
         </div>
       </div>
     </section>
+
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="loading-card">
+        <div class="loader"></div>
+        <strong id="loadingTitle">Processando...</strong>
+        <span id="loadingText">Aguarde um momento.</span>
+      </div>
+    </div>
   </section>
 
   <script src="assets/js/app.js"></script>
