@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Thiago - Sistema de Fechamento Pro</title>
 
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/login.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/banner.css" />
+
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -18,23 +22,10 @@
       <p>Sistema de Fechamento Pro</p>
 
       <label>E-mail</label>
-      <input
-        id="loginEmail"
-        type="email"
-        placeholder="Digite seu e-mail"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-      />
+      <input id="loginEmail" type="email" placeholder="Digite seu e-mail" autocomplete="off" />
 
       <label>Senha</label>
-      <input
-        id="loginPassword"
-        type="password"
-        placeholder="Digite sua senha"
-        autocomplete="new-password"
-        spellcheck="false"
-      />
+      <input id="loginPassword" type="password" placeholder="Digite sua senha" autocomplete="new-password" />
 
       <div id="loginError" class="login-error hidden"></div>
 
@@ -43,7 +34,7 @@
   </section>
 
   <section id="app" class="app">
-    <div class="topbar">
+    <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
           <div class="brand-mark">T</div>
@@ -58,122 +49,65 @@
             <div class="avatar" id="userAvatar">U</div>
             <span id="currentUserLabel">Usuário</span>
           </div>
-
           <button class="btn-light" id="goDashboardBtn">Dashboard</button>
           <button class="btn-light" id="logoutBtn">Sair</button>
         </div>
       </div>
-    </div>
+    </header>
 
     <section id="dashboard" class="dashboard">
-      <div class="hero">
+      <div class="dash-hero">
         <div>
-          <div class="hero-tag">⚡ Central de pré-impressão</div>
-          <h1>Feche arquivos com padrão, velocidade e segurança.</h1>
-          <p>
-            Automatize etapas repetitivas do fechamento de arquivos, reduza erro manual
-            e padronize a produção da gráfica.
-          </p>
+          <div class="eyebrow">Central de pré-impressão</div>
+          <h1>Fechamento de arquivos com padrão profissional.</h1>
+          <p>Automatize banners, padronize identificação técnica, reduza retrabalho e mantenha controle por usuário.</p>
 
           <div class="hero-actions">
-            <button class="btn-dark" id="openBannerHeroBtn">Abrir criador de banner</button>
-            <button class="btn-light" id="showFutureBtn">Ver módulos futuros</button>
+            <button class="btn-dark" id="openBannerHeroBtn">Abrir fechamento de banner</button>
           </div>
         </div>
 
-        <div class="hero-panel">
-          <div class="mini-stat">
-            <strong>Banner</strong>
-            <span>Fechamento com sangria, logo e OS</span>
+        <div class="hero-summary">
+          <div class="summary-item">
+            <strong>PDF multipágina</strong>
+            <span>Configuração individual por página</span>
           </div>
-
-          <div class="mini-stat">
-            <strong>Multi páginas</strong>
-            <span>Detecta páginas e medidas individuais</span>
+          <div class="summary-item">
+            <strong>Preview avançado</strong>
+            <span>Zoom, tela ampliada e guia de corte</span>
           </div>
-
-          <div class="mini-stat">
-            <strong>Preencher e cortar</strong>
-            <span>Amplia proporcionalmente e corta o excesso</span>
+          <div class="summary-item">
+            <strong>Logos por usuário</strong>
+            <span>Salvar, renomear, excluir e definir padrão</span>
           </div>
         </div>
       </div>
 
-      <div class="modules-header">
-        <div>
-          <h2>Módulos de fechamento</h2>
-          <p>Escolha uma ferramenta para preparar o arquivo.</p>
-        </div>
+      <div class="dashboard-section-title">
+        <h2>Ferramentas</h2>
+        <p>Escolha o tipo de fechamento que deseja preparar.</p>
       </div>
 
       <div class="module-grid">
-        <div class="module-card">
-          <div>
-            <div class="module-icon blue">🖼️</div>
-            <h3>Fechamento de banner</h3>
-            <p>
-              Detecta PDF, páginas, medidas, adiciona sangria, retângulos técnicos
-              e gera o arquivo final.
-            </p>
-            <div class="status available">Disponível</div>
-          </div>
-
+        <div class="module-card available-card">
+          <div class="module-icon">🖼️</div>
+          <h3>Fechamento de banner</h3>
+          <p>Adiciona sangria, retângulo técnico, logo, OS e exporta o PDF final.</p>
           <button class="module-btn" id="openBannerCardBtn">Abrir ferramenta</button>
         </div>
 
         <div class="module-card disabled">
-          <div>
-            <div class="module-icon green">✂️</div>
-            <h3>Adesivo com recorte</h3>
-            <p>Futuro módulo para sangria, linha de corte, espaçamento e montagem em folha.</p>
-            <div class="status soon">Em breve</div>
-          </div>
-
-          <button class="module-btn disabled">Indisponível</button>
+          <div class="module-icon">✂️</div>
+          <h3>Adesivo com recorte</h3>
+          <p>Módulo futuro para sangria, margem e linha de corte.</p>
+          <button class="module-btn disabled">Em breve</button>
         </div>
 
         <div class="module-card disabled">
-          <div>
-            <div class="module-icon purple">📄</div>
-            <h3>Panfleto e cartão</h3>
-            <p>Futuro módulo para conferir tamanho, sangria, margem segura e fechamento em PDF.</p>
-            <div class="status soon">Em breve</div>
-          </div>
-
-          <button class="module-btn disabled">Indisponível</button>
-        </div>
-
-        <div class="module-card disabled">
-          <div>
-            <div class="module-icon orange">🧾</div>
-            <h3>Ficha técnica</h3>
-            <p>Futuro gerador de ficha técnica com cliente, material, tamanho e acabamento.</p>
-            <div class="status soon">Em breve</div>
-          </div>
-
-          <button class="module-btn disabled">Indisponível</button>
-        </div>
-
-        <div class="module-card disabled">
-          <div>
-            <div class="module-icon blue">📦</div>
-            <h3>Montagem em folha</h3>
-            <p>Futuro aproveitamento automático para encaixar várias peças em uma mídia.</p>
-            <div class="status soon">Em breve</div>
-          </div>
-
-          <button class="module-btn disabled">Indisponível</button>
-        </div>
-
-        <div class="module-card disabled">
-          <div>
-            <div class="module-icon green">✅</div>
-            <h3>Checklist técnico</h3>
-            <p>Futuro checklist inteligente por tipo de material e máquina de produção.</p>
-            <div class="status soon">Em breve</div>
-          </div>
-
-          <button class="module-btn disabled">Indisponível</button>
+          <div class="module-icon">📦</div>
+          <h3>Montagem em folha</h3>
+          <p>Módulo futuro para aproveitamento de mídia.</p>
+          <button class="module-btn disabled">Em breve</button>
         </div>
       </div>
 
@@ -181,24 +115,23 @@
         <div class="admin-head">
           <div>
             <h2>Logs ao vivo</h2>
-            <p>Área visível somente para admin@admin.com.</p>
+            <p>Visível somente para admin@admin.com.</p>
           </div>
-
           <div class="admin-actions">
             <button id="refreshLogsBtn" class="btn-light">Atualizar</button>
             <button id="clearLogsBtn" class="btn-light danger">Limpar logs</button>
           </div>
         </div>
-
         <div id="logsList" class="logs-list"></div>
       </div>
     </section>
 
     <section id="bannerTool" class="tool">
       <div class="tool-head">
-        <div class="tool-title">
+        <div>
+          <div class="eyebrow">Ferramenta</div>
           <h1>Fechamento de banner</h1>
-          <p>Envie um PDF, escolha o modo de ajuste e gere o arquivo fechado.</p>
+          <p>Configure cada página, revise no preview e gere o PDF fechado.</p>
         </div>
 
         <div class="tool-actions">
@@ -208,16 +141,16 @@
       </div>
 
       <div class="tool-layout">
-        <div class="left">
-          <div class="card">
+        <aside class="side-panel">
+          <div class="panel-block">
             <div class="section-title">Arquivo</div>
 
             <input id="pdfInput" type="file" accept="application/pdf" class="hidden" />
 
             <div id="dropPdf" class="drop">
               <div class="drop-icon">⬆️</div>
-              <div class="drop-title">Enviar PDF</div>
-              <div class="small">Se tiver mais de uma página, todas serão detectadas.</div>
+              <strong>Enviar PDF</strong>
+              <span>O sistema detecta páginas e medidas automaticamente.</span>
             </div>
 
             <div id="pdfOk" class="file-ok hidden"></div>
@@ -230,24 +163,20 @@
             <div id="error" class="error"></div>
           </div>
 
-          <div class="card">
-            <div class="section-title">Modo de ajuste</div>
+          <div class="panel-block">
+            <div class="section-title">Ajuste da página atual</div>
 
             <div class="mode-grid">
               <button id="modeProportionalBtn" class="mode-btn active">
                 <strong>Proporcional</strong>
-                <span>Mantém proporção pelo lado alterado.</span>
+                <span>Mantém proporção.</span>
               </button>
 
               <button id="modeCoverBtn" class="mode-btn">
                 <strong>Preencher e cortar</strong>
-                <span>Preenche o tamanho informado e corta o excesso.</span>
+                <span>Preenche e corta excesso.</span>
               </button>
             </div>
-          </div>
-
-          <div class="card">
-            <div class="section-title">Tamanho final</div>
 
             <div class="grid2">
               <label>
@@ -262,13 +191,19 @@
             </div>
 
             <div class="result">
-              <small>Arquivo fechado</small>
+              <small>Arquivo fechado desta página</small>
               <strong id="closedSize">80 x 140 cm</strong>
-              <div class="small" style="color:#94a3b8">+10 cm em cima e +10 cm embaixo</div>
+              <span>+10 cm superior e +10 cm inferior</span>
+            </div>
+
+            <div class="page-tools">
+              <button id="copyPrevPageBtn" class="btn-soft">Copiar anterior</button>
+              <button id="applyAllPagesBtn" class="btn-soft">Aplicar em todas</button>
+              <button id="resetCurrentPageBtn" class="btn-soft">Resetar página</button>
             </div>
           </div>
 
-          <div class="card">
+          <div class="panel-block">
             <div class="section-title">Identificação</div>
 
             <label>
@@ -278,31 +213,33 @@
 
             <label>
               OS
-              <input id="osInput" value="1548" />
+              <input id="osInput" placeholder="0000" />
             </label>
+          </div>
 
-            <label>Logo</label>
+          <div class="panel-block">
+            <div class="section-title">Logos do usuário</div>
             <div id="logoList" class="logos"></div>
 
             <input id="logoInput" type="file" accept="image/png,image/jpeg" class="hidden" />
 
-            <button id="newLogoBtn" class="btn-soft" style="width:100%;margin-top:10px">
-              + Nova logo
-            </button>
-
-            <p class="small">A logo enviada fica salva somente para o usuário logado.</p>
+            <button id="newLogoBtn" class="btn-soft full-btn">+ Nova logo</button>
+            <p class="small">Logos ficam salvas separadas por usuário.</p>
           </div>
-        </div>
+        </aside>
 
-        <div class="preview-shell">
+        <main class="preview-shell">
           <div class="preview-top">
             <div>
-              <strong>Preview do fechamento</strong><br>
+              <strong>Preview</strong>
               <span id="previewSubtitle">Nenhum PDF enviado</span>
             </div>
 
             <div class="preview-actions">
               <span id="bannerSizeText">80 x 120 cm</span>
+              <button id="previewZoomOutBtn" class="btn-soft preview-big-btn">−</button>
+              <button id="previewZoomResetBtn" class="btn-soft preview-big-btn">100%</button>
+              <button id="previewZoomInBtn" class="btn-soft preview-big-btn">+</button>
               <button id="openPreviewModalBtn" class="btn-soft preview-big-btn">Ver maior</button>
             </div>
           </div>
@@ -313,7 +250,7 @@
                 <div class="tag">
                   <div id="topTagLogoText" class="tag-logo-text">GF</div>
                   <img id="topTagLogoImg" class="hidden" />
-                  <div id="topTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 1548</div>
+                  <div id="topTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 0000</div>
                 </div>
               </div>
 
@@ -336,18 +273,16 @@
                 <div class="tag">
                   <div id="bottomTagLogoText" class="tag-logo-text">GF</div>
                   <img id="bottomTagLogoImg" class="hidden" />
-                  <div id="bottomTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 1548</div>
+                  <div id="bottomTagInfo" class="tag-info">Mercado Lima • 80x120cm • OS 0000</div>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="preview-help">
-            <strong>Importante:</strong>
-            no modo “Preencher e cortar”, a linha vermelha mostra a área final do banner.
-            O excesso da arte é cortado fora dessa área. A linha vermelha não sai no PDF final.
+            No modo <strong>Preencher e cortar</strong>, a linha vermelha aparece apenas no preview e não sai no PDF final.
           </div>
-        </div>
+        </main>
       </div>
     </section>
 
