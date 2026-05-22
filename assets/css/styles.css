@@ -746,6 +746,12 @@ p {
   padding: 12px;
   font-size: 13px;
   transition: 0.18s;
+  line-height: 1.35;
+}
+
+.page-btn strong {
+  font-size: 14px;
+  color: inherit;
 }
 
 .page-btn:hover {
@@ -825,29 +831,100 @@ p {
   letter-spacing: -0.03em;
 }
 
+.page-tools {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
 .logos {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 10px;
 }
 
-.logo-choice {
+.logo-card {
   border: 1px solid var(--line);
   background: #fff;
   padding: 12px;
-  text-align: left;
-  border-radius: 14px;
+  border-radius: 16px;
+}
+
+.logo-card.active {
+  border-color: var(--dark);
+  box-shadow: 0 0 0 3px rgba(2, 6, 23, 0.06);
+}
+
+.logo-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.logo-card-title {
+  min-width: 0;
+}
+
+.logo-card-title strong {
+  display: block;
   font-size: 13px;
+  font-weight: 950;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.logo-choice.active {
-  background: var(--dark);
-  color: #fff;
-  border-color: var(--dark);
+.logo-card-title span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.logo-preview {
+  width: 46px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8fafc;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 950;
+  flex: 0 0 auto;
+}
+
+.logo-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo-actions {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.logo-actions button {
+  border: 1px solid var(--line);
+  background: var(--soft);
+  border-radius: 10px;
+  padding: 8px 6px;
+  font-size: 11px;
+}
+
+.logo-actions button:hover {
+  background: #e2e8f0;
+}
+
+.logo-actions button.danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
 }
 
 .preview-shell {
@@ -880,7 +957,9 @@ p {
 .preview-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .preview-big-btn {
@@ -896,7 +975,7 @@ p {
   display: grid;
   place-items: center;
   padding: 28px;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .preview-page {
@@ -1251,8 +1330,7 @@ p {
     padding: 16px;
   }
 
-  .grid2,
-  .logos {
+  .grid2 {
     grid-template-columns: 1fr;
   }
 
@@ -1276,5 +1354,9 @@ p {
   .preview-modal-mount {
     padding: 16px;
     border-radius: 20px;
+  }
+
+  .logo-actions {
+    grid-template-columns: 1fr 1fr;
   }
 }
